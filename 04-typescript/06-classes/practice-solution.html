@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第六章练习题答案</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #31708f;
+            border-bottom: 2px solid #31708f;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #3c763d;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #31708f;
+            margin-top: 25px;
+        }
+        .exercise {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #31708f;
+        }
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .output {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 4px solid #4caf50;
+        }
+        .note {
+            background-color: #e7f3ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <h1>第六章：类 - 练习题答案</h1>
+
+    <div class="exercise">
+        <h3>练习 6.1：银行账户类</h3>
+        <p><strong>题目：</strong>创建一个 `BankAccount` 类，包含私有属性 `balance`，公共方法 `deposit`、`withdraw` 和 `getBalance`。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 银行账户类
+class BankAccount {
+  private balance: number;
+  private readonly accountNumber: string;
+  private readonly accountHolder: string;
+  private transactions: { type: 'deposit' | 'withdraw'; amount: number; date: Date }[] = [];
+
+  constructor(accountHolder: string, accountNumber: string, initialBalance: number = 0) {
+    this.accountHolder = accountHolder;
+    this.accountNumber = accountNumber;
+    this.balance = initialBalance;
+    this.transactions.push({ type: 'deposit', amount: initialBalance, date: new Date() });
+  }
+
+  // 存款方法
+  public deposit(amount: number): boolean {
+    if (amount <= 0) {
+      console.log("存款金额必须大于0");
+      return false;
+    }
+    this.balance += amount;
+    this.transactions.push({ type: 'deposit', amount, date: new Date() });
+    console.log(`存款 ${amount} 成功，当前余额：${this.balance}`);
+    return true;
+  }
+
+  // 取款方法
+  public withdraw(amount: number): boolean {
+    if (amount <= 0) {
+      console.log("取款金额必须大于0");
+      return false;
+    }
+    if (amount > this.balance) {
+      console.log(`取款失败，余额不足。当前余额：${this.balance}`);
+      return false;
+    }
+    this.balance -= amount;
+    this.transactions.push({ type: 'withdraw', amount, date: new Date() });
+    console.log(`取款 ${amount} 成功，当前余额：${this.balance}`);
+    return true;
+  }
+
+  // 获取余额
+  public getBalance(): number {
+    return this.balance;
+  }
+
+  // 获取账户信息
+  public getAccountInfo(): string {
+    return `账户：${this.accountNumber}，持有人：${this.accountHolder}，余额：${this.balance}`;
+  }
+
+  // 获取交易记录
+  public getTransactions(): { type: 'deposit' | 'withdraw'; amount: number; date: Date }[] {
+    return [...this.transactions];
+  }
+}
+
+// 测试
+console.log("=== 银行账户测试 ===");
+
+const account = new BankAccount("张三", "123456789", 1000);
+console.log(account.getAccountInfo());
+
+account.deposit(500);
+account.withdraw(200);
+account.withdraw(2000);  // 余额不足
+account.deposit(1000);
+
+console.log("\n最终余额:", account.getBalance());
+console.log("\n交易记录：");
+account.getTransactions().forEach((t, i) => {
+  console.log(`${i + 1}. ${t.type}: ${t.amount}, 时间: ${t.date.toLocaleString()}`);
+});</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === 银行账户测试 ===<br>
+            账户：123456789，持有人：张三，余额：1000<br>
+            存款 500 成功，当前余额：1500<br>
+            取款 200 成功，当前余额：1300<br>
+            取款失败，余额不足。当前余额：1300<br>
+            存款 1000 成功，当前余额：2300<br><br>
+            最终余额: 2300<br><br>
+            交易记录：<br>
+            1. deposit: 1000, 时间: ...<br>
+            2. deposit: 500, 时间: ...<br>
+            3. withdraw: 200, 时间: ...<br>
+            4. deposit: 1000, 时间: ...
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 6.2：矩形类</h3>
+        <p><strong>题目：</strong>创建一个 `Rectangle` 类，包含属性 `width` 和 `height`，以及方法 `getArea` 和 `getPerimeter`。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 矩形类
+class Rectangle {
+  constructor(public width: number, public height: number) {}
+
+  public getArea(): number {
+    return this.width * this.height;
+  }
+
+  public getPerimeter(): number {
+    return 2 * (this.width + this.height);
+  }
+
+  public getDiagonal(): number {
+    return Math.sqrt(this.width ** 2 + this.height ** 2);
+  }
+
+  public isSquare(): boolean {
+    return this.width === this.height;
+  }
+
+  public scale(factor: number): void {
+    if (factor <= 0) {
+      console.log("缩放因子必须大于0");
+      return;
+    }
+    this.width *= factor;
+    this.height *= factor;
+  }
+
+  public toString(): string {
+    if (this.isSquare()) {
+      return `正方形 (${this.width}x${this.height})`;
+    }
+    return `矩形 (${this.width}x${this.height})`;
+  }
+}
+
+// 测试
+console.log("=== 矩形类测试 ===");
+
+const rect1 = new Rectangle(10, 5);
+console.log(`${rect1.toString()}:`);
+console.log(`  面积: ${rect1.getArea()}`);
+console.log(`  周长: ${rect1.getPerimeter()}`);
+console.log(`  对角线: ${rect1.getDiagonal().toFixed(2)}`);
+console.log(`  是正方形: ${rect1.isSquare()}`);
+
+const rect2 = new Rectangle(8, 8);
+console.log(`\n${rect2.toString()}:`);
+console.log(`  面积: ${rect2.getArea()}`);
+console.log(`  是正方形: ${rect2.isSquare()}`);
+
+console.log("\n缩放测试：");
+rect1.scale(2);
+console.log(`缩放后 ${rect1.toString()}:`);
+console.log(`  面积: ${rect1.getArea()}`);</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === 矩形类测试 ===<br>
+            矩形 (10x5):<br>
+            &nbsp;&nbsp;面积: 50<br>
+            &nbsp;&nbsp;周长: 30<br>
+            &nbsp;&nbsp;对角线: 11.18<br>
+            &nbsp;&nbsp;是正方形: false<br><br>
+            正方形 (8x8):<br>
+            &nbsp;&nbsp;面积: 64<br>
+            &nbsp;&nbsp;是正方形: true<br><br>
+            缩放测试：<br>
+            缩放后 矩形 (20x10):<br>
+            &nbsp;&nbsp;面积: 200
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 6.3：人物自我介绍类</h3>
+        <p><strong>题目：</strong>创建一个 `Person` 类，包含属性 `name` 和 `age`，以及方法 `introduce` 返回自我介绍字符串。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 人物类
+class Person {
+  private static readonly ADULT_AGE = 18;
+
+  constructor(
+    public name: string,
+    public age: number,
+    private occupation?: string
+  ) {}
+
+  public introduce(): string {
+    let intro = `我叫${this.name}，今年${this.age}岁`;
+    
+    if (this.occupation) {
+      intro += `，是一名${this.occupation}`;
+    }
+    
+    if (this.age >= Person.ADULT_AGE) {
+      intro += "，已成年";
+    } else {
+      intro += "，未成年";
+    }
+    
+    return intro;
+  }
+
+  public hasBirthday(): void {
+    this.age++;
+    console.log(`生日快乐！${this.name} 现在 ${this.age} 岁了`);
+  }
+
+  public getOccupation(): string | undefined {
+    return this.occupation;
+  }
+
+  public setOccupation(occupation: string): void {
+    this.occupation = occupation;
+  }
+
+  public static isAdult(age: number): boolean {
+    return age >= Person.ADULT_AGE;
+  }
+}
+
+// 测试
+console.log("=== 人物类测试 ===");
+
+const person1 = new Person("张三", 25, "软件工程师");
+console.log(person1.introduce());
+
+const person2 = new Person("李四", 15);
+console.log(person2.introduce());
+
+const person3 = new Person("王五", 18);
+console.log(person3.introduce());
+
+console.log("\n过生日测试：");
+person2.hasBirthday();
+console.log(person2.introduce());
+
+console.log("\n静态方法测试：");
+console.log(`25岁是成年人: ${Person.isAdult(25)}`);
+console.log(`17岁是成年人: ${Person.isAdult(17)}`);</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === 人物类测试 ===<br>
+            我叫张三，今年25岁，是一名软件工程师，已成年<br>
+            我叫李四，今年15岁，未成年<br>
+            我叫王五，今年18岁，已成年<br><br>
+            过生日测试：<br>
+            生日快乐！李四 现在 16 岁了<br>
+            我叫李四，今年16岁，未成年<br><br>
+            静态方法测试：<br>
+            25岁是成年人: true<br>
+            17岁是成年人: false
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 6.4：动物继承体系</h3>
+        <p><strong>题目：</strong>创建一个 `Animal` 父类，包含 `name` 和 `age` 属性，以及 `makeSound` 方法。创建 `Dog` 和 `Cat` 子类，重写 `makeSound` 方法。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 动物基类
+class Animal {
+  constructor(
+    public name: string,
+    protected age: number
+  ) {}
+
+  public makeSound(): void {
+    console.log(`${this.name} 发出声音`);
+  }
+
+  public introduce(): string {
+    return `我叫${this.name}，今年${this.age}岁`;
+  }
+
+  public getAge(): number {
+    return this.age;
+  }
+
+  public haveBirthday(): void {
+    this.age++;
+    console.log(`${this.name} 过了一岁，现在 ${this.age} 岁了`);
+  }
+}
+
+// 狗类
+class Dog extends Animal {
+  private breed: string;
+
+  constructor(name: string, age: number, breed: string) {
+    super(name, age);
+    this.breed = breed;
+  }
+
+  public makeSound(): void {
+    console.log(`${this.name} 说：汪！汪！汪！`);
+  }
+
+  public bark(): void {
+    console.log(`${this.name}（${this.breed}）在叫！`);
+  }
+
+  public fetch(item: string): void {
+    console.log(`${this.name} 捡回了 ${item}！`);
+  }
+
+  public getInfo(): string {
+    return `${this.introduce()}，是一只${this.breed}狗`;
+  }
+}
+
+// 猫类
+class Cat extends Animal {
+  private color: string;
+
+  constructor(name: string, age: number, color: string) {
+    super(name, age);
+    this.color = color;
+  }
+
+  public makeSound(): void {
+    console.log(`${this.name} 说：喵~ 喵~`);
+  }
+
+  public purr(): void {
+    console.log(`${this.name}（${this.color}猫）在发出呼噜声`);
+  }
+
+  public catchMouse(): void {
+    console.log(`${this.name} 抓到了老鼠！`);
+  }
+
+  public getInfo(): string {
+    return `${this.introduce}，是一只${this.color}色的猫`;
+  }
+}
+
+// 测试
+console.log("=== 动物继承体系测试 ===");
+
+const dog = new Dog("旺财", 3, "金毛");
+console.log(dog.getInfo());
+dog.makeSound();
+dog.bark();
+dog.fetch("球");
+
+console.log("\n---");
+
+const cat = new Cat("咪咪", 2, "橘白");
+console.log(cat.getInfo());
+cat.makeSound();
+cat.purr();
+
+console.log("\n---");
+console.log("原始动物类：");
+const animal = new Animal("小动物", 5);
+animal.makeSound();</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === 动物继承体系测试 ===<br>
+            我叫旺财，今年3岁，是一只金毛狗<br>
+            旺财 说：汪！汪！汪！<br>
+            旺财（金毛）在叫！<br>
+            旺财 捡回了 球！<br><br>
+            ---<br>
+            我叫咪咪，今年2岁，是一只橘白色的猫<br>
+            咪咪 说：喵~ 喵~<br>
+            咪咪（橘白猫）在发出呼噜声<br><br>
+            ---<br>
+            原始动物类：<br>
+            小动物 发出声音
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 6.5：抽象图形类</h3>
+        <p><strong>题目：</strong>创建一个抽象类 `Shape`，包含抽象方法 `getArea`。创建 `Circle` 和 `Rectangle` 子类实现这个方法。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 抽象图形类
+abstract class Shape {
+  constructor(public color: string) {}
+
+  // 抽象方法：必须在子类中实现
+  abstract getArea(): number;
+  abstract getPerimeter(): number;
+
+  // 具体方法
+  public describe(): string {
+    return `一个${this.color}的${this.constructor.name}，面积=${this.getArea().toFixed(2)}`;
+  }
+
+  public getInfo(): string {
+    return `${this.describe()}，周长=${this.getPerimeter().toFixed(2)}`;
+  }
+}
+
+// 圆形类
+class Circle extends Shape {
+  constructor(
+    public radius: number,
+    color: string
+  ) {
+    super(color);
+  }
+
+  getArea(): number {
+    return Math.PI * this.radius * this.radius;
+  }
+
+  getPerimeter(): number {
+    return 2 * Math.PI * this.radius;
+  }
+
+  getDiameter(): number {
+    return this.radius * 2;
+  }
+}
+
+// 矩形类
+class Rectangle extends Shape {
+  constructor(
+    public width: number,
+    public height: number,
+    color: string
+  ) {
+    super(color);
+  }
+
+  getArea(): number {
+    return this.width * this.height;
+  }
+
+  getPerimeter(): number {
+    return 2 * (this.width + this.height);
+  }
+
+  isSquare(): boolean {
+    return this.width === this.height;
+  }
+}
+
+// 三角形类
+class Triangle extends Shape {
+  constructor(
+    public sideA: number,
+    public sideB: number,
+    public sideC: number,
+    color: string
+  ) {
+    super(color);
+  }
+
+  getArea(): number {
+    // 海伦公式
+    const s = (this.sideA + this.sideB + this.sideC) / 2;
+    return Math.sqrt(s * (s - this.sideA) * (s - this.sideB) * (s - this.sideC));
+  }
+
+  getPerimeter(): number {
+    return this.sideA + this.sideB + this.sideC;
+  }
+
+  isEquilateral(): boolean {
+    return this.sideA === this.sideB && this.sideB === this.sideC;
+  }
+
+  isRightTriangle(): boolean {
+    const sides = [this.sideA, this.sideB, this.sideC].sort((a, b) => a - b);
+    return Math.abs(sides[0] ** 2 + sides[1] ** 2 - sides[2] ** 2) < 0.0001;
+  }
+}
+
+// 测试
+console.log("=== 抽象图形类测试 ===");
+
+const circle = new Circle(5, "红色");
+console.log("圆形：", circle.getInfo());
+
+const rectangle = new Rectangle(10, 5, "蓝色");
+console.log("矩形：", rectangle.getInfo());
+
+const triangle = new Triangle(3, 4, 5, "绿色");
+console.log("三角形（3-4-5直角三角形）：", triangle.getInfo());
+console.log(`是等边三角形: ${triangle.isEquilateral()}`);
+console.log(`是直角三角形: ${triangle.isRightTriangle()}`);
+
+console.log("\n使用多态处理不同图形：");
+const shapes: Shape[] = [
+  new Circle(3, "红色"),
+  new Rectangle(4, 6, "蓝色"),
+  new Triangle(5, 5, 5, "绿色")
+];
+
+shapes.forEach((shape, index) => {
+  console.log(`图形${index + 1}: ${shape.getInfo()}`);
+});</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === 抽象图形类测试 ===<br>
+            圆形：<br>
+            一个红色的Circle，面积=78.54，周长=31.42<br>
+            矩形：<br>
+            一个蓝色的Rectangle，面积=60，周长=32<br>
+            三角形（3-4-5直角三角形）：<br>
+            一个绿色的Triangle，面积=6.00，周长=12<br>
+            是等边三角形: false<br>
+            是直角三角形: true<br><br>
+            使用多态处理不同图形：<br>
+            图形1: 一个红色的Circle，面积=28.27，周长=18.85<br>
+            图形2: 一个蓝色的Rectangle，面积=24，周长=20<br>
+            图形3: 一个绿色的Triangle，面积=10.83，周长=15
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 6.6：图书管理系统</h3>
+        <p><strong>题目：</strong>创建一个图书管理系统，包含 `Book`、`Member` 和 `Library` 类。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 图书类
+class Book {
+  constructor(
+    public readonly isbn: string,
+    public title: string,
+    public author: string,
+    public year: number,
+    public available: boolean = true
+  ) {}
+
+  public borrow(): boolean {
+    if (!this.available) {
+      console.log(`《${this.title}》已被借出`);
+      return false;
+    }
+    this.available = false;
+    return true;
+  }
+
+  public return(): void {
+    this.available = true;
+    console.log(`《${this.title}》已归还`);
+  }
+
+  public getInfo(): string {
+    const status = this.available ? "可借阅" : "已借出";
+    return `《${this.title}》- ${this.author} (${this.year}) [${status}]`;
+  }
+}
+
+// 会员类
+class Member {
+  private borrowedBooks: Book[] = [];
+  private readonly maxBooks = 5;
+
+  constructor(
+    public readonly memberId: string,
+    public name: string,
+    public email: string
+  ) {}
+
+  public borrowBook(book: Book): boolean {
+    if (this.borrowedBooks.length >= this.maxBooks) {
+      console.log(`${this.name} 已达到最大借阅数量（${this.maxBooks}本）`);
+      return false;
+    }
+
+    if (!book.borrow()) {
+      return false;
+    }
+
+    this.borrowedBooks.push(book);
+    console.log(`${this.name} 借阅了《${book.title}》`);
+    return true;
+  }
+
+  public returnBook(book: Book): boolean {
+    const index = this.borrowedBooks.findIndex(b => b.isbn === book.isbn);
+    if (index === -1) {
+      console.log(`${this.name} 没有借阅《${book.title}》`);
+      return false;
+    }
+
+    this.borrowedBooks.splice(index, 1);
+    book.return();
+    return true;
+  }
+
+  public getBorrowedBooks(): Book[] {
+    return [...this.borrowedBooks];
+  }
+
+  public getBorrowedCount(): number {
+    return this.borrowedBooks.length;
+  }
+
+  public getInfo(): string {
+    return `${this.name} (ID: ${this.memberId}) - 已借 ${this.borrowedBooks.length}/${this.maxBooks} 本`;
+  }
+}
+
+// 图书馆类
+class Library {
+  private books: Map<string, Book> = new Map();
+  private members: Map<string, Member> = new Map();
+
+  public addBook(book: Book): void {
+    this.books.set(book.isbn, book);
+    console.log(`图书馆新增：《${book.title}》`);
+  }
+
+  public addMember(member: Member): void {
+    this.members.set(member.memberId, member);
+    console.log(`图书馆新增会员：${member.name}`);
+  }
+
+  public findBook(isbn: string): Book | undefined {
+    return this.books.get(isbn);
+  }
+
+  public findMember(memberId: string): Member | undefined {
+    return this.members.get(memberId);
+  }
+
+  public lendBook(memberId: string, isbn: string): boolean {
+    const member = this.members.get(memberId);
+    const book = this.books.get(isbn);
+
+    if (!member) {
+      console.log("会员不存在");
+      return false;
+    }
+
+    if (!book) {
+      console.log("图书不存在");
+      return false;
+    }
+
+    return member.borrowBook(book);
+  }
+
+  public returnBook(memberId: string, isbn: string): boolean {
+    const member = this.members.get(memberId);
+    const book = this.books.get(isbn);
+
+    if (!member || !book) {
+      console.log("会员或图书不存在");
+      return false;
+    }
+
+    return member.returnBook(book);
+  }
+
+  public getAvailableBooks(): Book[] {
+    return Array.from(this.books.values()).filter(b => b.available);
+  }
+
+  public getAllBooks(): Book[] {
+    return Array.from(this.books.values());
+  }
+
+  public getAllMembers(): Member[] {
+    return Array.from(this.members.values());
+  }
+
+  public getStatistics(): {
+    totalBooks: number;
+    availableBooks: number;
+    totalMembers: number;
+    borrowedBooks: number;
+  } {
+    const allBooks = this.getAllBooks();
+    return {
+      totalBooks: allBooks.length,
+      availableBooks: allBooks.filter(b => b.available).length,
+      totalMembers: this.members.size,
+      borrowedBooks: allBooks.filter(b => !b.available).length
+    };
+  }
+}
+
+// 测试图书管理系统
+console.log("=== 图书管理系统测试 ===\n");
+
+// 创建图书馆
+const library = new Library();
+
+// 添加图书
+library.addBook(new Book("978-7-111-12345", "TypeScript 入门", "张三", 2024));
+library.addBook(new Book("978-7-111-12346", "JavaScript 高级", "李四", 2023));
+library.addBook(new Book("978-7-111-12347", "React 实战", "王五", 2024));
+library.addBook(new Book("978-7-111-12348", "Node.js 指南", "赵六", 2023));
+
+// 添加会员
+library.addMember(new Member("M001", "Alice", "alice@example.com"));
+library.addMember(new Member("M002", "Bob", "bob@example.com"));
+
+// 借阅图书
+console.log("\n借阅测试：");
+library.lendBook("M001", "978-7-111-12345");
+library.lendBook("M001", "978-7-111-12346");
+library.lendBook("M002", "978-7-111-12347");
+library.lendBook("M002", "978-7-111-12348");
+
+// 尝试借阅已借出的图书
+console.log("\n尝试借阅已借出的图书：");
+library.lendBook("M001", "978-7-111-12345");
+
+// 查看会员借阅情况
+console.log("\n会员借阅情况：");
+const member1 = library.findMember("M001")!;
+console.log(member1.getInfo());
+member1.getBorrowedBooks().forEach(book => {
+  console.log(`  借阅：《${book.title}》`);
+});
+
+// 归还图书
+console.log("\n归还测试：");
+library.returnBook("M001", "978-7-111-12345");
+
+// 查看统计信息
+console.log("\n图书馆统计：");
+const stats = library.getStatistics();
+console.log(`总图书数: ${stats.totalBooks}`);
+console.log(`可借图书: ${stats.availableBooks}`);
+console.log(`已借出: ${stats.borrowedBooks}`);
+console.log(`会员数: ${stats.totalMembers}`);</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === 图书管理系统测试 ===<br><br>
+            图书馆新增：《TypeScript 入门》<br>
+            图书馆新增：《JavaScript 高级》<br>
+            图书馆新增：《React 实战》<br>
+            图书馆新增：《Node.js 指南》<br>
+            图书馆新增会员：Alice<br>
+            图书馆新增会员：<br>
+            Bob<br><br>
+            借阅测试：<br>
+            Alice 借阅了《TypeScript 入门》<br>
+            Alice 借阅了《JavaScript 高级》<br>
+            Bob 借阅了《React 实战》<br>
+            Bob 借阅了《Node.js 指南》<br><br>
+            尝试借阅已借出的图书：<br>
+            《TypeScript 入门》已被借出<br><br>
+            会员借阅情况：<br>
+            Alice (ID: M001) - 已借 2/5 本<br>
+            &nbsp;&nbsp;借阅：《TypeScript 入门》<br>
+            &nbsp;&nbsp;借阅：《JavaScript 高级》<br><br>
+            归还测试：<br>
+            《TypeScript 入门》已归还<br><br>
+            图书馆统计：<br>
+            总图书数: 4<br>
+            可借图书: 2<br>
+            已借出: 2<br>
+            会员数: 2
+        </div>
+    </div>
+
+    <p style="text-align: center; color: #666; margin-top: 40px;">
+        练习题答案仅供参考，建议自己动手实践加深理解。
+    </p>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第二十三章：provide 与 inject - TypeScript 示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; }
+    .demo-section { border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 8px; }
+    .component-box { border: 2px solid #42b983; padding: 15px; margin: 10px 0; border-radius: 8px; }
+    button { padding: 8px 16px; margin: 5px; background: #42b983; color: white; border: none; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>第二十三章：provide 与 inject（TypeScript）</h1>
+  <div id="app">
+    <ts-provide-demo></ts-provide-demo>
+  </div>
+
+  <script>
+    const { createApp, provide, inject, ref, readonly } = Vue;
+
+    // 定义 Symbol key
+    const ThemeKey = Symbol('theme');
+    
+    /**
+     * @typedef {Object} Theme
+     * @property {string} color
+     * @property {string} background
+     */
+    
+    const ChildComponent = {
+      setup() {
+        /** @type {import('vue').Ref<Theme>} */
+        const theme = inject(ThemeKey);
+        
+        return { theme };
+      },
+      template: `
+        <div class="component-box" :style="{ background: theme.background, color: theme.color }">
+          <h4>子组件</h4>
+          <p>主题颜色：{{ theme.color }}</p>
+        </div>
+      `
+    };
+
+    const TsProvideDemo = {
+      components: { ChildComponent },
+      setup() {
+        /** @type {import('vue').Ref<Theme>} */
+        const theme = ref({
+          color: '#42b983',
+          background: '#f0fff4'
+        });
+        
+        provide(ThemeKey, readonly(theme));
+        
+        const toggleTheme = () => {
+          if (theme.value.color === '#42b983') {
+            theme.value = { color: 'white', background: '#333' };
+          } else {
+            theme.value = { color: '#42b983', background: '#f0fff4' };
+          }
+        };
+        
+        return { theme, toggleTheme };
+      },
+      template: `
+        <div class="demo-section">
+          <h3>父组件</h3>
+          <button @click="toggleTheme">切换主题</button>
+          <child-component></child-component>
+        </div>
+      `
+    };
+
+    createApp({ components: { TsProvideDemo } }).mount('#app');
+  </script>
+</body>
+</html>

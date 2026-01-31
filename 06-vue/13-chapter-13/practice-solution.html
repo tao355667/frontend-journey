@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第13章练习答案 - 插槽应用</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #f5f5f5; }
+    h1 { text-align: center; color: #333; margin-bottom: 30px; }
+    h2 { color: #42b883; margin: 30px 0 15px; border-bottom: 2px solid #42b883; padding-bottom: 10px; }
+    .container { max-width: 1000px; margin: 0 auto; }
+    
+    /* Modal 样式 */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+    .modal { background: white; border-radius: 8px; min-width: 400px; max-width: 600px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .modal-header { padding: 20px; border-bottom: 1px solid #eee; background: #f8f8f8; border-radius: 8px 8px 0 0; }
+    .modal-body { padding: 20px; min-height: 100px; }
+    .modal-footer { padding: 20px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 10px; }
+    button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; transition: opacity 0.2s; }
+    button.primary { background: #42b883; color: white; }
+    button.danger { background: #ff5252; color: white; }
+    button.default { background: #e0e0e0; color: #333; }
+    button:hover { opacity: 0.8; }
+    
+    /* Table 样式 */
+    .table-container { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
+    th { background: #f8f8f8; font-weight: bold; color: #666; }
+    tr:hover { background: #f8f8f8; }
+    .tag { padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+    .tag.success { background: #e8f5e9; color: #2e7d32; }
+    .tag.warning { background: #fff3e0; color: #ef6c00; }
+    .tag.error { background: #ffebee; color: #c62828; }
+    
+    /* Comment 样式 */
+    .comments-section { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .comment { display: flex; gap: 15px; padding: 20px; border-bottom: 1px solid #eee; }
+    .comment:last-child { border-bottom: none; }
+    .avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #42b883, #347474); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 20px; flex-shrink: 0; }
+    .comment-content { flex: 1; }
+    .comment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .author-info { display: flex; align-items: center; gap: 10px; }
+    .author { font-weight: bold; color: #333; font-size: 15px; }
+    .badge { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+    .badge.author-badge { background: #42b883; color: white; }
+    .badge.vip { background: #ffc107; color: #333; }
+    .time { color: #999; font-size: 12px; }
+    .comment-text { color: #555; line-height: 1.6; margin-bottom: 12px; }
+    .actions { display: flex; gap: 20px; }
+    .action { color: #666; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 4px; transition: color 0.2s; }
+    .action:hover { color: #42b883; }
+    .action.liked { color: #42b883; }
+    
+    /* 练习说明卡片 */
+    .exercise-card { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0; }
+    .exercise-card h3 { color: #1976d2; margin-bottom: 10px; }
+    .exercise-card code { background: rgba(255,255,255,0.7); padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>第13章练习题答案</h1>
+      
+      <!-- 练习1：模态框组件 -->
+      <div class="exercise-card">
+        <h3>练习 1：Modal 组件</h3>
+        <p>创建包含标题插槽（具名）、内容插槽（默认）、底部操作区插槽（具名）的模态框</p>
+      </div>
+      
+      <button class="primary" @click="showModal1 = true">打开信息模态框</button>
+      <button class="danger" @click="showModal2 = true">打开警告模态框</button>
+      
+      <modal v-if="showModal1" @close="showModal1 = false">
+        <template #title>
+          <h3>欢迎使用</h3>
+        </template>
+        <p>这是一个使用插槽自定义内容的模态框示例。</p>
+        <p>你可以通过 <code>&lt;template #title&gt;</code> 自定义标题，通过默认插槽自定义内容。</p>
+        <template #actions>
+          <button class="primary" @click="showModal1 = false">知道了</button>
+        </template>
+      </modal>
+      
+      <modal v-if="showModal2" @close="showModal2 = false">
+        <template #title>
+          <h3 style="color: #ff5252;">⚠️ 警告</h3>
+        </template>
+        <p style="color: #c62828;">您确定要删除此项目吗？此操作无法撤销！</p>
+        <template #actions>
+          <button class="default" @click="showModal2 = false">取消</button>
+          <button class="danger" @click="confirmDelete">确认删除</button>
+        </template>
+      </modal>
+      
+      <!-- 练习2：表格组件 -->
+      <div class="exercise-card">
+        <h3>练习 2：Table 组件</h3>
+        <p>使用作用域插槽让用户自定义每列的渲染方式，暴露 <code>row</code>、<code>column</code>、<code>value</code></p>
+      </div>
+      
+      <div class="table-container">
+        <data-table :columns="tableColumns" :data="tableData">
+          <template #id="{ value }">
+            <code>#{{ value }}</code>
+          </template>
+          <template #product="{ value, row }">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 40px; height: 40px; background: #e0e0e0; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                {{ row.category[0] }}
+              </div>
+              <div>
+                <div style="font-weight: 500;">{{ value }}</div>
+                <div style="font-size: 12px; color: #999;">{{ row.category }}</div>
+              </div>
+            </div>
+          </template>
+          <template #price="{ value }">
+            <span style="color: #42b883; font-weight: 600;">¥{{ value }}</span>
+          </template>
+          <template #status="{ value }">
+            <span class="tag" :class="value">
+              {{ value === 'success' ? '已上架' : value === 'warning' ? '审核中' : '已下架' }}
+            </span>
+          </template>
+          <template #actions="{ row }">
+            <button class="primary" style="padding: 4px 12px; font-size: 12px;" @click="editProduct(row)">编辑</button>
+            <button class="danger" style="padding: 4px 12px; font-size: 12px;" @click="deleteProduct(row)">删除</button>
+          </template>
+        </data-table>
+      </div>
+      
+      <!-- 练习3：评论列表 -->
+      <div class="exercise-card">
+        <h3>练习 3：CommentList 组件</h3>
+        <p>使用作用域插槽暴露 <code>comment</code> 数据，允许父组件完全自定义评论的显示方式</p>
+      </div>
+      
+      <div class="comments-section">
+        <h3 style="margin-bottom: 20px;">评论列表 ({{ comments.length }}条)</h3>
+        <comment-list :comments="comments">
+          <template #default="{ comment }">
+            <div class="comment">
+              <div class="avatar">{{ comment.author[0] }}</div>
+              <div class="comment-content">
+                <div class="comment-header">
+                  <div class="author-info">
+                    <span class="author">{{ comment.author }}</span>
+                    <span v-if="comment.isAuthor" class="badge author-badge">作者</span>
+                    <span v-if="comment.isVIP" class="badge vip">VIP</span>
+                  </div>
+                  <span class="time">{{ comment.time }}</span>
+                </div>
+                <p class="comment-text">{{ comment.content }}</p>
+                <div class="actions">
+                  <span class="action" :class="{ liked: comment.isLiked }" @click="toggleLike(comment)">
+                    {{ comment.isLiked ? '❤️' : '🤍' }} {{ comment.likes }}
+                  </span>
+                  <span class="action">💬 {{ comment.replies }} 回复</span>
+                  <span class="action">↗️ 分享</span>
+                </div>
+              </div>
+            </div>
+          </template>
+        </comment-list>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref } = Vue;
+
+    // 练习1：Modal 组件
+    const Modal = {
+      emits: ['close'],
+      template: `
+        <div class="modal-overlay" @click.self="$emit('close')">
+          <div class="modal">
+            <div class="modal-header">
+              <slot name="title">
+                <h3>提示</h3>
+              </slot>
+            </div>
+            <div class="modal-body">
+              <slot>
+                <p>确定要执行此操作吗？</p>
+              </slot>
+            </div>
+            <div class="modal-footer">
+              <slot name="actions">
+                <button class="default" @click="$emit('close')">关闭</button>
+              </slot>
+            </div>
+          </div>
+        </div>
+      `
+    };
+
+    // 练习2：Table 组件
+    const DataTable = {
+      props: ['columns', 'data'],
+      template: `
+        <table>
+          <thead>
+            <tr>
+              <th v-for="col in columns" :key="col.key">{{ col.title }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in data" :key="row.id">
+              <td v-for="col in columns" :key="col.key">
+                <slot :name="col.key" :value="row[col.key]" :row="row" :column="col">
+                  {{ row[col.key] }}
+                </slot>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      `
+    };
+
+    // 练习3：CommentList 组件
+    const CommentList = {
+      props: ['comments'],
+      template: `
+        <div>
+          <div v-for="comment in comments" :key="comment.id">
+            <slot :comment="comment">
+              <div style="padding: 10px; border-bottom: 1px solid #eee;">
+                <strong>{{ comment.author }}</strong>: {{ comment.content }}
+              </div>
+            </slot>
+          </div>
+        </div>
+      `
+    };
+
+    createApp({
+      components: {
+        Modal,
+        DataTable,
+        CommentList
+      },
+      setup() {
+        const showModal1 = ref(false);
+        const showModal2 = ref(false);
+
+        const tableColumns = ref([
+          { key: 'id', title: 'ID' },
+          { key: 'product', title: '商品' },
+          { key: 'price', title: '价格' },
+          { key: 'stock', title: '库存' },
+          { key: 'status', title: '状态' },
+          { key: 'actions', title: '操作' }
+        ]);
+
+        const tableData = ref([
+          { id: 1001, product: 'iPhone 15', category: '电子产品', price: '5999', stock: 100, status: 'success' },
+          { id: 1002, product: 'MacBook Pro', category: '电子产品', price: '14999', stock: 50, status: 'warning' },
+          { id: 1003, product: 'AirPods', category: '配件', price: '1299', stock: 0, status: 'error' }
+        ]);
+
+        const comments = ref([
+          { 
+            id: 1, 
+            author: '小明', 
+            content: '这个插槽教程写得真好，终于理解了作用域插槽的原理！', 
+            time: '2小时前', 
+            likes: 45, 
+            replies: 12,
+            isAuthor: false,
+            isVIP: true,
+            isLiked: true
+          },
+          { 
+            id: 2, 
+            author: '张三', 
+            content: '建议在表格示例中加入排序功能，会更加完整。', 
+            time: '5小时前', 
+            likes: 23, 
+            replies: 5,
+            isAuthor: true,
+            isVIP: false,
+            isLiked: false
+          },
+          { 
+            id: 3, 
+            author: '李四', 
+            content: '请问如何在插槽中使用子组件的方法？', 
+            time: '1天前', 
+            likes: 8, 
+            replies: 20,
+            isAuthor: false,
+            isVIP: false,
+            isLiked: false
+          }
+        ]);
+
+        const confirmDelete = () => {
+          alert('项目已删除！');
+          showModal2.value = false;
+        };
+
+        const editProduct = (product) => {
+          alert(`编辑商品: ${product.product}`);
+        };
+
+        const deleteProduct = (product) => {
+          if (confirm(`确定要删除 ${product.product} 吗？`)) {
+            alert('商品已删除');
+          }
+        };
+
+        const toggleLike = (comment) => {
+          comment.isLiked = !comment.isLiked;
+          comment.likes += comment.isLiked ? 1 : -1;
+        };
+
+        return {
+          showModal1,
+          showModal2,
+          tableColumns,
+          tableData,
+          comments,
+          confirmDelete,
+          editProduct,
+          deleteProduct,
+          toggleLike
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表单基础示例</title>
+</head>
+<body>
+    <h1>联系表单</h1>
+    <form action="#" method="post">
+        <p>
+            <label for="name">姓名：</label>
+            <input id="name" name="name" type="text" placeholder="请输入姓名" required>
+        </p>
+        <p>
+            <label for="email">邮箱：</label>
+            <input id="email" name="email" type="email" placeholder="name@example.com" required>
+        </p>
+        <p>
+            <label for="topic">咨询类型：</label>
+            <select id="topic" name="topic">
+                <option value="">请选择</option>
+                <option value="learn">学习相关</option>
+                <option value="bug">问题反馈</option>
+                <option value="other">其他</option>
+            </select>
+        </p>
+        <p>
+            <label for="message">留言：</label><br>
+            <textarea id="message" name="message" rows="4" cols="40" placeholder="写下你的问题或想法"></textarea>
+        </p>
+        <p>
+            <label><input type="checkbox" name="agree" required> 我已阅读并同意条款</label>
+        </p>
+        <button type="submit">提交</button>
+        <button type="reset">重置</button>
+    </form>
+</body>
+</html>

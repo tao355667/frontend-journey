@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>事件处理 - JavaScript 版本</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 36px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .demo-card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    
+    .demo-title {
+      color: #667eea;
+      font-size: 24px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 3px solid #667eea;
+    }
+    
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      background: #42b883;
+      color: white;
+    }
+    
+    button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(66, 184, 131, 0.4); }
+    button.secondary { background: #6c757d; }
+    button.warning { background: #ffc107; color: #212529; }
+    
+    .click-demo {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+    
+    .message-box {
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 15px;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    .success { background: #d4edda; color: #155724; }
+    .info { background: #d1ecf1; color: #0c5460; }
+    
+    .mouse-area {
+      height: 200px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: crosshair;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .mouse-coords {
+      font-size: 24px;
+      font-weight: bold;
+      color: #667eea;
+    }
+    
+    .input-demo {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .input-group label {
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .input-group input {
+      padding: 12px;
+      border: 2px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    
+    .char-count {
+      text-align: right;
+      color: #6c757d;
+      font-size: 14px;
+    }
+    
+    .keyboard-demo {
+      background: #f8f9fa;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    
+    .key-display {
+      font-size: 48px;
+      font-weight: bold;
+      color: #667eea;
+      min-height: 60px;
+      margin: 20px 0;
+    }
+    
+    .modifier-display {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    
+    .modifier-badge {
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: #e9ecef;
+      color: #6c757d;
+      font-weight: 600;
+    }
+    
+    .modifier-badge.active {
+      background: #667eea;
+      color: white;
+    }
+    
+    .event-log {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+    
+    .log-item {
+      padding: 5px 0;
+      border-bottom: 1px solid #dee2e6;
+      color: #666;
+    }
+    
+    .log-item:last-child { border-bottom: none; }
+    
+    .canvas-container {
+      border: 2px solid #dee2e6;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+    
+    canvas {
+      display: block;
+      cursor: crosshair;
+    }
+    
+    .color-picker {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    
+    .color-option {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+    
+    .color-option:hover { transform: scale(1.1); }
+    .color-option.active { border-color: #333; }
+    
+    .code-block {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #d63384;
+      margin-top: 15px;
+      overflow-x: auto;
+    }
+    
+    .info-section {
+      background: #e7f3ff;
+      border-left: 4px solid #667eea;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 0 8px 8px 0;
+    }
+    
+    .info-section h4 { color: #667eea; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>🖱️ 事件处理演示</h1>
+      
+      <!-- Demo 1: 点击事件 -->
+      <div class="demo-card">
+        <h2 class="demo-title">1. 点击事件 (@click)</h2>
+        
+        <div class="click-demo">
+          <button @click="showMessage('Hello World!')">
+            点击显示消息
+          </button>
+          <button @click="increment">
+            点击计数: {{ count }}
+          </button>
+          <button @click="toggleColor">
+            切换颜色
+          </button>
+        </div>
+        
+        <div 
+          class="message-box"
+          :class="messageClass"
+          v-if="message"
+        >
+          {{ message }}
+        </div>
+        
+        <div class="code-block">
+          &lt;button @click="handleClick"&gt;点击&lt;/button&gt;
+          &lt;button @click="count++"&gt;计数&lt;/button&gt;
+        </div>
+      </div>
+      
+      <!-- Demo 2: 鼠标事件 -->
+      <div class="demo-card">
+        <h2 class="demo-title">2. 鼠标事件 (@mousemove, @mouseenter, @mouseleave)</h2>
+        
+        <div 
+          class="mouse-area"
+          @mousemove="updateCoords"
+          @mouseenter="mouseInArea = true"
+          @mouseleave="mouseInArea = false"
+        >
+          <p v-if="mouseInArea" class="mouse-coords">
+            X: {{ mouseX }}, Y: {{ mouseY }}
+          </p>
+          <p v-else style="color: #6c757d;">
+            移动鼠标到该区域
+          </p>
+        </div>
+        
+        <div class="code-block">
+          &lt;div @mousemove="updateCoords" @mouseenter="..." @mouseleave="..."&gt;
+        </div>
+      </div>
+      
+      <!-- Demo 3: 输入事件 -->
+      <div class="demo-card">
+        <h2 class="demo-title">3. 输入事件 (@input, @change, @keyup)</h2>
+        
+        <div class="input-demo">
+          <div class="input-group">
+            <label>@input - 实时输入</label>
+            <input 
+              @input="handleInput"
+              placeholder="输入时实时更新..."
+            >
+            <span class="char-count">实时输入: {{ inputValue }}</span>
+          </div>
+          
+          <div class="input-group">
+            <label>@change - 失去焦点时更新</label>
+            <input 
+              @change="handleChange"
+              placeholder="失去焦点后更新..."
+            >
+            <span class="char-count">change 值: {{ changeValue }}</span>
+          </div>
+          
+          <div class="input-group">
+            <label>@keyup.enter - 回车提交</label>
+            <input 
+              @keyup.enter="handleEnter"
+              placeholder="按回车提交..."
+            >
+            <span class="char-count" style="color: #28a745;" v-if="enterMessage">
+              {{ enterMessage }}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Demo 4: 键盘事件与修饰符 -->
+      <div class="demo-card">
+        <h2 class="demo-title">4. 键盘事件与修饰符</h2>
+        
+        <div 
+          class="keyboard-demo"
+          tabindex="0"
+          @keydown="handleKeydown"
+        >
+          <p>点击此区域后按任意键</p>
+          <div class="key-display">{{ pressedKey || 'Press any key' }}</div>
+          
+          <div class="modifier-display">
+            <span 
+              class="modifier-badge"
+              :class="{ active: modifiers.ctrl }"
+            >Ctrl</span>
+            <span 
+              class="modifier-badge"
+              :class="{ active: modifiers.alt }"
+            >Alt</span>
+            <span 
+              class="modifier-badge"
+              :class="{ active: modifiers.shift }"
+            >Shift</span>
+          </div>
+        </div>
+        
+        <div class="event-log">
+          <div 
+            v-for="(log, index) in eventLogs" 
+            :key="index"
+            class="log-item"
+          >
+            {{ log }}
+          </div>
+        </div>
+        
+        <div class="code-block">
+          &lt;input @keyup.enter="submit"&gt;
+          &lt;div @keydown.ctrl.s="save"&gt;
+        </div>
+      </div>
+      
+      <!-- Demo 5: 事件修饰符 -->
+      <div class="demo-card">
+        <h2 class="demo-title">5. 事件修饰符 (.stop, .prevent, .once)</h2>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+          <div @click="parentClick" style="padding: 20px; background: #e9ecef; border-radius: 8px;">
+            <p>父元素（点击我会触发）</p>
+            
+            <button 
+              @click.stop="childClick"
+              style="margin: 10px 5px;"
+            >
+              .stop - 阻止冒泡
+            </button>
+            
+            <a 
+              href="https://vuejs.org"
+              @click.prevent="linkClick"
+              style="display: inline-block; margin: 10px 5px; padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 8px;"
+            >
+              .prevent - 阻止默认
+            </a>
+            
+            <button 
+              @click.once="onceClick"
+              class="warning"
+              style="margin: 10px 5px;"
+            >
+              .once - 只能点一次
+            </button>
+          </div>
+        </div>
+        
+        <div class="event-log" style="margin-top: 15px;">
+          <div 
+            v-for="(log, index) in modifierLogs" 
+            :key="index"
+            class="log-item"
+          >
+            {{ log }}
+          </div>
+        </div>
+        
+        <div class="code-block">
+          &lt;button @click.stop&gt;阻止冒泡&lt;/button&gt;
+          &lt;a @click.prevent&gt;阻止默认&lt;/a&gt;
+          &lt;button @click.once&gt;只触发一次&lt;/button&gt;
+        </div>
+      </div>
+      
+      <!-- Demo 6: 简单画板 -->
+      <div class="demo-card">
+        <h2 class="demo-title">6. 画板示例（鼠标事件综合）</h2>
+        
+        <div class="color-picker">
+          <div 
+            v-for="color in colors" 
+            :key="color"
+            class="color-option"
+            :style="{ background: color }"
+            :class="{ active: currentColor === color }"
+            @click="currentColor = color"
+          ></div>
+        </div>
+        
+        <div class="canvas-container">
+          <canvas 
+            ref="canvas"
+            width="800"
+            height="300"
+            @mousedown="startDrawing"
+            @mousemove="draw"
+            @mouseup="stopDrawing"
+            @mouseleave="stopDrawing"
+          ></canvas>
+        </div>
+        
+        <div style="margin-top: 15px; display: flex; gap: 10px;">
+          <button @click="clearCanvas">清空画布</button>
+          <button @click="downloadCanvas" class="secondary">下载图片</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, onMounted } = Vue
+
+    createApp({
+      setup() {
+        // Demo 1
+        const message = ref('')
+        const messageClass = ref('info')
+        const count = ref(0)
+        
+        const showMessage = (msg) => {
+          message.value = msg
+          messageClass.value = 'success'
+          setTimeout(() => { message.value = '' }, 3000)
+        }
+        
+        const increment = () => {
+          count.value++
+          message.value = `当前计数: ${count.value}`
+          messageClass.value = 'info'
+        }
+        
+        const toggleColor = () => {
+          message.value = messageClass.value === 'info' ? '切换到绿色样式' : '切换到蓝色样式'
+          messageClass.value = messageClass.value === 'info' ? 'success' : 'info'
+        }
+        
+        // Demo 2
+        const mouseX = ref(0)
+        const mouseY = ref(0)
+        const mouseInArea = ref(false)
+        
+        const updateCoords = (e) => {
+          mouseX.value = e.offsetX
+          mouseY.value = e.offsetY
+        }
+        
+        // Demo 3
+        const inputValue = ref('')
+        const changeValue = ref('')
+        const enterMessage = ref('')
+        
+        const handleInput = (e) => {
+          inputValue.value = e.target.value
+        }
+        
+        const handleChange = (e) => {
+          changeValue.value = e.target.value
+        }
+        
+        const handleEnter = (e) => {
+          enterMessage.value = `提交: "${e.target.value}"`
+          e.target.value = ''
+          setTimeout(() => { enterMessage.value = '' }, 3000)
+        }
+        
+        // Demo 4
+        const pressedKey = ref('')
+        const modifiers = ref({ ctrl: false, alt: false, shift: false })
+        const eventLogs = ref([])
+        
+        const handleKeydown = (e) => {
+          pressedKey.value = e.key
+          modifiers.value = {
+            ctrl: e.ctrlKey,
+            alt: e.altKey,
+            shift: e.shiftKey
+          }
+          
+          const modStr = []
+          if (e.ctrlKey) modStr.push('Ctrl')
+          if (e.altKey) modStr.push('Alt')
+          if (e.shiftKey) modStr.push('Shift')
+          
+          const log = `${new Date().toLocaleTimeString()}: ${modStr.join('+')}${modStr.length ? '+' : ''}${e.key}`
+          eventLogs.value.unshift(log)
+          if (eventLogs.value.length > 5) eventLogs.value.pop()
+        }
+        
+        // Demo 5
+        const modifierLogs = ref([])
+        
+        const parentClick = () => {
+          modifierLogs.value.unshift(`${new Date().toLocaleTimeString()}: 父元素被点击`)
+          if (modifierLogs.value.length > 5) modifierLogs.value.pop()
+        }
+        
+        const childClick = () => {
+          modifierLogs.value.unshift(`${new Date().toLocaleTimeString()}: 子元素被点击 (冒泡已阻止)`)
+          if (modifierLogs.value.length > 5) modifierLogs.value.pop()
+        }
+        
+        const linkClick = () => {
+          modifierLogs.value.unshift(`${new Date().toLocaleTimeString()}: 链接被点击 (跳转已阻止)`)
+          if (modifierLogs.value.length > 5) modifierLogs.value.pop()
+        }
+        
+        const onceClick = () => {
+          modifierLogs.value.unshift(`${new Date().toLocaleTimeString()}: 一次性按钮被点击`)
+          if (modifierLogs.value.length > 5) modifierLogs.value.pop()
+        }
+        
+        // Demo 6
+        const canvas = ref(null)
+        const currentColor = ref('#000000')
+        const colors = ['#000000', '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff']
+        let isDrawing = false
+        let ctx = null
+        
+        onMounted(() => {
+          if (canvas.value) {
+            ctx = canvas.value.getContext('2d')
+            ctx.lineCap = 'round'
+            ctx.lineJoin = 'round'
+            ctx.lineWidth = 3
+          }
+        })
+        
+        const startDrawing = (e) => {
+          isDrawing = true
+          const rect = canvas.value.getBoundingClientRect()
+          ctx.beginPath()
+          ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top)
+        }
+        
+        const draw = (e) => {
+          if (!isDrawing) return
+          const rect = canvas.value.getBoundingClientRect()
+          ctx.strokeStyle = currentColor.value
+          ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top)
+          ctx.stroke()
+        }
+        
+        const stopDrawing = () => {
+          isDrawing = false
+        }
+        
+        const clearCanvas = () => {
+          if (ctx) {
+            ctx.clearRect(0, 0, canvas.value.width, canvas.value.height)
+          }
+        }
+        
+        const downloadCanvas = () => {
+          const link = document.createElement('a')
+          link.download = 'drawing.png'
+          link.href = canvas.value.toDataURL()
+          link.click()
+        }
+        
+        return {
+          message, messageClass, count, showMessage, increment, toggleColor,
+          mouseX, mouseY, mouseInArea, updateCoords,
+          inputValue, changeValue, enterMessage, handleInput, handleChange, handleEnter,
+          pressedKey, modifiers, eventLogs, handleKeydown,
+          modifierLogs, parentClick, childClick, linkClick, onceClick,
+          canvas, currentColor, colors, startDrawing, draw, stopDrawing, clearCanvas, downloadCanvas
+        }
+      }
+    }).mount('#app')
+  </script>
+</body>
+</html>

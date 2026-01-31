@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第 10 章练习题答案</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 36px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .exercise-card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    
+    .exercise-title {
+      color: #667eea;
+      font-size: 24px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 3px solid #667eea;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .checkbox-group, .radio-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .checkbox-item, .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      background: #42b883;
+      color: white;
+    }
+    
+    button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(66, 184, 131, 0.4); }
+    button.secondary { background: #6c757d; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .preview-box {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    
+    .step-indicator {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      position: relative;
+    }
+    
+    .step-indicator::before {
+      content: '';
+      position: absolute;
+      top: 15px;
+      left: 10%;
+      right: 10%;
+      height: 4px;
+      background: #dee2e6;
+      z-index: 0;
+    }
+    
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .step-number {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #dee2e6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-bottom: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .step.active .step-number { background: #667eea; color: white; }
+    .step.completed .step-number { background: #42b883; color: white; }
+    
+    .wizard-nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+    }
+    
+    .error { color: #dc3545; font-size: 14px; margin-top: 5px; }
+    .success-message { text-align: center; padding: 40px; }
+    .success-icon { font-size: 64px; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>🎯 第 10 章练习题答案</h1>
+      
+      <!-- 基础练习 -->
+      <div class="exercise-card">
+        <h2 class="exercise-title">基础练习：用户信息表单</h2>
+        
+        <form @submit.prevent="submitBasic">
+          <div class="form-group">
+            <label>姓名 (v-model.trim)</label>
+            <input v-model.trim="basicForm.name" placeholder="自动去除首尾空格">
+          </div>
+          
+          <div class="form-group">
+            <label>年龄 (v-model.number)</label>
+            <input v-model.number="basicForm.age" type="number" min="1" max="120">
+          </div>
+          
+          <div class="form-group">
+            <label>性别</label>
+            <div class="radio-group">
+              <div class="radio-item">
+                <input type="radio" value="male" v-model="basicForm.gender" id="male">
+                <label for="male">男</label>
+              </div>
+              <div class="radio-item">
+                <input type="radio" value="female" v-model="basicForm.gender" id="female">
+                <label for="female">女</label>
+              </div>
+              <div class="radio-item">
+                <input type="radio" value="other" v-model="basicForm.gender" id="other">
+                <label for="other">其他</label>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>兴趣爱好</label>
+            <div class="checkbox-group">
+              <div class="checkbox-item" v-for="hobby in hobbies" :key="hobby">
+                <input type="checkbox" :value="hobby" v-model="basicForm.hobbies" :id="hobby">
+                <label :for="hobby">{{ hobby }}</label>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>城市</label>
+            <select v-model="basicForm.city">
+              <option value="">请选择</option>
+              <option v-for="city in cities" :key="city" :value="city">{{ city }}</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>自我介绍 (v-model.lazy)</label>
+            <textarea v-model.lazy="basicForm.bio" rows="3" placeholder="失去焦点后更新"></textarea>
+          </div>
+          
+          <button type="submit">提交</button>
+        </form>
+        
+        <div class="preview-box">
+          <h4>实时预览：</h4>
+          <pre>{{ JSON.stringify(basicForm, null, 2) }}</pre>
+        </div>
+      </div>
+      
+      <!-- 挑战练习：多步骤向导 -->
+      <div class="exercise-card">
+        <h2 class="exercise-title">挑战练习：多步骤注册向导</h2>
+        
+        <div class="step-indicator">
+          <div v-for="step in steps" :key="step.number" 
+               :class="['step', { active: currentStep === step.number, completed: currentStep > step.number }]">
+            <div class="step-number">{{ currentStep > step.number ? '✓' : step.number }}</div>
+            <div>{{ step.label }}</div>
+          </div>
+        </div>
+        
+        <!-- 步骤 1 -->
+        <div v-if="currentStep === 1">
+          <h3>步骤 1：账户信息</h3>
+          <div class="form-group">
+            <label>用户名 *</label>
+            <input v-model.trim="wizardForm.username" placeholder="3-20个字符">
+            <span class="error" v-if="errors.username">{{ errors.username }}</span>
+          </div>
+          <div class="form-group">
+            <label>邮箱 *</label>
+            <input v-model.trim="wizardForm.email" type="email" placeholder="your@email.com">
+            <span class="error" v-if="errors.email">{{ errors.email }}</span>
+          </div>
+          <div class="form-group">
+            <label>密码 *</label>
+            <input v-model="wizardForm.password" type="password" placeholder="至少6位">
+            <span class="error" v-if="errors.password">{{ errors.password }}</span>
+          </div>
+          <div class="form-group">
+            <label>确认密码 *</label>
+            <input v-model="wizardForm.confirmPassword" type="password" placeholder="再次输入密码">
+            <span class="error" v-if="errors.confirmPassword">{{ errors.confirmPassword }}</span>
+          </div>
+        </div>
+        
+        <!-- 步骤 2 -->
+        <div v-if="currentStep === 2">
+          <h3>步骤 2：个人资料</h3>
+          <div class="form-group">
+            <label>姓名</label>
+            <input v-model.trim="wizardForm.fullName" placeholder="真实姓名">
+          </div>
+          <div class="form-group">
+            <label>生日</label>
+            <input v-model="wizardForm.birthday" type="date">
+          </div>
+          <div class="form-group">
+            <label>头像 URL</label>
+            <input v-model.trim="wizardForm.avatar" placeholder="https://example.com/avatar.jpg">
+          </div>
+        </div>
+        
+        <!-- 步骤 3 -->
+        <div v-if="currentStep === 3">
+          <h3>步骤 3：偏好设置</h3>
+          <div class="form-group">
+            <label>主题</label>
+            <select v-model="wizardForm.theme">
+              <option value="light">浅色</option>
+              <option value="dark">深色</option>
+              <option value="auto">自动</option>
+            </select>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" v-model="wizardForm.newsletter" id="newsletter">
+            <label for="newsletter">订阅新闻通讯</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" v-model="wizardForm.notifications" id="notifications">
+            <label for="notifications">启用推送通知</label>
+          </div>
+        </div>
+        
+        <!-- 步骤 4 -->
+        <div v-if="currentStep === 4">
+          <h3>步骤 4：确认信息</h3>
+          <div class="preview-box">
+            <div v-for="(value, key) in wizardForm" :key="key" style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+              <strong>{{ key }}:</strong> {{ Array.isArray(value) ? value.join(', ') : value }}
+            </div>
+          </div>
+        </div>
+        
+        <!-- 完成 -->
+        <div v-if="currentStep === 5" class="success-message">
+          <div class="success-icon">🎉</div>
+          <h3>注册成功！</h3>
+          <p>欢迎加入我们，{{ wizardForm.username }}！</p>
+          <button @click="resetWizard" class="secondary" style="margin-top: 20px;">重新开始</button>
+        </div>
+        
+        <!-- 导航 -->
+        <div class="wizard-nav" v-if="currentStep < 5">
+          <button @click="prevStep" :disabled="currentStep === 1" class="secondary">上一步</button>
+          <button @click="nextStep">{{ currentStep === 4 ? '完成' : '下一步' }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, reactive } = Vue
+
+    createApp({
+      setup() {
+        // 基础练习
+        const basicForm = reactive({
+          name: '',
+          age: null,
+          gender: 'male',
+          hobbies: [],
+          city: '',
+          bio: ''
+        })
+        
+        const hobbies = ['读书', '运动', '音乐', '旅行', '摄影', '游戏']
+        const cities = ['北京', '上海', '广州', '深圳', '杭州']
+        
+        const submitBasic = () => {
+          alert('提交的数据：\n' + JSON.stringify(basicForm, null, 2))
+        }
+        
+        // 挑战练习
+        const currentStep = ref(1)
+        const steps = [
+          { number: 1, label: '账户信息' },
+          { number: 2, label: '个人资料' },
+          { number: 3, label: '偏好设置' },
+          { number: 4, label: '确认' }
+        ]
+        
+        const wizardForm = reactive({
+          username: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
+          fullName: '',
+          birthday: '',
+          avatar: '',
+          theme: 'light',
+          newsletter: false,
+          notifications: true
+        })
+        
+        const errors = reactive({
+          username: '',
+          email: '',
+          password: '',
+          confirmPassword: ''
+        })
+        
+        const validateStep = () => {
+          let valid = true
+          Object.keys(errors).forEach(key => errors[key] = '')
+          
+          if (currentStep.value === 1) {
+            if (wizardForm.username.length < 3) {
+              errors.username = '用户名至少3个字符'
+              valid = false
+            }
+            if (!wizardForm.email.includes('@')) {
+              errors.email = '请输入有效的邮箱'
+              valid = false
+            }
+            if (wizardForm.password.length < 6) {
+              errors.password = '密码至少6个字符'
+              valid = false
+            }
+            if (wizardForm.password !== wizardForm.confirmPassword) {
+              errors.confirmPassword = '两次输入的密码不一致'
+              valid = false
+            }
+          }
+          
+          return valid
+        }
+        
+        const nextStep = () => {
+          if (!validateStep()) return
+          if (currentStep.value < 5) currentStep.value++
+        }
+        
+        const prevStep = () => {
+          if (currentStep.value > 1) currentStep.value--
+        }
+        
+        const resetWizard = () => {
+          currentStep.value = 1
+          Object.keys(wizardForm).forEach(key => {
+            if (typeof wizardForm[key] === 'boolean') {
+              wizardForm[key] = key === 'notifications'
+            } else if (typeof wizardForm[key] === 'string') {
+              wizardForm[key] = ''
+            }
+          })
+          wizardForm.theme = 'light'
+        }
+        
+        return {
+          basicForm, hobbies, cities, submitBasic,
+          currentStep, steps, wizardForm, errors,
+          nextStep, prevStep, resetWizard
+        }
+      }
+    }).mount('#app')
+  </script>
+</body>
+</html>

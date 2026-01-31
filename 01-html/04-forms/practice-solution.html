@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>联系表单练习</title>
+</head>
+<body>
+    <h1>联系我们</h1>
+    <p>如果您有任何问题或建议，欢迎填写下面的表单与我们联系。</p>
+
+    <form action="#" method="post">
+        <p>
+            <label for="name">姓名：</label>
+            <input id="name" name="name" type="text" placeholder="请输入您的姓名" required>
+        </p>
+        <p>
+            <label for="email">邮箱：</label>
+            <input id="email" name="email" type="email" placeholder="name@example.com" required>
+        </p>
+        <p>
+            <label for="topic">咨询主题：</label>
+            <select id="topic" name="topic">
+                <option value="">请选择咨询主题</option>
+                <option value="product">产品咨询</option>
+                <option value="service">服务咨询</option>
+                <option value="cooperation">合作咨询</option>
+                <option value="other">其他</option>
+            </select>
+        </p>
+        <p>
+            <label for="message">留言内容：</label><br>
+            <textarea id="message" name="message" rows="6" cols="50" placeholder="请详细描述您的问题或建议..."></textarea>
+        </p>
+        <button type="submit">提交</button>
+        <button type="reset">重置</button>
+    </form>
+</body>
+</html>

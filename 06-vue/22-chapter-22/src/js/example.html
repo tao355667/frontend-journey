@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第二十二章：生命周期钩子 - JavaScript 示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .demo-section {
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    .demo-title {
+      color: #42b983;
+      margin-top: 0;
+    }
+    button {
+      padding: 8px 16px;
+      margin: 5px;
+      background: #42b983;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #369870;
+    }
+    button.danger {
+      background: #ff6b6b;
+    }
+    button.danger:hover {
+      background: #ff5252;
+    }
+    .info-box {
+      background: #f0f8ff;
+      padding: 15px;
+      border-left: 4px solid #42b983;
+      margin: 10px 0;
+    }
+    .log-box {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .log-entry {
+      margin: 2px 0;
+      padding: 2px 5px;
+      border-bottom: 1px solid #444;
+    }
+    .component-box {
+      border: 2px solid #42b983;
+      padding: 20px;
+      margin: 10px 0;
+      border-radius: 8px;
+      background: #f9f9f9;
+    }
+    .loading {
+      color: #42b983;
+    }
+    .error {
+      color: #ff6b6b;
+    }
+  </style>
+</head>
+<body>
+  <h1>第二十二章：生命周期钩子（组合式）</h1>
+  <p>本章演示组合式 API 中的生命周期钩子的使用。</p>
+
+  <div id="app">
+    <!-- 示例 1：生命周期演示 -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 1：生命周期钩子演示</h2>
+      <button @click="showLifecycleDemo = !showLifecycleDemo">
+        {{ showLifecycleDemo ? '卸载' : '挂载' }}组件
+      </button>
+      <lifecycle-demo v-if="showLifecycleDemo"></lifecycle-demo>
+    </div>
+
+    <!-- 示例 2：数据获取 -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 2：onMounted 数据获取</h2>
+      <data-fetch-demo></data-fetch-demo>
+    </div>
+
+    <!-- 示例 3：定时器清理 -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 3：onUnmounted 清理副作用</h2>
+      <button @click="showTimer = !showTimer">
+        {{ showTimer ? '停止' : '开始' }}计时器
+      </button>
+      <timer-demo v-if="showTimer"></timer-demo>
+    </div>
+
+    <!-- 示例 4：事件监听 -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 4：事件监听与清理</h2>
+      <button @click="showMouseTracker = !showMouseTracker">
+        {{ showMouseTracker ? '隐藏' : '显示' }}鼠标追踪
+      </button>
+      <mouse-tracker v-if="showMouseTracker"></mouse-tracker>
+    </div>
+  </div>
+
+  <script>
+    const { 
+      createApp, 
+      ref, 
+      onBeforeMount,
+      onMounted, 
+      onBeforeUpdate,
+      onUpdated,
+      onBeforeUnmount,
+      onUnmounted 
+    } = Vue;
+
+    // 示例 1：生命周期演示组件
+    const LifecycleDemo = {
+      setup() {
+        const count = ref(0);
+        const logs = ref([]);
+        
+        const addLog = (message) => {
+          const time = new Date().toLocaleTimeString();
+          logs.value.push(`${time} - ${message}`);
+        };
+        
+        onBeforeMount(() => {
+          addLog('onBeforeMount: 组件即将挂载到 DOM');
+        });
+        
+        onMounted(() => {
+          addLog('onMounted: 组件已挂载，可以访问 DOM');
+        });
+        
+        onBeforeUpdate(() => {
+          addLog('onBeforeUpdate: 组件即将更新');
+        });
+        
+        onUpdated(() => {
+          addLog('onUpdated: 组件已更新，DOM 已同步');
+        });
+        
+        onBeforeUnmount(() => {
+          addLog('onBeforeUnmount: 组件即将卸载');
+        });
+        
+        onUnmounted(() => {
+          console.log('onUnmounted: 组件已卸载，执行清理工作');
+        });
+        
+        return {
+          count,
+          logs
+        };
+      },
+      template: `
+        <div class="component-box">
+          <h4>生命周期演示组件</h4>
+          <p>计数：{{ count }}</p>
+          <button @click="count++">增加计数（触发更新）</button>
+          <div class="log-box" style="margin-top: 10px;">
+            <div v-for="(log, index) in logs" :key="index" class="log-entry">
+              {{ log }}
+            </div>
+          </div>
+        </div>
+      `
+    };
+
+    // 示例 2：数据获取
+    const DataFetchDemo = {
+      setup() {
+        const users = ref([]);
+        const loading = ref(false);
+        const error = ref(null);
+        
+        const fetchUsers = async () => {
+          loading.value = true;
+          error.value = null;
+          
+          try {
+            // 模拟 API 调用
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // 模拟随机失败
+            if (Math.random() > 0.8) {
+              throw new Error('网络请求失败');
+            }
+            
+            users.value = [
+              { id: 1, name: '张三', role: '管理员' },
+              { id: 2, name: '李四', role: '用户' },
+              { id: 3, name: '王五', role: '用户' },
+            ];
+          } catch (err) {
+            error.value = err.message;
+          } finally {
+            loading.value = false;
+          }
+        };
+        
+        onMounted(() => {
+          fetchUsers();
+        });
+        
+        return {
+          users,
+          loading,
+          error,
+          fetchUsers
+        };
+      },
+      template: `
+        <div>
+          <div v-if="loading" class="loading">
+            <p>加载中...</p>
+          </div>
+          <div v-else-if="error" class="error">
+            <p>错误：{{ error }}</p>
+            <button @click="fetchUsers">重试</button>
+          </div>
+          <div v-else>
+            <ul>
+              <li v-for="user in users" :key="user.id">
+                {{ user.name }} - {{ user.role }}
+              </li>
+            </ul>
+            <button @click="fetchUsers">刷新数据</button>
+          </div>
+        </div>
+      `
+    };
+
+    // 示例 3：定时器
+    const TimerDemo = {
+      setup() {
+        const seconds = ref(0);
+        let timer = null;
+        
+        onMounted(() => {
+          timer = setInterval(() => {
+            seconds.value++;
+          }, 1000);
+          console.log('定时器启动');
+        });
+        
+        onUnmounted(() => {
+          clearInterval(timer);
+          console.log('定时器已清理');
+        });
+        
+        return {
+          seconds
+        };
+      },
+      template: `
+        <div class="component-box">
+          <p style="font-size: 24px; font-weight: bold; color: #42b983;">
+            {{ seconds }} 秒
+          </p>
+          <p>组件卸载时，定时器会自动清理</p>
+        </div>
+      `
+    };
+
+    // 示例 4：鼠标追踪
+    const MouseTracker = {
+      setup() {
+        const x = ref(0);
+        const y = ref(0);
+        const isTracking = ref(false);
+        
+        const updatePosition = (event) => {
+          x.value = event.clientX;
+          y.value = event.clientY;
+        };
+        
+        onMounted(() => {
+          window.addEventListener('mousemove', updatePosition);
+          isTracking.value = true;
+          console.log('开始监听鼠标移动');
+        });
+        
+        onUnmounted(() => {
+          window.removeEventListener('mousemove', updatePosition);
+          console.log('停止监听鼠标移动');
+        });
+        
+        return {
+          x,
+          y,
+          isTracking
+        };
+      },
+      template: `
+        <div class="component-box" style="text-align: center;">
+          <p>鼠标追踪状态：{{ isTracking ? '运行中' : '已停止' }}</p>
+          <p style="font-size: 18px; font-family: monospace;">
+            X: {{ x }} | Y: {{ y }}
+          </p>
+          <div style="font-size: 12px; color: #666;">
+            移动鼠标查看坐标变化
+          </div>
+        </div>
+      `
+    };
+
+    createApp({
+      components: {
+        LifecycleDemo,
+        DataFetchDemo,
+        TimerDemo,
+        MouseTracker
+      },
+      setup() {
+        const showLifecycleDemo = ref(false);
+        const showTimer = ref(false);
+        const showMouseTracker = ref(false);
+        
+        return {
+          showLifecycleDemo,
+          showTimer,
+          showMouseTracker
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第五章练习题答案</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #31708f;
+            border-bottom: 2px solid #31708f;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #3c763d;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #31708f;
+            margin-top: 25px;
+        }
+        .exercise {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #31708f;
+        }
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .output {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 4px solid #4caf50;
+        }
+        .note {
+            background-color: #e7f3ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <h1>第五章：函数 - 练习题答案</h1>
+
+    <div class="exercise">
+        <h3>练习 5.1：价格格式化函数</h3>
+        <p><strong>题目：</strong>编写一个函数 `formatPrice`，接受一个数字参数，返回格式化的价格字符串（如 1234.56 → "¥1,234.56"）。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 价格格式化函数
+function formatPrice(price: number): string {
+  // 使用 Intl.NumberFormat 进行本地化格式化
+  return new Intl.NumberFormat('zh-CN', {
+    style: 'currency',
+    currency: 'CNY',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(price);
+}
+
+// 测试
+const prices = [1234.56, 99.99, 1000, 0.5, 12345678.9];
+
+console.log("价格格式化测试：");
+prices.forEach(price => {
+  console.log(`${price} → ${formatPrice(price)}`);
+});</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            价格格式化测试：<br>
+            1234.56 → ¥1,234.56<br>
+            99.99 → ¥99.99<br>
+            1000 → ¥1,000.00<br>
+            0.5 → ¥0.50<br>
+            12345678.9 → ¥12,345,678.90
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 5.2：按长度过滤字符串</h3>
+        <p><strong>题目：</strong>编写一个函数 `filterByLength`，接受字符串数组和最小长度参数，返回符合长度要求的字符串数组。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 按长度过滤字符串
+function filterByLength(
+  strings: string[],
+  minLength: number
+): string[] {
+  return strings.filter(str => str.length >= minLength);
+}
+
+// 测试
+const words = [
+  "apple",
+  "hi",
+  "banana",
+  "cat",
+  "strawberry",
+  "dog",
+  "watermelon"
+];
+
+console.log("按长度过滤测试：");
+console.log("原数组:", words);
+
+const minLen3 = filterByLength(words, 3);
+console.log("最小长度 3:", minLen3);
+
+const minLen5 = filterByLength(words, 5);
+console.log("最小长度 5:", minLen5);
+
+const minLen8 = filterByLength(words, 8);
+console.log("最小长度 8:", minLen8);
+
+// 进阶：支持最大长度
+function filterByLengthRange(
+  strings: string[],
+  minLength: number,
+  maxLength?: number
+): string[] {
+  return strings.filter(str => {
+    if (str.length < minLength) return false;
+    if (maxLength !== undefined && str.length > maxLength) return false;
+    return true;
+  });
+}
+
+console.log("\n进阶：长度范围 3-6");
+const rangeResult = filterByLengthRange(words, 3, 6);
+console.log("结果:", rangeResult);</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            按长度过滤测试：<br>
+            原数组: [ 'apple', 'hi', 'banana', 'cat', 'strawberry', 'dog', 'watermelon' ]<br>
+            最小长度 3: [ 'apple', 'banana', 'cat', 'strawberry', 'dog', 'watermelon' ]<br>
+            最小长度 5: [ 'apple', 'banana', 'strawberry', 'watermelon' ]<br>
+            最小长度 8: [ 'strawberry', 'watermelon' ]<br><br>
+            进阶：长度范围 3-6<br>
+            结果: [ 'apple', 'banana', 'cat', 'dog' ]
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 5.3：创建乘法函数</h3>
+        <p><strong>题目：</strong>编写一个箭头函数 `createMultiplier`，接受一个乘数，返回一个函数，该函数接受数字并返回乘以该乘数的结果。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 创建乘法函数的箭头函数
+const createMultiplier = (multiplier: number) => {
+  return (value: number) => value * multiplier;
+};
+
+// 测试
+const double = createMultiplier(2);
+const triple = createMultiplier(3);
+const tenTimes = createMultiplier(10);
+
+console.log("=== 乘法函数工厂 ===");
+console.log("double(5) =", double(5));           // 10
+console.log("double(10) =", double(10));         // 20
+
+console.log("triple(5) =", triple(5));           // 15
+console.log("triple(10) =", triple(10));         // 30
+
+console.log("tenTimes(7) =", tenTimes(7));       // 70
+console.log("tenTimes(0.5) =", tenTimes(0.5));   // 5
+
+// 链式调用
+const numbers = [1, 2, 3, 4, 5];
+console.log("\n原始数组:", numbers);
+console.log("全部加倍:", numbers.map(double));
+console.log("全部乘3:", numbers.map(triple));
+
+// 进阶：支持多个乘数
+const createMultiMultiplier = (...multipliers: number[]) => {
+  return (value: number): number[] => {
+    return multipliers.map(m => value * m);
+  };
+};
+
+const multiFunc = createMultiMultiplier(2, 3, 4);
+console.log("\n多乘数函数 (值=5, 乘数=2,3,4):", multiFunc(5));</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === 乘法函数工厂 ===<br>
+            double(5) = 10<br>
+            double(10) = 20<br>
+            triple(5) = 15<br>
+            triple(10) = 30<br>
+            tenTimes(7) = 70<br>
+            tenTimes(0.5) = 5<br><br>
+            原始数组: [ 1, 2, 3, 4, 5 ]<br>
+            全部加倍: [ 2, 4, 6, 8, 10 ]<br>
+            全部乘3: [ 3, 6, 9, 12, 15 ]<br><br>
+            多乘数函数 (值=5, 乘数=2,3,4): [ 10, 15, 20 ]
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 5.4：parseInput 函数重载</h3>
+        <p><strong>题目：</strong>使用函数重载实现 `parseInput` 函数。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 函数重载签名
+function parseInput(input: string): string[];
+function parseInput(input: number): number[];
+function parseInput(input: boolean): boolean[];
+
+// 实现
+function parseInput(input: string | number | boolean): string[] | number[] | boolean[] {
+  if (typeof input === "string") {
+    return input.split("");
+  }
+  if (typeof input === "number") {
+    const digits = input.toString().replace(".", "").split("").map(Number);
+    return digits;
+  }
+  if (typeof input === "boolean") {
+    return [input];
+  }
+  return [];
+}
+
+// 测试
+console.log("=== parseInput 函数重载 ===");
+
+// 字符串输入
+const strInput = "hello";
+console.log(`parseInput("${strInput}"):`, parseInput(strInput));
+
+// 数字输入
+const numInput = 12345;
+console.log(`parseInput(${numInput}):`, parseInput(numInput));
+
+// 浮点数输入
+const floatInput = 3.14;
+console.log(`parseInput(${floatInput}):`, parseInput(floatInput));
+
+// 布尔值输入
+const boolInput = true;
+console.log(`parseInput(${boolInput}):`, parseInput(boolInput));
+
+// 进阶：处理数组
+function parseArray<T extends string | number | boolean>(
+  items: T[]
+): (string | number | boolean)[][] {
+  return items.map(item => {
+    if (typeof item === "string") {
+      return item.split("");
+    }
+    if (typeof item === "number") {
+      return item.toString().split("").map(Number);
+    }
+    return [item];
+  });
+}
+
+console.log("\n数组处理:", parseArray(["ab", 456, true]));</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === parseInput 函数重载 ===<br>
+            parseInput("hello"): [ 'h', 'e', 'l', 'l', 'o' ]<br>
+            parseInput(12345): [ 1, 2, 3, 4, 5 ]<br>
+            parseInput(3.14): [ 3, 1, 4 ]<br>
+            parseInput(true): [ true ]<br><br>
+            数组处理: [ [ 'a', 'b' ], [ 4, 5, 6 ], [ true ] ]
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 5.5：防抖函数</h3>
+        <p><strong>题目：</strong>创建一个 `debounce` 函数，接收一个函数和延迟时间，返回一个防抖处理后的新函数。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 防抖函数
+function debounce<T extends (...args: any[]) => any>(
+  fn: T,
+  delay: number
+): (...args: Parameters<T>) => void {
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+  return (...args: Parameters<T>) => {
+    if (timeoutId !== null) {
+      clearTimeout(timeoutId);
+    }
+
+    timeoutId = setTimeout(() => {
+      fn(...args);
+      timeoutId = null;
+    }, delay);
+  };
+}
+
+// 测试
+console.log("=== 防抖函数测试 ===");
+
+// 模拟搜索函数
+let searchCount = 0;
+const performSearch = (query: string) => {
+  searchCount++;
+  console.log(`搜索 #${searchCount}: "${query}"`);
+};
+
+// 创建防抖搜索函数（延迟 500ms）
+const debouncedSearch = debounce(performSearch, 500);
+
+// 模拟快速输入
+console.log("模拟用户快速输入...");
+debouncedSearch("h");
+debouncedSearch("he");
+debouncedSearch("hel");
+debouncedSearch("hell");
+debouncedSearch("hello");
+
+// 等待防抖触发
+setTimeout(() => {
+  console.log("\n防抖触发后，搜索次数:", searchCount);
+}, 1000);
+
+// 进阶：支持取消
+function debounceWithCancel<T extends (...args: any[]) => any>(
+  fn: T,
+  delay: number
+): {
+  (...args: Parameters<T>): void;
+  cancel(): void;
+} {
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+  const debouncedFn = (...args: Parameters<T>) => {
+    if (timeoutId !== null) {
+      clearTimeout(timeoutId);
+    }
+
+    timeoutId = setTimeout(() => {
+      fn(...args);
+      timeoutId = null;
+    }, delay);
+  };
+
+  debouncedFn.cancel = () => {
+    if (timeoutId !== null) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+  };
+
+  return debouncedFn;
+}
+
+// 测试取消功能
+let clickCount = 0;
+const handleClick = () => {
+  clickCount++;
+  console.log(`点击处理 #${clickCount}`);
+};
+
+const debouncedClick = debounceWithCancel(handleClick, 300);
+
+console.log("\n测试取消功能：");
+debouncedClick();
+setTimeout(() => {
+  debouncedClick.cancel();
+  console.log("已取消第二次点击");
+}, 100);
+
+setTimeout(() => {
+  console.log("最终点击次数:", clickCount);
+}, 500);</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === 防抖函数测试 ===<br>
+            模拟用户快速输入...<br>
+            搜索 #1: "hello"<br><br>
+            防抖触发后，搜索次数: 1<br><br>
+            测试取消功能：<br>
+            已取消第二次点击<br>
+            最终点击次数: 1
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 5.6：泛型 Map 数据结构</h3>
+        <p><strong>题目：</strong>创建一个泛型 `Map` 数据结构。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 泛型 Map 实现
+class Map<K, V> {
+  private items: Map<K, V>["items"];
+  private keys: K[];
+  private values: V[];
+
+  constructor() {
+    this.keys = [];
+    this.values = [];
+  }
+
+  set(key: K, value: V): void {
+    const existingIndex = this.keys.findIndex(k => this.equals(k, key));
+    if (existingIndex !== -1) {
+      this.values[existingIndex] = value;
+    } else {
+      this.keys.push(key);
+      this.values.push(value);
+    }
+  }
+
+  get(key: K): V | undefined {
+    const index = this.keys.findIndex(k => this.equals(k, key));
+    if (index !== -1) {
+      return this.values[index];
+    }
+    return undefined;
+  }
+
+  has(key: K): boolean {
+    return this.keys.some(k => this.equals(k, key));
+  }
+
+  delete(key: K): boolean {
+    const index = this.keys.findIndex(k => this.equals(k, key));
+    if (index !== -1) {
+      this.keys.splice(index, 1);
+      this.values.splice(index, 1);
+      return true;
+    }
+    return false;
+  }
+
+  forEach(callback: (value: V, key: K) => void): void {
+    this.keys.forEach((key, index) => {
+      callback(this.values[index], key);
+    });
+  }
+
+  getSize(): number {
+    return this.keys.length;
+  }
+
+  clear(): void {
+    this.keys = [];
+    this.values = [];
+  }
+
+  private equals(a: K, b: K): boolean {
+    if (typeof a === "object" && a !== null && b !== null) {
+      return JSON.stringify(a) === JSON.stringify(b);
+    }
+    return a === b;
+  }
+}
+
+// 测试
+console.log("=== 泛型 Map 测试 ===");
+
+const userMap = new Map<string, { name: string; age: number }>();
+
+// 设置
+userMap.set("user1", { name: "Alice", age: 25 });
+userMap.set("user2", { name: "Bob", age: 30 });
+userMap.set("user3", { name: "Charlie", age: 35 });
+
+console.log("Map 大小:", userMap.getSize());
+
+// 获取
+console.log("user1:", userMap.get("user1"));
+
+// 存在性检查
+console.log("has user2:", userMap.has("user2"));
+console.log("has user4:", userMap.has("user4"));
+
+// 遍历
+console.log("\n遍历 Map：");
+userMap.forEach((value, key) => {
+  console.log(`  ${key}: ${value.name}, ${value.age}岁`);
+});
+
+// 删除
+console.log("\n删除 user2:", userMap.delete("user2"));
+console.log("删除后大小:", userMap.getSize());
+
+// 重新设置
+userMap.set("user2", { name: "Bob Updated", age: 31 });
+console.log("重新添加 user2:", userMap.get("user2"));
+
+// 清空
+userMap.clear();
+console.log("清空后大小:", userMap.getSize());</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === 泛型 Map 测试 ===<br>
+            Map 大小: 3<br>
+            user1: { name: 'Alice', age: 25 }<br>
+            has user2: true<br>
+            has user4: false<br><br>
+            遍历 Map：<br>
+            &nbsp;&nbsp;user1: Alice, 25岁<br>
+            &nbsp;&nbsp;user2: Bob, 30岁<br>
+            &nbsp;&nbsp;user3: Charlie, 35岁<br><br>
+            删除 user2: true<br>
+            删除后大小: 2<br>
+            重新添加 user2: { name: 'Bob Updated', age: 31 }<br>
+            清空后大小: 0
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 5.7：函数组合</h3>
+        <p><strong>题目：</strong>实现一个 `compose` 函数，接受多个函数，返回一个组合函数。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 函数组合：从右到左执行
+function compose<T, R1, R2>(
+  f2: (x: T) => R2,
+  f1: (x: R2) => R1
+): (x: T) => R1;
+
+function compose<T, R1, R2, R3>(
+  f3: (x: T) => R3,
+  f2: (x: R3) => R2,
+  f1: (x: R2) => R1
+): (x: T) => R1;
+
+function compose<T>(
+  ...fns: Array<(x: any) => any>
+): (x: T) => any {
+  return (x: T) => {
+    return fns.reduceRight((result, fn) => fn(result), x);
+  };
+}
+
+// 测试基本函数
+const add1 = (x: number) => x + 1;
+const double = (x: number) => x * 2;
+const square = (x: number) => x * x;
+const toString = (x: number) => x.toString();
+
+console.log("=== 函数组合测试 ===");
+
+// 组合两个函数：square(add1(x))
+const squareOfAdd1 = compose(square, add1);
+console.log("square(add1(3)) = square(4) =", squareOfAdd1(3));
+
+// 组合三个函数：double(square(add1(x)))
+const complexFunc = compose(double, square, add1);
+console.log("double(square(add1(2))) = double(square(3)) = double(9) =", complexFunc(2));
+
+// 组合四个函数
+const veryComplex = compose(toString, double, square, add1);
+console.log("toString(double(square(add1(2)))) =", veryComplex(2));
+
+// 实际应用示例
+const trim = (s: string) => s.trim();
+const upperCase = (s: string) => s.toUpperCase();
+const addExclamation = (s: string) => s + "!";
+
+const formatMessage = compose(addExclamation, upperCase, trim);
+console.log("\n格式化消息：");
+console.log(`  "  hello world  " → "${formatMessage("  hello world  ")}"`);
+
+// 管道函数（从左到右）
+function pipe<T, R1, R2>(
+  f1: (x: T) => R1,
+  f2: (x: R1) => R2
+): (x: T) => R2;
+
+function pipe<T>(
+  ...fns: Array<(x: any) => any>
+): (x: any) => any {
+  return (x: any) => {
+    return fns.reduce((result, fn) => fn(result), x);
+  };
+}
+
+const pipeResult = pipe(
+  (x: number) => x + 1,  // 2 + 1 = 3
+  (x) => x * 2,          // 3 * 2 = 6
+  (x) => x ** 2,         // 6 ** 2 = 36
+  (x) => x - 10          // 36 - 10 = 26
+);
+
+console.log("\n管道函数测试 (2+1)×2²-10 =", pipeResult(2));
+
+// compose vs pipe 对比
+const add2 = (x: number) => x + 2;
+const multiply3 = (x: number) => x * 3;
+
+const composed = compose(multiply3, add2);  // multiply3(add2(x))
+const piped = pipe(add2, multiply3);        // multiply3(add2(x))
+
+console.log("\ncompose vs pipe 对比：");
+console.log("compose(multiply3, add2)(5) =", composed(5));
+console.log("pipe(add2, multiply3)(5) =", piped(5));</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === 函数组合测试 ===<br>
+            square(add1(3)) = square(4) = 16<br>
+            double(square(add1(2))) = double(square(3)) = double(9) = 18<br>
+            toString(double(square(add1(2)))) = "18"<br><br>
+            格式化消息：<br>
+            &nbsp;&nbsp;"&nbsp;&nbsp;hello world&nbsp;&nbsp;" → "HELLO WORLD!"<br><br>
+            管道函数测试 (2+1)×2²-10 = 26<br><br>
+            compose vs pipe 对比：<br>
+            compose(multiply3, add2)(5) = 21<br>
+            pipe(add2, multiply3)(5) = 21
+        </div>
+    </div>
+
+    <p style="text-align: center; color: #666; margin-top: 40px;">
+        练习题答案仅供参考，建议自己动手实践加深理解。
+    </p>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS 定位 - 基础练习答案</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            padding-top: 70px;
+            background-color: #f5f7fb;
+            color: #2c3e50;
+        }
+
+        .fixed-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: #2c3e50;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            gap: 20px;
+        }
+
+        .card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .relative-box {
+            width: 160px;
+            height: 100px;
+            background-color: #1677ff;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            top: 10px;
+            left: 20px;
+        }
+
+        .absolute-container {
+            position: relative;
+            height: 180px;
+            border: 2px dashed #95a5a6;
+            border-radius: 8px;
+            background-color: #fdfdfd;
+        }
+
+        .absolute-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #e67e22;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <header class="fixed-header" aria-label="固定导航栏">
+        固定导航栏（position: fixed）
+    </header>
+
+    <main class="container" aria-label="定位基础练习">
+        <section class="card" aria-label="相对定位">
+            <h2>相对定位</h2>
+            <p>盒子相对自身原始位置偏移。</p>
+            <div class="relative-box">relative</div>
+        </section>
+
+        <section class="card" aria-label="绝对定位">
+            <h2>绝对定位叠加</h2>
+            <div class="absolute-container">
+                <div class="absolute-badge">absolute</div>
+            </div>
+        </section>
+
+        <section class="card" aria-label="固定定位说明">
+            <h2>固定定位说明</h2>
+            <p>顶部导航栏固定在视口顶部，并设置较高的 z-index。</p>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第14章练习答案 - 生命周期应用</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #f5f5f5; }
+    h1 { text-align: center; color: #333; margin-bottom: 30px; }
+    h2 { color: #42b883; margin: 30px 0 15px; border-bottom: 2px solid #42b883; padding-bottom: 10px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    .exercise-card { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0; }
+    .exercise-card h3 { color: #1976d2; margin-bottom: 10px; }
+    .exercise-card code { background: rgba(255,255,255,0.7); padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 13px; }
+    
+    .card { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin: 5px; transition: opacity 0.2s; }
+    .btn-primary { background: #42b883; color: white; }
+    .btn-danger { background: #ff5252; color: white; }
+    .btn-warning { background: #ff9800; color: white; }
+    .btn-default { background: #e0e0e0; color: #333; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn:hover:not(:disabled) { opacity: 0.8; }
+    
+    .countdown-display { font-size: 72px; font-weight: bold; text-align: center; font-family: monospace; transition: color 0.3s; }
+    .countdown-display.running { color: #42b883; }
+    .countdown-display.warning { color: #ff9800; }
+    .countdown-display.danger { color: #ff5252; }
+    .countdown-display.finished { color: #999; }
+    
+    .progress-bar { height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden; margin: 15px 0; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #42b883, #347474); transition: width 0.5s, background 0.5s; }
+    .progress-fill.warning { background: linear-gradient(90deg, #ff9800, #f57c00); }
+    .progress-fill.danger { background: linear-gradient(90deg, #ff5252, #c62828); }
+    
+    .window-monitor { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+    .monitor-box { background: #f8f8f8; padding: 20px; border-radius: 8px; text-align: center; }
+    .monitor-value { font-size: 36px; font-weight: bold; color: #42b883; font-family: monospace; }
+    .monitor-label { color: #666; margin-top: 8px; font-size: 13px; }
+    .monitor-hint { grid-column: 1 / -1; text-align: center; color: #999; font-size: 13px; padding: 10px; }
+    
+    .user-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    .user-table th, .user-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+    .user-table th { background: #f8f8f8; font-weight: 600; color: #666; font-size: 13px; }
+    .user-table tr:hover { background: #f8f8f8; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #42b883, #347474); display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px; margin-right: 10px; }
+    .user-info { display: flex; align-items: center; }
+    .user-name { font-weight: 500; }
+    .user-email { font-size: 12px; color: #666; }
+    .status-badge { padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+    .status-active { background: #e8f5e9; color: #2e7d32; }
+    .status-inactive { background: #ffebee; color: #c62828; }
+    
+    .loading { text-align: center; padding: 40px; }
+    .loading-spinner { width: 40px; height: 40px; border: 3px solid #e0e0e0; border-top-color: #42b883; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error-box { background: #ffebee; color: #c62828; padding: 15px; border-radius: 4px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>第14章练习题答案</h1>
+      
+      <!-- 练习1：倒计时组件 -->
+      <div class="exercise-card">
+        <h3>练习 1：倒计时组件</h3>
+        <p>创建可配置秒数的倒计时组件，组件卸载时自动清理定时器，结束时触发 finish 事件</p>
+      </div>
+      
+      <div class="card">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+          <div>
+            <h4 style="text-align: center; margin-bottom: 15px;">60秒倒计时</h4>
+            <exercise-countdown :seconds="60" @finish="onFinish('60秒倒计时')" />
+          </div>
+          <div>
+            <h4 style="text-align: center; margin-bottom: 15px;">30秒倒计时（快捷）</h4>
+            <exercise-countdown :seconds="30" @finish="onFinish('30秒倒计时')" />
+          </div>
+        </div>
+        <div style="margin-top: 15px; text-align: center;">
+          <button class="btn btn-primary" @click="showCountdown = !showCountdown">
+            {{ showCountdown ? '隐藏' : '显示' }} 倒计时
+          </button>
+          <div v-if="!showCountdown" style="color: #999; margin-top: 10px; font-size: 13px;">
+            倒计时组件已卸载，定时器已自动清理
+          </div>
+        </div>
+      </div>
+      
+      <!-- 练习2：窗口大小监听 -->
+      <div class="exercise-card">
+        <h3>练习 2：窗口大小监听</h3>
+        <p>实时显示窗口尺寸，带100ms防抖优化，组件卸载时移除监听</p>
+      </div>
+      
+      <div class="card">
+        <exercise-window-monitor />
+      </div>
+      
+      <!-- 练习3：API数据获取 -->
+      <div class="exercise-card">
+        <h3>练习 3：用户列表组件</h3>
+        <p>挂载时自动获取数据，支持手动刷新，显示加载/错误状态，卸载时取消未完成请求</p>
+      </div>
+      
+      <div class="card">
+        <exercise-user-list />
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed, onMounted, onUnmounted, watch } = Vue;
+
+    // 练习1：倒计时组件
+    const ExerciseCountdown = {
+      props: {
+        seconds: {
+          type: Number,
+          required: true,
+          validator: (value) => value > 0
+        }
+      },
+      emits: ['finish'],
+      template: `
+        <div v-if="showCountdown">
+          <div class="countdown-display" :class="displayClass">
+            {{ formattedTime }}
+          </div>
+          <div class="progress-bar">
+            <div 
+              class="progress-fill" 
+              :class="progressClass"
+              :style="{ width: progressPercent + '%' }"
+            ></div>
+          </div>
+          <div style="text-align: center; margin-top: 15px;">
+            <button 
+              class="btn" 
+              :class="isRunning ? 'btn-warning' : 'btn-primary'"
+              @click="toggle"
+            >
+              {{ isRunning ? '暂停' : (remaining === total ? '开始' : '继续') }}
+            </button>
+            <button class="btn btn-default" @click="reset">重置</button>
+          </div>
+        </div>
+        <div v-else style="text-align: center; padding: 40px; color: #999;">
+          <div style="font-size: 48px;">✅</div>
+          <div style="margin-top: 10px;">倒计时结束</div>
+          <button class="btn btn-primary" style="margin-top: 15px;" @click="reset">重新开始</button>
+        </div>
+      `,
+      setup(props, { emit }) {
+        const total = ref(props.seconds);
+        const remaining = ref(props.seconds);
+        const isRunning = ref(false);
+        const showCountdown = ref(true);
+        let timer = null;
+
+        const formattedTime = computed(() => {
+          const m = Math.floor(remaining.value / 60);
+          const s = remaining.value % 60;
+          return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        });
+
+        const progressPercent = computed(() => {
+          return (remaining.value / total.value) * 100;
+        });
+
+        const displayClass = computed(() => {
+          if (!showCountdown.value) return 'finished';
+          if (remaining.value <= 5) return 'danger';
+          if (remaining.value <= 10) return 'warning';
+          return 'running';
+        });
+
+        const progressClass = computed(() => {
+          if (remaining.value <= 5) return 'danger';
+          if (remaining.value <= 10) return 'warning';
+          return '';
+        });
+
+        function start() {
+          if (isRunning.value) return;
+          isRunning.value = true;
+          timer = setInterval(() => {
+            if (remaining.value > 0) {
+              remaining.value--;
+            } else {
+              finish();
+            }
+          }, 1000);
+        }
+
+        function pause() {
+          isRunning.value = false;
+          clearInterval(timer);
+        }
+
+        function toggle() {
+          if (isRunning.value) {
+            pause();
+          } else {
+            start();
+          }
+        }
+
+        function reset() {
+          pause();
+          remaining.value = total.value;
+          showCountdown.value = true;
+        }
+
+        function finish() {
+          pause();
+          showCountdown.value = false;
+          emit('finish');
+        }
+
+        onMounted(() => {
+          start();
+        });
+
+        onUnmounted(() => {
+          clearInterval(timer);
+        });
+
+        return {
+          total,
+          remaining,
+          isRunning,
+          showCountdown,
+          formattedTime,
+          progressPercent,
+          displayClass,
+          progressClass,
+          toggle,
+          reset
+        };
+      }
+    };
+
+    // 练习2：窗口大小监听（带防抖）
+    const ExerciseWindowMonitor = {
+      template: `
+        <div class="window-monitor">
+          <div class="monitor-box">
+            <div class="monitor-value">{{ width }}px</div>
+            <div class="monitor-label">窗口宽度</div>
+          </div>
+          <div class="monitor-box">
+            <div class="monitor-value">{{ height }}px</div>
+            <div class="monitor-label">窗口高度</div>
+          </div>
+          <div class="monitor-hint">
+            💡 尝试改变窗口大小，数值会实时更新（防抖: 100ms）
+          </div>
+          <div class="monitor-box" style="grid-column: 1 / -1; background: #e3f2fd;">
+            <div style="font-size: 14px; color: #1976d2;">
+              屏幕方向: {{ orientation }} | 设备类型: {{ deviceType }}
+            </div>
+          </div>
+        </div>
+      `,
+      setup() {
+        const width = ref(window.innerWidth);
+        const height = ref(window.innerHeight);
+        const orientation = ref(window.innerWidth > window.innerHeight ? '横向' : '纵向');
+        const deviceType = ref(window.innerWidth < 768 ? '移动端' : '桌面端');
+        let debounceTimer = null;
+
+        function handleResize() {
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => {
+            width.value = window.innerWidth;
+            height.value = window.innerHeight;
+            orientation.value = window.innerWidth > window.innerHeight ? '横向' : '纵向';
+            deviceType.value = window.innerWidth < 768 ? '移动端' : '桌面端';
+          }, 100);
+        }
+
+        onMounted(() => {
+          window.addEventListener('resize', handleResize);
+        });
+
+        onUnmounted(() => {
+          window.removeEventListener('resize', handleResize);
+          clearTimeout(debounceTimer);
+        });
+
+        return { width, height, orientation, deviceType };
+      }
+    };
+
+    // 练习3：用户列表组件（带请求取消）
+    const ExerciseUserList = {
+      template: `
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3>用户列表 ({{ users.length }}人)</h3>
+            <button class="btn btn-primary" @click="fetchUsers" :disabled="loading">
+              {{ loading ? '加载中...' : '刷新数据' }}
+            </button>
+          </div>
+          
+          <div v-if="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <div>正在获取用户数据...</div>
+            <div style="font-size: 12px; color: #999; margin-top: 10px;">使用 AbortController 可在组件卸载时取消请求</div>
+          </div>
+          
+          <div v-else-if="error" class="error-box">
+            <div style="font-size: 24px; margin-bottom: 10px;">⚠️</div>
+            <div>{{ error }}</div>
+            <button class="btn btn-default" style="margin-top: 10px;" @click="fetchUsers">重试</button>
+          </div>
+          
+          <table v-else class="user-table">
+            <thead>
+              <tr>
+                <th>用户</th>
+                <th>部门</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="user in users" :key="user.id">
+                <td>
+                  <div class="user-info">
+                    <span class="avatar">{{ user.name[0] }}</span>
+                    <div>
+                      <div class="user-name">{{ user.name }}</div>
+                      <div class="user-email">{{ user.email }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ user.department }}</td>
+                <td>
+                  <span class="status-badge" :class="user.active ? 'status-active' : 'status-inactive'">
+                    {{ user.active ? '在职' : '离职' }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div v-if="lastUpdated" style="text-align: right; color: #999; font-size: 12px; margin-top: 15px;">
+            最后更新: {{ lastUpdated }}
+          </div>
+        </div>
+      `,
+      setup() {
+        const users = ref([]);
+        const loading = ref(false);
+        const error = ref(null);
+        const lastUpdated = ref(null);
+        let abortController = null;
+
+        async function fetchUsers() {
+          // 取消之前的请求
+          if (abortController) {
+            abortController.abort();
+          }
+          
+          abortController = new AbortController();
+          loading.value = true;
+          error.value = null;
+
+          try {
+            // 模拟 API 请求
+            await new Promise((resolve, reject) => {
+              const timer = setTimeout(() => {
+                // 随机模拟错误（10%概率）
+                if (Math.random() < 0.1) {
+                  reject(new Error('网络请求失败，请稍后重试'));
+                } else {
+                  resolve();
+                }
+              }, 1500);
+              
+              // 监听取消信号
+              abortController.signal.addEventListener('abort', () => {
+                clearTimeout(timer);
+                reject(new Error('请求已取消'));
+              });
+            });
+
+            // 模拟用户数据
+            users.value = [
+              { id: 1, name: '张三', email: 'zhangsan@company.com', department: '技术部', active: true },
+              { id: 2, name: '李四', email: 'lisi@company.com', department: '产品部', active: true },
+              { id: 3, name: '王五', email: 'wangwu@company.com', department: '设计部', active: false },
+              { id: 4, name: '赵六', email: 'zhaoliu@company.com', department: '技术部', active: true },
+              { id: 5, name: '钱七', email: 'qianqi@company.com', department: '运营部', active: true }
+            ];
+            
+            lastUpdated.value = new Date().toLocaleString();
+          } catch (e) {
+            if (e.message !== '请求已取消') {
+              error.value = e.message;
+            }
+          } finally {
+            loading.value = false;
+          }
+        }
+
+        onMounted(() => {
+          fetchUsers();
+        });
+
+        onUnmounted(() => {
+          // 取消未完成的请求
+          if (abortController) {
+            abortController.abort();
+          }
+        });
+
+        return { users, loading, error, lastUpdated, fetchUsers };
+      }
+    };
+
+    // 创建应用
+    createApp({
+      components: {
+        ExerciseCountdown,
+        ExerciseWindowMonitor,
+        ExerciseUserList
+      },
+      setup() {
+        const showCountdown = ref(true);
+
+        const onFinish = (name) => {
+          console.log(`${name} 已完成！`);
+        };
+
+        return {
+          showCountdown,
+          onFinish
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

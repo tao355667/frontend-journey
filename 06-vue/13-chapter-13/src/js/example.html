@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第13章：插槽 - JavaScript示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #f5f5f5; }
+    h1 { text-align: center; color: #333; margin-bottom: 30px; }
+    h2 { color: #42b883; margin: 30px 0 15px; border-bottom: 2px solid #42b883; padding-bottom: 10px; }
+    .container { max-width: 800px; margin: 0 auto; }
+    
+    /* Card样式 */
+    .card { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .card-header { border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
+    .card-footer { border-top: 2px solid #eee; padding-top: 15px; margin-top: 15px; color: #666; }
+    
+    /* 列表样式 */
+    .list { list-style: none; padding: 0; }
+    .list-item { padding: 12px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; }
+    .list-item:last-child { border-bottom: none; }
+    .index { color: #999; font-weight: bold; min-width: 30px; }
+    .name { flex: 1; }
+    .role { padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+    .role.admin { background: #42b883; color: white; }
+    .role.user { background: #e0e0e0; color: #666; }
+    .role.guest { background: #ffc107; color: #333; }
+    
+    /* 模态框样式 */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+    .modal { background: white; border-radius: 8px; min-width: 400px; max-width: 600px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .modal-header { padding: 20px; border-bottom: 1px solid #eee; }
+    .modal-body { padding: 20px; }
+    .modal-footer { padding: 20px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 10px; }
+    button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    button.primary { background: #42b883; color: white; }
+    button.default { background: #e0e0e0; color: #333; }
+    button:hover { opacity: 0.9; }
+    
+    /* 表格样式 */
+    table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+    th { background: #f8f8f8; font-weight: bold; color: #666; }
+    tr:hover { background: #f8f8f8; }
+    .tag { padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+    .tag.active { background: #42b883; color: white; }
+    .tag.inactive { background: #ff5252; color: white; }
+    
+    /* 注释样式 */
+    .comment { display: flex; gap: 15px; padding: 15px; border-bottom: 1px solid #eee; }
+    .avatar { width: 48px; height: 48px; border-radius: 50%; background: #42b883; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 20px; }
+    .comment-content { flex: 1; }
+    .comment-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .author { font-weight: bold; color: #333; }
+    .time { color: #999; font-size: 12px; }
+    .comment-text { color: #666; line-height: 1.6; }
+    .actions { display: flex; gap: 15px; margin-top: 10px; }
+    .action { color: #42b883; cursor: pointer; font-size: 13px; }
+    .action:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>Vue 3 插槽 (Slots) 示例</h1>
+      
+      <h2>1. 基础插槽 - 卡片组件</h2>
+      
+      <!-- 使用默认内容 -->
+      <card></card>
+      
+      <!-- 自定义内容 -->
+      <card>
+        <template #header>
+          <h3 style="color: #42b883;">Vue 插槽教程</h3>
+        </template>
+        <p>插槽是 Vue 中非常强大的功能，它允许你将内容分发到组件的指定位置。</p>
+        <ul style="margin: 10px 0; padding-left: 20px;">
+          <li>默认插槽</li>
+          <li>具名插槽</li>
+          <li>作用域插槽</li>
+        </ul>
+        <template #footer>
+          <button class="primary" @click="showMessage('学习了插槽！')">学习更多</button>
+        </template>
+      </card>
+      
+      <h2>2. 作用域插槽 - 用户列表</h2>
+      
+      <user-list :items="users">
+        <template #default="{ item, index }">
+          <span class="index">{{ index + 1 }}</span>
+          <span class="name">{{ item.name }}</span>
+          <span class="role" :class="item.role">{{ item.role.toUpperCase() }}</span>
+        </template>
+      </user-list>
+      
+      <h2>3. 综合示例 - 模态框</h2>
+      
+      <button class="primary" @click="showModal = true">打开模态框</button>
+      
+      <modal v-if="showModal" @close="showModal = false">
+        <template #title>
+          <h3>确认操作</h3>
+        </template>
+        <p>您确定要执行此操作吗？此操作无法撤销。</p>
+        <template #actions>
+          <button class="default" @click="showModal = false">取消</button>
+          <button class="primary" @click="confirmAction">确认</button>
+        </template>
+      </modal>
+      
+      <h2>4. 高级作用域插槽 - 表格</h2>
+      
+      <data-table :columns="tableColumns" :data="tableData">
+        <template #name="{ value }">
+          <strong style="color: #42b883;">{{ value }}</strong>
+        </template>
+        <template #status="{ value }">
+          <span class="tag" :class="value ? 'active' : 'inactive'">
+            {{ value ? '启用' : '禁用' }}
+          </span>
+        </template>
+        <template #actions="{ row }">
+          <button class="primary" style="padding: 4px 12px; font-size: 12px;" @click="editUser(row)">编辑</button>
+          <button class="default" style="padding: 4px 12px; font-size: 12px;" @click="deleteUser(row)">删除</button>
+        </template>
+      </data-table>
+      
+      <h2>5. 自定义评论列表</h2>
+      
+      <comment-list :comments="comments">
+        <template #default="{ comment }">
+          <div class="comment">
+            <div class="avatar">{{ comment.author[0] }}</div>
+            <div class="comment-content">
+              <div class="comment-header">
+                <span class="author">{{ comment.author }}</span>
+                <span class="time">{{ comment.time }}</span>
+              </div>
+              <p class="comment-text">{{ comment.content }}</p>
+              <div class="actions">
+                <span class="action" @click="likeComment(comment)">👍 {{ comment.likes }}</span>
+                <span class="action">💬 回复</span>
+              </div>
+            </div>
+          </div>
+        </template>
+      </comment-list>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref } = Vue;
+
+    // Card 组件 - 基础插槽
+    const Card = {
+      template: `
+        <div class="card">
+          <div class="card-header">
+            <slot name="header">
+              <h3>默认标题</h3>
+            </slot>
+          </div>
+          <div class="card-body">
+            <slot>
+              <p>暂无内容</p>
+            </slot>
+          </div>
+          <div class="card-footer">
+            <slot name="footer">
+              <small>默认页脚</small>
+            </slot>
+          </div>
+        </div>
+      `
+    };
+
+    // UserList 组件 - 作用域插槽
+    const UserList = {
+      props: ['items'],
+      template: `
+        <ul class="list">
+          <li v-for="(item, index) in items" :key="item.id" class="list-item">
+            <slot :item="item" :index="index">
+              {{ item.name }}
+            </slot>
+          </li>
+        </ul>
+      `
+    };
+
+    // Modal 组件 - 具名插槽
+    const Modal = {
+      emits: ['close'],
+      template: `
+        <div class="modal-overlay" @click.self="$emit('close')">
+          <div class="modal">
+            <div class="modal-header">
+              <slot name="title">
+                <h3>提示</h3>
+              </slot>
+            </div>
+            <div class="modal-body">
+              <slot>
+                <p>确定要执行此操作吗？</p>
+              </slot>
+            </div>
+            <div class="modal-footer">
+              <slot name="actions">
+                <button class="default" @click="$emit('close')">关闭</button>
+              </slot>
+            </div>
+          </div>
+        </div>
+      `
+    };
+
+    // DataTable 组件 - 高级作用域插槽
+    const DataTable = {
+      props: ['columns', 'data'],
+      template: `
+        <table>
+          <thead>
+            <tr>
+              <th v-for="col in columns" :key="col.key">{{ col.title }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in data" :key="row.id">
+              <td v-for="col in columns" :key="col.key">
+                <slot :name="col.key" :value="row[col.key]" :row="row" :column="col">
+                  {{ row[col.key] }}
+                </slot>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      `
+    };
+
+    // CommentList 组件
+    const CommentList = {
+      props: ['comments'],
+      template: `
+        <div class="card">
+          <div v-for="comment in comments" :key="comment.id">
+            <slot :comment="comment">
+              <div class="comment">
+                <strong>{{ comment.author }}:</strong> {{ comment.content }}
+              </div>
+            </slot>
+          </div>
+        </div>
+      `
+    };
+
+    // 创建应用
+    createApp({
+      components: {
+        Card,
+        UserList,
+        Modal,
+        DataTable,
+        CommentList
+      },
+      setup() {
+        const showModal = ref(false);
+        
+        const users = ref([
+          { id: 1, name: '张三', role: 'admin' },
+          { id: 2, name: '李四', role: 'user' },
+          { id: 3, name: '王五', role: 'user' },
+          { id: 4, name: '赵六', role: 'guest' }
+        ]);
+
+        const tableColumns = ref([
+          { key: 'id', title: 'ID' },
+          { key: 'name', title: '姓名' },
+          { key: 'email', title: '邮箱' },
+          { key: 'status', title: '状态' },
+          { key: 'actions', title: '操作' }
+        ]);
+
+        const tableData = ref([
+          { id: 1, name: '张三', email: 'zhangsan@example.com', status: true },
+          { id: 2, name: '李四', email: 'lisi@example.com', status: false },
+          { id: 3, name: '王五', email: 'wangwu@example.com', status: true }
+        ]);
+
+        const comments = ref([
+          { id: 1, author: '小明', content: '这个教程真的很棒！学了很多关于插槽的知识。', time: '2小时前', likes: 15 },
+          { id: 2, author: '小红', content: '作用域插槽的概念有点难理解，但示例很清晰。', time: '5小时前', likes: 8 },
+          { id: 3, author: '小刚', content: '期待更多 Vue3 的教程内容！', time: '1天前', likes: 23 }
+        ]);
+
+        const showMessage = (msg) => {
+          alert(msg);
+        };
+
+        const confirmAction = () => {
+          alert('操作已确认！');
+          showModal.value = false;
+        };
+
+        const editUser = (user) => {
+          alert(`编辑用户: ${user.name}`);
+        };
+
+        const deleteUser = (user) => {
+          if (confirm(`确定要删除用户 ${user.name} 吗？`)) {
+            alert('用户已删除');
+          }
+        };
+
+        const likeComment = (comment) => {
+          comment.likes++;
+        };
+
+        return {
+          showModal,
+          users,
+          tableColumns,
+          tableData,
+          comments,
+          showMessage,
+          confirmAction,
+          editUser,
+          deleteUser,
+          likeComment
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

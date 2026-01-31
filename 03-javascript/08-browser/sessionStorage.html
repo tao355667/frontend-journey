@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sessionStorage 示例</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        input, button { padding: 8px; margin: 5px; }
+        button { background-color: #28a745; color: white; border: none; border-radius:3px; cursor: pointer; }
+        .storage-display { background-color: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 3px; }
+        .comparison { background-color: #e9ecef; padding: 15px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>sessionStorage 示例</h1>
+    
+    <div class="comparison">
+        <h3>localStorage vs sessionStorage</h3>
+        <p><strong>localStorage:</strong> 持久化存储，直到手动删除，跨标签页共享</p>
+        <p><strong>sessionStorage:</strong> 会话级存储，关闭标签页后清除，仅限当前标签页</p>
+    </div>
+    
+    <div class="container">
+        <h2>会话数据</h2>
+        <input type="text" id="sessionKey" placeholder="键名">
+        <input type="text" id="sessionValue" placeholder="值">
+        <button onclick="saveToSessionStorage()">保存到会话</button>
+        <button onclick="getFromSessionStorage()">从会话获取</button>
+        <button onclick="removeFromSessionStorage()">删除</button>
+        <button onclick="clearSessionStorage()">清空会话</button>
+    </div>
+    
+    <div class="container">
+        <h2>表单数据示例</h2>
+        <input type="text" id="formData" placeholder="输入内容...">
+        <button onclick="saveFormData()">保存表单数据</button>
+        <button onclick="loadFormData()">加载表单数据</button>
+        <button onclick="clearFormData()">清空表单数据</button>
+    </div>
+    
+    <div class="container">
+        <h2>当前 sessionStorage 数据</h2>
+        <div id="sessionDisplay" class="storage-display">没有会话数据</div>
+        <button onclick="displaySessionStorage()">刷新显示</button>
+    </div>
+    
+    <div class="container">
+        <h2>访问计数器</h2>
+        <p>此标签页在本次会话中被访问了 <span id="visitCount">0</span> 次。</p>
+        <button onclick="incrementVisitCount()">增加访问</button>
+        <button onclick="openNewTab()">在新标签页中打开</button>
+    </div>
+
+    <script>
+        // 基本 sessionStorage 操作
+        function saveToSessionStorage() {
+            const key = document.getElementById('sessionKey').value;
+            const value = document.getElementById('sessionValue').value;
+            
+            if (key && value) {
+                sessionStorage.setItem(key, value);
+                alert('数据已保存到 sessionStorage！');
+                displaySessionStorage();
+                
+                document.getElementById('sessionKey').value = '';
+                document.getElementById('sessionValue').value = '';
+            } else {
+                alert('请输入键名和值');
+            }
+        }
+        
+        function getFromSessionStorage() {
+            const key = document.getElementById('sessionKey').value;
+            
+            if (key) {
+                const value = sessionStorage.getItem(key);
+                if (value !== null) {
+                    document.getElementById('sessionValue').value = value;
+                    alert(`获取到: ${value}`);
+                } else {
+                    alert('在 sessionStorage 中未找到该键');
+                }
+            } else {
+                alert('请输入键名');
+            }
+        }
+        
+        function removeFromSessionStorage() {
+            const key = document.getElementById('sessionKey').value;
+            
+            if (key) {
+                sessionStorage.removeItem(key);
+                alert('已从 sessionStorage 删除该项！');
+                displaySessionStorage();
+            } else {
+                alert('请输入要删除的键名');
+            }
+        }
+        
+        function clearSessionStorage() {
+            if (confirm('确定要清空所有 sessionStorage 数据吗？')) {
+                sessionStorage.clear();
+                alert('sessionStorage 已清空！');
+                displaySessionStorage();
+            }
+        }
+        
+        // 表单数据示例
+        function saveFormData() {
+            const formData = document.getElementById('formData').value;
+            
+            if (formData) {
+                sessionStorage.setItem('formData', formData);
+                alert('表单数据已保存到会话！');
+            } else {
+                alert('请输入一些表单数据');
+            }
+        }
+        
+        function loadFormData() {
+            const formData = sessionStorage.getItem('formData');
+            
+            if (formData) {
+                document.getElementById('formData').value = formData;
+                alert('表单数据已从会话加载！');
+            } else {
+                alert('在会话中未找到表单数据');
+            }
+        }
+        
+        function clearFormData() {
+            sessionStorage.removeItem('formData');
+            document.getElementById('formData').value = '';
+            alert('表单数据已从会话清除！');
+        }
+        
+        // 显示所有 sessionStorage 数据
+        function displaySessionStorage() {
+            const display = document.getElementById('sessionDisplay');
+            
+            if (sessionStorage.length === 0) {
+                display.textContent = '没有会话数据';
+                return;
+            }
+            
+            let output = '<strong>sessionStorage 内容:</strong><br>';
+            
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                const value = sessionStorage.getItem(key);
+                output += `<br><strong>${key}:</strong> ${value}`;
+            }
+            
+            display.innerHTML = output;
+        }
+        
+        // 访问计数器示例
+        function incrementVisitCount() {
+            let count = parseInt(sessionStorage.getItem('visitCount') || '0');
+            count++;
+            sessionStorage.setItem('visitCount', count.toString());
+            updateVisitDisplay();
+        }
+        
+        function updateVisitDisplay() {
+            const count = sessionStorage.getItem('visitCount') || '0';
+            document.getElementById('visitCount').textContent = count;
+        }
+        
+        function openNewTab() {
+            window.open(window.location.href, '_blank');
+        }
+        
+        // 多步骤表单示例
+        let currentStep = 1;
+        
+        function saveStepData(step, data) {
+            sessionStorage.setItem(`step${step}`, JSON.stringify(data));
+        }
+        
+        function getStepData(step) {
+            const data = sessionStorage.getItem(`step${step}`);
+            return data ? JSON.parse(data) : null;
+        }
+        
+        // 页面加载时初始化
+        window.onload = function() {
+            displaySessionStorage();
+            updateVisitDisplay();
+            
+            const formData = sessionStorage.getItem('formData');
+            if (formData) {
+                console.log('在 sessionStorage 中找到表单数据');
+            }
+            
+            if (!sessionStorage.getItem('visitCount')) {
+                sessionStorage.setItem('visitCount', '1');
+                updateVisitDisplay();
+            }
+            
+            if (!sessionStorage.getItem('sessionStart')) {
+                sessionStorage.setItem('sessionStart', new Date().toISOString());
+            }
+            
+            console.log('会话开始时间:', sessionStorage.getItem('sessionStart'));
+        };
+        
+        // 卸载前显示会话信息
+        window.addEventListener('beforeunload', function(e) {
+            const sessionStart = sessionStorage.getItem('sessionStart');
+            const duration = Date.now() - new Date(sessionStart).getTime();
+            console.log(`会话时长: ${Math.round(duration / 1000)} 秒`);
+        });
+        
+        // 监听存储变化
+        window.addEventListener('storage', function(e) {
+            console.log('存储已变化:', e.key, e.newValue);
+        });
+    </script>
+</body>
+</html>

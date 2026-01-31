@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第18章：混入 (Mixins) - JavaScript示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #f5f5f5; }
+    h1 { text-align: center; color: #333; margin-bottom: 30px; }
+    h2 { color: #42b883; margin: 30px 0 15px; border-bottom: 2px solid #42b883; padding-bottom: 10px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    .card { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin: 5px; transition: all 0.2s; }
+    .btn-primary { background: #42b883; color: white; }
+    .btn-danger { background: #ff5252; color: white; }
+    .btn-default { background: #e0e0e0; color: #333; }
+    .btn:hover { opacity: 0.8; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    /* 日志显示区域 */
+    .log-container { background: #1e1e1e; color: #4ec9b0; padding: 15px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; max-height: 200px; overflow-y: auto; margin-top: 15px; }
+    .log-entry { margin: 3px 0; padding: 2px 0; border-bottom: 1px solid #333; }
+    .log-time { color: #ce9178; }
+    .log-component { color: #9cdcfe; }
+    .log-level-info { color: #4ec9b0; }
+    .log-level-warn { color: #dcdcaa; }
+    .log-level-error { color: #f44747; }
+    
+    /* 加载状态 */
+    .loading-overlay { background: rgba(255,255,255,0.9); padding: 40px; text-align: center; border-radius: 4px; }
+    .loading-spinner { width: 40px; height: 40px; border: 3px solid #e0e0e0; border-top-color: #42b883; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* 数据列表 */
+    .data-list { list-style: none; padding: 0; }
+    .data-item { padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+    .data-item:last-child { border-bottom: none; }
+    .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; }
+    .status-success { background: #e8f5e9; color: #2e7d32; }
+    .status-error { background: #ffebee; color: #c62828; }
+    
+    /* 计数器 */
+    .counter-display { font-size: 48px; font-weight: bold; color: #42b883; text-align: center; padding: 20px; }
+    
+    /* 混入说明 */
+    .mixin-info { background: #fff3e0; border-left: 4px solid #ff9800; padding: 12px; margin: 15px 0; border-radius: 0 4px 4px 0; font-size: 13px; color: #666; }
+    
+    /* 表单 */
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; color: #666; font-size: 13px; }
+    .form-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+    .error-message { color: #ff5252; font-size: 12px; margin-top: 5px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>Vue 3 混入 (Mixins) 示例</h1>
+      
+      <div class="mixin-info">
+        <strong>说明：</strong>混入是 Vue 选项式 API 中复用逻辑的方式。在 Vue 3 组合式 API 中，推荐使用 Composables 替代混入。
+        本示例展示了混入的基本用法和合并策略。
+      </div>
+      
+      <h2>1. 日志混入 (loggerMixin)</h2>
+      
+      <div class="card">
+        <p style="margin-bottom: 15px;">这个组件使用了日志混入，所有方法调用都会记录到下方：</p>
+        <component-a />
+      </div>
+      
+      <h2>2. 加载状态混入 (loadingMixin)</h2>
+      
+      <div class="card">
+        <p style="margin-bottom: 15px;">这个组件使用了加载混入，自动处理加载状态：</p>
+        <component-b />
+      </div>
+      
+      <h2>3. 计数器混入 (counterMixin)</h2>
+      
+      <div class="card">
+        <p style="margin-bottom: 15px;">多个组件共享相同的计数器逻辑：</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <counter-component title="计数器 A" />
+          <counter-component title="计数器 B" />
+        </div>
+      </div>
+      
+      <h2>4. 表单验证混入 (validationMixin)</h2>
+      
+      <div class="card">
+        <p style="margin-bottom: 15px;">这个表单使用了验证混入：</p>
+        <form-component />
+      </div>
+      
+      <h2>5. 混入合并策略演示</h2>
+      
+      <div class="card">
+        <merge-demo-component />
+      </div>
+      
+      <h2>全局混入效果</h2>
+      
+      <div class="card">
+        <p>所有组件都可以访问全局混入提供的 $log 方法：</p>
+        <button class="btn btn-primary" @click="testGlobalMixin">
+          测试全局混入方法
+        </button>
+        <p style="margin-top: 10px; color: #666; font-size: 13px;">
+          点击按钮在控制台查看全局混入的日志输出
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, defineComponent } = Vue;
+
+    // ========== 定义混入 ==========
+    
+    // 1. 日志混入
+    const loggerMixin = {
+      methods: {
+        log(message, level = 'info') {
+          const timestamp = new Date().toLocaleTimeString();
+          const componentName = this.$options.name || 'Anonymous';
+          
+          const logEntry = {
+            time: timestamp,
+            component: componentName,
+            message: message,
+            level: level
+          };
+          
+          // 添加到全局日志
+          if (!window.globalLogs) window.globalLogs = [];
+          window.globalLogs.unshift(logEntry);
+          
+          // 同时输出到控制台
+          console[level](`[${timestamp}] ${componentName}: ${message}`);
+          
+          return logEntry;
+        },
+        
+        logInfo(message) {
+          return this.log(message, 'info');
+        },
+        
+        logWarn(message) {
+          return this.log(message, 'warn');
+        },
+        
+        logError(message) {
+          return this.log(message, 'error');
+        }
+      }
+    };
+
+    // 2. 加载状态混入
+    const loadingMixin = {
+      data() {
+        return {
+          loading: false,
+          loadingText: '加载中...'
+        };
+      },
+      
+      methods: {
+        showLoading(text) {
+          this.loading = true;
+          if (text) this.loadingText = text;
+        },
+        
+        hideLoading() {
+          this.loading = false;
+        },
+        
+        async withLoading(promise, text) {
+          this.showLoading(text);
+          try {
+            const result = await promise;
+            return result;
+          } catch (error) {
+            throw error;
+          } finally {
+            this.hideLoading();
+          }
+        }
+      }
+    };
+
+    // 3. 计数器混入
+    const counterMixin = {
+      data() {
+        return {
+          count: 0
+        };
+      },
+      
+      computed: {
+        doubleCount() {
+          return this.count * 2;
+        },
+        
+        isEven() {
+          return this.count % 2 === 0;
+        }
+      },
+      
+      methods: {
+        increment() {
+          this.count++;
+        },
+        
+        decrement() {
+          this.count--;
+        },
+        
+        reset() {
+          this.count = 0;
+        }
+      }
+    };
+
+    // 4. 表单验证混入
+    const validationMixin = {
+      data() {
+        return {
+          errors: {},
+          validated: false
+        };
+      },
+      
+      methods: {
+        validateField(fieldName, value, rules) {
+          this.errors[fieldName] = [];
+          
+          for (const rule of rules) {
+            if (!rule.validator(value)) {
+              this.errors[fieldName].push(rule.message);
+            }
+          }
+          
+          return this.errors[fieldName].length === 0;
+        },
+        
+        clearErrors() {
+          this.errors = {};
+          this.validated = false;
+        },
+        
+        hasErrors() {
+          return Object.values(this.errors).some(arr => arr.length > 0);
+        },
+        
+        getFieldError(fieldName) {
+          return this.errors[fieldName]?.[0] || '';
+        }
+      }
+    };
+
+    // 5. 定时器混入
+    const timerMixin = {
+      data() {
+        return {
+          _timers: []
+        };
+      },
+      
+      methods: {
+        setTimer(callback, delay) {
+          const timer = setTimeout(callback, delay);
+          this._timers.push(timer);
+          return timer;
+        },
+        
+        setIntervalTimer(callback, delay) {
+          const timer = setInterval(callback, delay);
+          this._timers.push(timer);
+          return timer;
+        }
+      },
+      
+      beforeUnmount() {
+        // 自动清理所有定时器
+        this._timers.forEach(timer => clearTimeout(timer));
+        this._timers = [];
+      }
+    };
+
+    // ========== 定义组件 ==========
+    
+    // 组件 A：使用日志混入
+    const ComponentA = defineComponent({
+      name: 'ComponentA',
+      mixins: [loggerMixin],
+      template: `
+        <div>
+          <button class="btn btn-primary" @click="handleAction">执行操作</button>
+          <button class="btn btn-default" @click="handleWarning">触发警告</button>
+          <button class="btn btn-danger" @click="handleError">触发错误</button>
+          <div class="log-container">
+            <div v-for="(log, index) in recentLogs" :key="index" class="log-entry">
+              <span class="log-time">[{{ log.time }}]</span>
+              <span class="log-component"> {{ log.component }}:</span>
+              <span :class="'log-level-' + log.level"> {{ log.message }}</span>
+            </div>
+            <div v-if="recentLogs.length === 0" style="color: #666;">暂无日志...</div>
+          </div>
+        </div>
+      `,
+      data() {
+        return {
+          logs: []
+        };
+      },
+      computed: {
+        recentLogs() {
+          return window.globalLogs?.slice(0, 10) || [];
+        }
+      },
+      methods: {
+        handleAction() {
+          this.logInfo('执行了某个操作');
+        },
+        handleWarning() {
+          this.logWarn('这是一个警告信息');
+        },
+        handleError() {
+          this.logError('发生了一个错误');
+        }
+      },
+      created() {
+        this.logInfo('ComponentA 已创建');
+      }
+    });
+
+    // 组件 B：使用加载混入
+    const ComponentB = defineComponent({
+      name: 'ComponentB',
+      mixins: [loadingMixin, loggerMixin],
+      template: `
+        <div>
+          <button class="btn btn-primary" @click="fetchData" :disabled="loading">
+            {{ loading ? loadingText : '获取数据' }}
+          </button>
+          
+          <div v-if="loading" class="loading-overlay" style="margin-top: 15px;">
+            <div class="loading-spinner"></div>
+            <div>{{ loadingText }}</div>
+          </div>
+          
+          <div v-else-if="data.length > 0" style="margin-top: 15px;">
+            <ul class="data-list">
+              <li v-for="item in data" :key="item.id" class="data-item">
+                <span>{{ item.name }}</span>
+                <span class="status-badge" :class="item.status === 'active' ? 'status-success' : 'status-error'">
+                  {{ item.status === 'active' ? '正常' : '异常' }}
+                </span>
+              </li>
+            </ul>
+          </div>
+          
+          <div v-else style="margin-top: 15px; color: #999; text-align: center; padding: 20px;">
+            点击按钮获取数据
+          </div>
+        </div>
+      `,
+      data() {
+        return {
+          data: []
+        };
+      },
+      methods: {
+        async fetchData() {
+          this.logInfo('开始获取数据');
+          
+          try {
+            const result = await this.withLoading(
+              this.simulateFetch(),
+              '正在获取用户数据...'
+            );
+            
+            this.data = result;
+            this.logInfo(`成功获取 ${result.length} 条数据`);
+          } catch (error) {
+            this.logError('获取数据失败: ' + error.message);
+          }
+        },
+        
+        simulateFetch() {
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              resolve([
+                { id: 1, name: '张三', status: 'active' },
+                { id: 2, name: '李四', status: 'active' },
+                { id: 3, name: '王五', status: 'inactive' }
+              ]);
+            }, 2000);
+          });
+        }
+      }
+    });
+
+    // 计数器组件：使用计数器混入
+    const CounterComponent = defineComponent({
+      name: 'CounterComponent',
+      mixins: [counterMixin, loggerMixin],
+      props: ['title'],
+      template: `
+        <div style="border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px;">
+          <h4 style="margin-bottom: 15px;">{{ title }}</h4>
+          <div class="counter-display">{{ count }}</div>
+          <div style="text-align: center; color: #666; margin-bottom: 15px;">
+            双倍: {{ doubleCount }} | {{ isEven ? '偶数' : '奇数' }}
+          </div>
+          <div style="text-align: center;">
+            <button class="btn btn-primary" @click="incrementAndLog">+1</button>
+            <button class="btn btn-default" @click="decrement">-1</button>
+            <button class="btn btn-danger" @click="resetAndLog">重置</button>
+          </div>
+        </div>
+      `,
+      methods: {
+        incrementAndLog() {
+          this.increment();
+          this.logInfo(`${this.title} 计数增加到 ${this.count}`);
+        },
+        resetAndLog() {
+          this.reset();
+          this.logInfo(`${this.title} 计数已重置`);
+        }
+      }
+    });
+
+    // 表单组件：使用验证混入
+    const FormComponent = defineComponent({
+      name: 'FormComponent',
+      mixins: [validationMixin, loggerMixin],
+      template: `
+        <form @submit.prevent="handleSubmit">
+          <div class="form-group">
+            <label>用户名</label>
+            <input v-model="form.username" @blur="validateUsername" placeholder="输入用户名（至少3个字符）" />
+            <div v-if="getFieldError('username')" class="error-message">{{ getFieldError('username') }}</div>
+          </div>
+          
+          <div class="form-group">
+            <label>邮箱</label>
+            <input v-model="form.email" @blur="validateEmail" placeholder="输入邮箱地址" />
+            <div v-if="getFieldError('email')" class="error-message">{{ getFieldError('email') }}</div>
+          </div>
+          
+          <div class="form-group">
+            <label>密码</label>
+            <input v-model="form.password" type="password" @blur="validatePassword" placeholder="输入密码（至少6个字符）" />
+            <div v-if="getFieldError('password')" class="error-message">{{ getFieldError('password') }}</div>
+          </div>
+          
+          <button type="submit" class="btn btn-primary">提交</button>
+          <button type="button" class="btn btn-default" @click="clearAll">清空</button>
+          
+          <div v-if="submitMessage" style="margin-top: 15px; padding: 10px; border-radius: 4px;" :style="submitStyle">
+            {{ submitMessage }}
+          </div>
+        </form>
+      `,
+      data() {
+        return {
+          form: {
+            username: '',
+            email: '',
+            password: ''
+          },
+          submitMessage: '',
+          submitSuccess: false
+        };
+      },
+      computed: {
+        submitStyle() {
+          return {
+            background: this.submitSuccess ? '#e8f5e9' : '#ffebee',
+            color: this.submitSuccess ? '#2e7d32' : '#c62828'
+          };
+        }
+      },
+      methods: {
+        validateUsername() {
+          this.validateField('username', this.form.username, [
+            { validator: v => !!v, message: '用户名不能为空' },
+            { validator: v => v.length >= 3, message: '用户名至少3个字符' }
+          ]);
+        },
+        
+        validateEmail() {
+          this.validateField('email', this.form.email, [
+            { validator: v => !!v, message: '邮箱不能为空' },
+            { validator: v => /\S+@\S+\.\S+/.test(v), message: '邮箱格式不正确' }
+          ]);
+        },
+        
+        validatePassword() {
+          this.validateField('password', this.form.password, [
+            { validator: v => !!v, message: '密码不能为空' },
+            { validator: v => v.length >= 6, message: '密码至少6个字符' }
+          ]);
+        },
+        
+        handleSubmit() {
+          this.validateUsername();
+          this.validateEmail();
+          this.validatePassword();
+          
+          if (this.hasErrors()) {
+            this.submitSuccess = false;
+            this.submitMessage = '表单验证失败，请检查输入';
+            this.logError('表单验证失败');
+          } else {
+            this.submitSuccess = true;
+            this.submitMessage = '表单提交成功！';
+            this.logInfo('表单提交成功');
+          }
+        },
+        
+        clearAll() {
+          this.form = { username: '', email: '', password: '' };
+          this.clearErrors();
+          this.submitMessage = '';
+        }
+      }
+    });
+
+    // 合并策略演示组件
+    const MergeDemoComponent = defineComponent({
+      name: 'MergeDemoComponent',
+      mixins: [loggerMixin],
+      template: `
+        <div>
+          <h4>混入合并策略</h4>
+          <ul style="margin-top: 10px; padding-left: 20px; line-height: 1.8;">
+            <li><strong>data:</strong> 递归合并，组件数据优先</li>
+            <li><strong>methods:</strong> 组件方法覆盖混入方法</li>
+            <li><strong>computed:</strong> 组件计算属性覆盖混入</li>
+            <li><strong>生命周期:</strong> 合并成数组，全部执行（混入的先执行）</li>
+          </ul>
+          
+          <div style="margin-top: 15px; padding: 15px; background: #f8f8f8; border-radius: 4px;">
+            <p><strong>演示：</strong></p>
+            <p>message = "{{ message }}" (组件覆盖混入)</p>
+            <p>mixinOnly = "{{ mixinOnly }}" (仅混入提供)</p>
+            <p>componentOnly = "{{ componentOnly }}" (仅组件提供)</p>
+            <button class="btn btn-primary" style="margin-top: 10px;" @click="testMerge">调用方法</button>
+            <p style="margin-top: 10px; color: #666; font-size: 13px;">
+              查看控制台，观察 created 钩子的执行顺序
+            </p>
+          </div>
+        </div>
+      `,
+      data() {
+        return {
+          message: '这是组件的数据',  // 覆盖混入的 message
+          componentOnly: '只有组件有这个数据'
+        };
+      },
+      methods: {
+        testMerge() {
+          // 组件的方法
+          this.logInfo('组件的方法被调用');
+          this.someMethod();  // 混入的方法
+        }
+      },
+      created() {
+        console.log('组件的 created 钩子（混入的先执行）');
+        this.logInfo('合并演示组件已创建');
+      }
+    });
+
+    // 创建应用
+    const app = createApp({
+      components: {
+        ComponentA,
+        ComponentB,
+        CounterComponent,
+        FormComponent,
+        MergeDemoComponent
+      },
+      setup() {
+        const testGlobalMixin = () => {
+          // 全局混入提供的 $log 方法
+          if (this && this.$log) {
+            this.$log('全局混入方法测试');
+          } else {
+            console.log('[Global Mixin] 测试消息');
+            alert('全局混入测试 - 请查看控制台');
+          }
+        };
+
+        return { testGlobalMixin };
+      }
+    });
+
+    // 添加一个演示用的混入数据
+    const demoMixin = {
+      data() {
+        return {
+          message: '这是混入的数据',
+          mixinOnly: '只有混入有这个数据'
+        };
+      },
+      methods: {
+        someMethod() {
+          console.log('混入的方法被调用');
+        }
+      },
+      created() {
+        console.log('混入的 created 钩子');
+      }
+    };
+
+    // 全局混入
+    app.mixin({
+      methods: {
+        $log(...args) {
+          console.log('[Global Mixin]', ...args);
+        }
+      }
+    });
+
+    // 为 MergeDemoComponent 添加演示混入
+    MergeDemoComponent.mixins.push(demoMixin);
+
+    app.mount('#app');
+  </script>
+</body>
+</html>

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 5: 侦听器 - JavaScript 示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .demo-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .demo-section h2 {
+      color: #42b883;
+      border-bottom: 2px solid #42b883;
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      margin: 10px 0;
+    }
+    .log-area {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 5px;
+      height: 150px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    .log-entry {
+      margin: 3px 0;
+      padding: 2px 5px;
+      border-left: 3px solid #42b883;
+    }
+    .form-group {
+      margin: 15px 0;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    input, select {
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      width: 250px;
+      transition: border-color 0.3s;
+    }
+    input.valid { border-color: #42b883; }
+    input.invalid { border-color: #e74c3c; }
+    .validation-msg {
+      font-size: 12px;
+      margin-top: 5px;
+    }
+    .validation-msg.success { color: #42b883; }
+    .validation-msg.error { color: #e74c3c; }
+    button {
+      padding: 10px 20px;
+      background: #42b883;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .search-results {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .search-item {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    .search-item:hover {
+      background: #f5f5f5;
+    }
+    .loading {
+      color: #666;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1 style="text-align: center; color: #42b883;">👂 侦听器详解</h1>
+
+    <!-- 1. 侦听器基础 -->
+    <div class="demo-section">
+      <h2>1. 侦听器基础</h2>
+      
+      <div class="form-group">
+        <label>输入一些文字，观察侦听器响应：</label>
+        <input v-model="message" placeholder="输入内容...">
+      </div>
+      
+      <p>当前值: {{ message }}</p>
+      
+      <h4>侦听日志：</h4>
+      <div class="log-area">
+        <div v-for="(log, index) in messageLogs" :key="index" class="log-entry">
+          {{ log }}
+        </div>
+        <div v-if="messageLogs.length === 0" style="color: #666; font-style: italic;">
+          等待输入...
+        </div>
+      </div>
+      
+      <div class="code-block">
+watch: {
+  // 基础侦听器语法
+  message(newValue, oldValue) {
+    console.log(`值从 "${oldValue}" 变为 "${newValue}"`)
+    this.logs.push(`${new Date().toLocaleTimeString()}: "${oldValue}" → "${newValue}"`)
+  }
+}
+      </div>
+    </div>
+
+    <!-- 2. immediate 选项 -->
+    <div class="demo-section">
+      <h2>2. immediate 选项（立即执行）</h2>
+      
+      <div class="form-group">
+        <label>immediate 为 true 时，初始化就会执行：</label>
+        <input v-model="immediateMessage" placeholder="输入内容...">
+      </div>
+      
+      <h4>执行记录（包含初始化时的执行）：</h4>
+      <div class="log-area">
+        <div v-for="(log, index) in immediateLogs" :key="index" class="log-entry">
+          {{ log }}
+        </div>
+      </div>
+      
+      <div class="code-block">
+watch: {
+  immediateMessage: {
+    handler(newValue, oldValue) {
+      console.log('执行:', newValue)
+    },
+    immediate: true  // 初始化时立即执行一次
+  }
+}
+      </div>
+    </div>
+
+    <!-- 3. deep 选项 -->
+    <div class="demo-section">
+      <h2>3. deep 选项（深度侦听）</h2>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+          <h4>浅层侦听（无 deep）</h4>
+          <div class="form-group">
+            <label>用户姓名:</label>
+            <input v-model="user.name">
+          </div>
+          <div class="form-group">
+            <label>用户年龄:</label>
+            <input type="number" v-model.number="user.age">
+          </div>
+          <p style="font-size: 12px; color: #666;">修改姓名或年龄，观察右侧日志</p>
+        </div>
+        
+        <div>
+          <h4>侦听日志对比：</h4>
+          <div class="log-area" style="height: 200px;">
+            <div style="color: #e74c3c; border-left-color: #e74c3c;" class="log-entry">
+              浅层侦听（无 deep）:
+            </div>
+            <div v-for="(log, index) in shallowLogs.slice(0, 3)" :key="'s'+index" class="log-entry">
+              {{ log }}
+            </div>
+            <div v-if="shallowLogs.length === 0" style="color: #666; font-style: italic; padding-left: 10px;">
+              未触发（除非替换整个 user 对象）
+            </div>
+            
+            <div style="color: #42b883; border-left-color: #42b883; margin-top: 10px;" class="log-entry">
+              深度侦听（有 deep）:
+            </div>
+            <div v-for="(log, index) in deepLogs.slice(0, 3)" :key="'d'+index" class="log-entry">
+              {{ log }}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <button @click="replaceUser">替换整个 user 对象（触发浅层侦听）</button>
+      
+      <div class="code-block">
+watch: {
+  // 浅层侦听 - 只监听对象引用变化
+  user(newVal, oldVal) {
+    console.log('浅层侦听触发')
+  },
+  
+  // 深度侦听 - 监听对象内部属性变化
+  user: {
+    handler(newVal, oldVal) {
+      console.log('深度侦听触发')
+    },
+    deep: true
+  }
+}
+      </div>
+    </div>
+
+    <!-- 4. 侦听特定属性 -->
+    <div class="demo-section">
+      <h2>4. 侦听对象的特定属性</h2>
+      
+      <div class="form-group">
+        <label>只侦听 user.name 的变化：</label>
+        <input v-model="user.name" placeholder="修改姓名...">
+      </div>
+      <div class="form-group">
+        <label>修改 user.age 不会触发上面的侦听器：</label>
+        <input type="number" v-model.number="user.age" placeholder="修改年龄...">
+      </div>
+      
+      <h4>name 变化日志：</h4>
+      <div class="log-area" style="height: 100px;">
+        <div v-for="(log, index) in nameLogs" :key="index" class="log-entry">
+          {{ log }}
+        </div>
+      </div>
+      
+      <div class="code-block">
+watch: {
+  // 使用字符串路径侦听特定属性
+  'user.name'(newName, oldName) {
+    console.log(`姓名从 "${oldName}" 变为 "${newName}"`)
+  }
+}
+      </div>
+    </div>
+
+    <!-- 5. 异步操作与防抖 -->
+    <div class="demo-section">
+      <h2>5. 异步操作与防抖（Debounce）</h2>
+      
+      <div class="form-group">
+        <label>搜索（带300ms防抖）：</label>
+        <input 
+          v-model="searchQuery" 
+          placeholder="输入搜索关键词..."
+          :disabled="isSearching"
+        >
+        <span v-if="isSearching" class="loading">搜索中...</span>
+      </div>
+      
+      <div class="search-results" v-if="searchResults.length > 0">
+        <div 
+          v-for="result in searchResults" 
+          :key="result.id" 
+          class="search-item"
+        >
+          {{ result.title }}
+        </div>
+      </div>
+      
+      <h4>请求日志：</h4>
+      <div class="log-area" style="height: 100px;">
+        <div v-for="(log, index) in searchLogs" :key="index" class="log-entry">
+          {{ log }}
+        </div>
+      </div>
+      
+      <div class="code-block">
+watch: {
+  searchQuery(newValue) {
+    // 清除之前的定时器
+    clearTimeout(this.debounceTimer)
+    
+    // 设置新的定时器（防抖）
+    this.debounceTimer = setTimeout(() => {
+      this.performSearch(newValue)
+    }, 300)
+  }
+},
+
+methods: {
+  async performSearch(keyword) {
+    this.isSearching = true
+    // 模拟异步请求
+    const results = await this.mockSearchAPI(keyword)
+    this.searchResults = results
+    this.isSearching = false
+  }
+}
+      </div>
+    </div>
+
+    <!-- 6. 表单验证示例 -->
+    <div class="demo-section">
+      <h2>6. 综合示例：实时表单验证</h2>
+      
+      <div class="form-group">
+        <label>用户名 (3-20字符，字母数字)：</label>
+        <input 
+          v-model="form.username" 
+          :class="validation.username.valid ? 'valid' : 'invalid'"
+          placeholder="输入用户名"
+        >
+        <div class="validation-msg" :class="validation.username.valid ? 'success' : 'error'">
+          {{ validation.username.message }}
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>邮箱：</label>
+        <input 
+          v-model="form.email" 
+          :class="validation.email.valid ? 'valid' : 'invalid'"
+          placeholder="输入邮箱"
+        >
+        <div class="validation-msg" :class="validation.email.valid ? 'success' : 'error'">
+          {{ validation.email.message }}
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>密码 (至少6位)：</label>
+        <input 
+          v-model="form.password" 
+          type="password"
+          :class="validation.password.valid ? 'valid' : 'invalid'"
+          placeholder="输入密码"
+        >
+        <div class="validation-msg" :class="validation.password.valid ? 'success' : 'error'">
+          {{ validation.password.message }}
+        </div>
+      </div>
+      
+      <button :disabled="!isFormValid">提交表单</button>
+      
+      <div class="code-block">
+watch: {
+  // 侦听用户名变化并验证
+  'form.username'(newValue) {
+    if (!newValue) {
+      this.validation.username = { valid: false, message: '用户名不能为空' }
+    } else if (newValue.length < 3 || newValue.length > 20) {
+      this.validation.username = { valid: false, message: '用户名长度应为3-20字符' }
+    } else if (!/^[a-zA-Z0-9]+$/.test(newValue)) {
+      this.validation.username = { valid: false, message: '只能包含字母和数字' }
+    } else {
+      this.validation.username = { valid: true, message: '✓ 用户名有效' }
+    }
+  }
+}
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          // 基础侦听数据
+          message: '',
+          messageLogs: [],
+          
+          // immediate 示例
+          immediateMessage: '初始值',
+          immediateLogs: [],
+          
+          // 深度侦听数据
+          user: {
+            name: '张三',
+            age: 25
+          },
+          shallowLogs: [],
+          deepLogs: [],
+          nameLogs: [],
+          
+          // 搜索数据
+          searchQuery: '',
+          searchResults: [],
+          isSearching: false,
+          searchLogs: [],
+          debounceTimer: null,
+          
+          // 表单数据
+          form: {
+            username: '',
+            email: '',
+            password: ''
+          },
+          validation: {
+            username: { valid: false, message: '' },
+            email: { valid: false, message: '' },
+            password: { valid: false, message: '' }
+          }
+        };
+      },
+
+      computed: {
+        isFormValid() {
+          return this.validation.username.valid &&
+                 this.validation.email.valid &&
+                 this.validation.password.valid;
+        }
+      },
+
+      watch: {
+        // ===== 1. 基础侦听器 =====
+        message(newValue, oldValue) {
+          const log = `${new Date().toLocaleTimeString()}: "${oldValue}" → "${newValue}"`;
+          this.messageLogs.unshift(log);
+          // 只保留最近5条
+          if (this.messageLogs.length > 5) {
+            this.messageLogs.pop();
+          }
+        },
+
+        // ===== 2. immediate 选项 =====
+        immediateMessage: {
+          handler(newValue, oldValue) {
+            const log = oldValue === undefined 
+              ? `[初始化] 值为: "${newValue}"`
+              : `${new Date().toLocaleTimeString()}: "${oldValue}" → "${newValue}"`;
+            this.immediateLogs.unshift(log);
+            if (this.immediateLogs.length > 5) {
+              this.immediateLogs.pop();
+            }
+          },
+          immediate: true
+        },
+
+        // ===== 3. 深度侦听 =====
+        // 浅层侦听
+        user(newVal, oldVal) {
+          this.shallowLogs.unshift(`${new Date().toLocaleTimeString()}: user 对象被替换`);
+          if (this.shallowLogs.length > 3) this.shallowLogs.pop();
+        },
+        
+        // 深度侦听
+        user: {
+          handler(newVal, oldVal) {
+            this.deepLogs.unshift(`${new Date().toLocaleTimeString()}: user 属性变化 - ${JSON.stringify(newVal)}`);
+            if (this.deepLogs.length > 3) this.deepLogs.pop();
+          },
+          deep: true
+        },
+
+        // ===== 4. 侦听特定属性 =====
+        'user.name'(newName, oldName) {
+          this.nameLogs.unshift(`${new Date().toLocaleTimeString()}: 姓名 "${oldName}" → "${newName}"`);
+          if (this.nameLogs.length > 5) this.nameLogs.pop();
+        },
+
+        // ===== 5. 搜索防抖 =====
+        searchQuery(newValue) {
+          // 清除之前的定时器
+          clearTimeout(this.debounceTimer);
+          
+          if (!newValue.trim()) {
+            this.searchResults = [];
+            return;
+          }
+          
+          // 设置新的定时器（300ms防抖）
+          this.debounceTimer = setTimeout(() => {
+            this.performSearch(newValue);
+          }, 300);
+        },
+
+        // ===== 6. 表单验证 =====
+        'form.username'(newValue) {
+          if (!newValue) {
+            this.validation.username = { valid: false, message: '用户名不能为空' };
+          } else if (newValue.length < 3 || newValue.length > 20) {
+            this.validation.username = { valid: false, message: '用户名长度应为3-20字符' };
+          } else if (!/^[a-zA-Z0-9]+$/.test(newValue)) {
+            this.validation.username = { valid: false, message: '只能包含字母和数字' };
+          } else {
+            this.validation.username = { valid: true, message: '✓ 用户名有效' };
+          }
+        },
+
+        'form.email'(newValue) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!newValue) {
+            this.validation.email = { valid: false, message: '邮箱不能为空' };
+          } else if (!emailRegex.test(newValue)) {
+            this.validation.email = { valid: false, message: '邮箱格式不正确' };
+          } else {
+            this.validation.email = { valid: true, message: '✓ 邮箱格式正确' };
+          }
+        },
+
+        'form.password'(newValue) {
+          if (!newValue) {
+            this.validation.password = { valid: false, message: '密码不能为空' };
+          } else if (newValue.length < 6) {
+            this.validation.password = { valid: false, message: '密码至少6位' };
+          } else {
+            this.validation.password = { valid: true, message: '✓ 密码强度合格' };
+          }
+        }
+      },
+
+      methods: {
+        replaceUser() {
+          // 替换整个对象，触发浅层侦听
+          this.user = { ...this.user, name: this.user.name + ' (新)' };
+        },
+
+        async performSearch(keyword) {
+          this.isSearching = true;
+          this.searchLogs.unshift(`${new Date().toLocaleTimeString()}: 搜索 "${keyword}"`);
+          if (this.searchLogs.length > 5) this.searchLogs.pop();
+
+          // 模拟异步搜索
+          await new Promise(resolve => setTimeout(resolve, 500));
+
+          // 生成模拟结果
+          this.searchResults = [
+            { id: 1, title: `关于 "${keyword}" 的结果 1` },
+            { id: 2, title: `关于 "${keyword}" 的结果 2` },
+            { id: 3, title: `关于 "${keyword}" 的结果 3` }
+          ];
+
+          this.isSearching = false;
+          this.searchLogs.unshift(`${new Date().toLocaleTimeString()}: 找到 ${this.searchResults.length} 个结果`);
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

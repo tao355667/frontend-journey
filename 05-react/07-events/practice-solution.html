@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事件处理练习题参考答案</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        h2 {
+            color: #61dafb;
+            border-bottom: 2px solid #61dafb;
+            padding-bottom: 10px;
+        }
+        /* 计算器样式 */
+        .calculator {
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        .calculator .display {
+            background: #333;
+            color: white;
+            padding: 15px;
+            text-align: right;
+            font-size: 24px;
+            border-radius: 8px 8px 0 0;
+        }
+        .calculator .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+        }
+        .calculator .buttons button {
+            padding: 20px;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            background: #f0f0f0;
+        }
+        .calculator .buttons button:hover {
+            background: #e0e0e0;
+        }
+        .calculator .buttons button.operator {
+            background: #ff9500;
+            color: white;
+        }
+        .calculator .buttons button.equals {
+            background: #007bff;
+            color: white;
+            grid-column: span 2;
+        }
+        .calculator .buttons button.clear {
+            background: #ff3b30;
+            color: white;
+        }
+        /* 待办事项样式 */
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+        .todo-item.completed span {
+            text-decoration: line-through;
+            color: #999;
+        }
+        .todo-item input[type="checkbox"] {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+        }
+        .todo-item span {
+            flex: 1;
+        }
+        .todo-item button {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        /* 鼠标追踪器样式 */
+        .mouse-tracker {
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+        }
+        .mouse-tracker .position {
+            font-size: 48px;
+            font-family: monospace;
+            margin: 20px 0;
+        }
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // ========== 基础练习：计算器 ==========
+        function Calculator() {
+            const [display, setDisplay] = React.useState('0');
+            const [firstOperand, setFirstOperand] = React.useState(null);
+            const [operator, setOperator] = React.useState(null);
+            const [waitingForSecond, setWaitingForSecond] = React.useState(false);
+            
+            const handleNumber = (num) => {
+                if (waitingForSecond) {
+                    setDisplay(num);
+                    setWaitingForSecond(false);
+                } else {
+                    setDisplay(display === '0' ? num : display + num);
+                }
+            };
+            
+            const handleOperator = (op) => {
+                if (firstOperand === null) {
+                    setFirstOperand(parseFloat(display));
+                } else if (operator) {
+                    const result = calculate(firstOperand, parseFloat(display), operator);
+                    setDisplay(String(result));
+                    setFirstOperand(result);
+                }
+                setOperator(op);
+                setWaitingForSecond(true);
+            };
+            
+            const calculate = (a, b, op) => {
+                switch (op) {
+                    case '+': return a + b;
+                    case '-': return a - b;
+                    case '×': return a * b;
+                    case '÷': return b !== 0 ? a / b : 'Error';
+                    default: return b;
+                }
+            };
+            
+            const handleEquals = () => {
+                if (firstOperand !== null && operator) {
+                    const result = calculate(firstOperand, parseFloat(display), operator);
+                    setDisplay(String(result));
+                    setFirstOperand(null);
+                    setOperator(null);
+                    setWaitingForSecond(false);
+                }
+            };
+            
+            const handleClear = () => {
+                setDisplay('0');
+                setFirstOperand(null);
+                setOperator(null);
+                setWaitingForSecond(false);
+            };
+            
+            const handleDecimal = () => {
+                if (waitingForSecond) {
+                    setDisplay('0.');
+                    setWaitingForSecond(false);
+                } else if (!display.includes('.')) {
+                    setDisplay(display + '.');
+                }
+            };
+            
+            const handlePercent = () => {
+                setDisplay(String(parseFloat(display) / 100));
+            };
+            
+            return (
+                <div className="calculator">
+                    <div className="display">{display}</div>
+                    <div className="buttons">
+                        <button className="clear" onClick={handleClear}>C</button>
+                        <button onClick={handlePercent}>%</button>
+                        <button onClick={() => handleOperator('÷')}>÷</button>
+                        <button className="operator" onClick={() => handleOperator('×')}>×</button>
+                        
+                        {[7, 8, 9].map(num => (
+                            <button key={num} onClick={() => handleNumber(String(num))}>{num}</button>
+                        ))}
+                        <button className="operator" onClick={() => handleOperator('-')}>-</button>
+                        
+                        {[4, 5, 6].map(num => (
+                            <button key={num} onClick={() => handleNumber(String(num))}>{num}</button>
+                        ))}
+                        <button className="operator" onClick={() => handleOperator('+')}>+</button>
+                        
+                        {[1, 2, 3].map(num => (
+                            <button key={num} onClick={() => handleNumber(String(num))}>{num}</button>
+                        ))}
+                        <button className="equals" onClick={handleEquals}>=</button>
+                        
+                        <button onClick={handleDecimal}>.</button>
+                        <button onClick={() => handleNumber('0')}>0</button>
+                    </div>
+                </div>
+            );
+        }
+
+        // ========== 进阶练习：待办事项列表 ==========
+        function TodoApp() {
+            const [todos, setTodos] = React.useState(() => {
+                const saved = localStorage.getItem('todos');
+                return saved ? JSON.parse(saved) : [];
+            });
+            const [inputValue, setInputValue] = React.useState('');
+            
+            React.useEffect(() => {
+                localStorage.setItem('todos', JSON.stringify(todos));
+            }, [todos]);
+            
+            const addTodo = () => {
+                if (inputValue.trim()) {
+                    setTodos([
+                        ...todos,
+                        { id: Date.now(), text: inputValue.trim(), completed: false }
+                    ]);
+                    setInputValue('');
+                }
+            };
+            
+            const toggleTodo = (id) => {
+                setTodos(todos.map(todo =>
+                    todo.id === id ? { ...todo, completed: !todo.completed } : todo
+                ));
+            };
+            
+            const deleteTodo = (id) => {
+                setTodos(todos.filter(todo => todo.id !== id));
+            };
+            
+            const clearAll = () => {
+                setTodos([]);
+            };
+            
+            return (
+                <div style={{ maxWidth: '500px', margin: '0 auto' }}>
+                    <h3>待办事项列表</h3>
+                    <div style={{ display: 'flex', marginBottom: '10px' }}>
+                        <input
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && addTodo()}
+                            placeholder="添加新任务..."
+                            style={{ flex: 1, padding: '8px' }}
+                        />
+                        <button onClick={addTodo} style={{ marginLeft: '5px' }}>添加</button>
+                    </div>
+                    
+                    {todos.length > 0 && (
+                        <div style={{ marginBottom: '10px' }}>
+                            <button onClick={clearAll}>清空全部</button>
+                        </div>
+                    )}
+                    
+                    <ul style={{ listStyle: 'none', padding: 0 }}>
+                        {todos.map(todo => (
+                            <li key={todo.id} className={`todo-item ${todo.completed ? 'completed' : ''}`}>
+                                <input
+                                    type="checkbox"
+                                    checked={todo.completed}
+                                    onChange={() => toggleTodo(todo.id)}
+                                />
+                                <span>{todo.text}</span>
+                                <button onClick={() => deleteTodo(todo.id)}>删除</button>
+                            </li>
+                        ))}
+                    </ul>
+                    
+                    {todos.length === 0 && (
+                        <p style={{ textAlign: 'center', color: '#999' }}>暂无任务</p>
+                    )}
+                </div>
+            );
+        }
+
+        // ========== 挑战练习：鼠标位置追踪器 ==========
+        function useMouseTracker() {
+            const [position, setPosition] = React.useState({ x: 0, y: 0 });
+            
+            React.useEffect(() => {
+                const handleMouseMove = (e) => {
+                    setPosition({ x: e.clientX, y: e.clientY });
+                };
+                
+                window.addEventListener('mousemove', handleMouseMove);
+                return () => {
+                    window.removeEventListener('mousemove', handleMouseMove);
+                };
+            }, []);
+            
+            return position;
+        }
+        
+        function MouseTracker() {
+            const position = useMouseTracker();
+            
+            return (
+                <div className="mouse-tracker">
+                    <h3>鼠标位置追踪器</h3>
+                    <p>在页面上移动鼠标查看位置</p>
+                    <div className="position">
+                        X: {position.x}, Y: {position.y}
+                    </div>
+                    <table style={{ marginTop: '20px', color: 'white' }}>
+                        <thead>
+                            <tr>
+                                <th>位置</th>
+                                <th>坐标</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>X 坐标</td>
+                                <td>{position.x}px</td>
+                            </tr>
+                            <tr>
+                                <td>Y 坐标</td>
+                                <td>{position.y}px</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }
+
+        // ========== 额外示例：键盘快捷键 ==========
+        function KeyboardShortcuts() {
+            const [count, setCount] = React.useState(0);
+            const [message, setMessage] = React.useState('');
+            
+            React.useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if (e.key === '+' || e.key === '=') {
+                        setCount(c => c + 1);
+                        setMessage(`按下 + 键，计数: ${count + 1}`);
+                    } else if (e.key === '-') {
+                        setCount(c => Math.max(0, c - 1));
+                        setMessage(`按下 - 键，计数: ${Math.max(0, count - 1)}`);
+                    } else if (e.key === 'r') {
+                        setCount(0);
+                        setMessage('按下 R 键，重置计数');
+                    }
+                };
+                
+                window.addEventListener('keydown', handleKeyDown);
+                return () => {
+                    window.removeEventListener('keydown', handleKeyDown);
+                };
+            }, [count]);
+            
+            return (
+                <div style={{ textAlign: 'center', padding: '20px' }}>
+                    <h3>键盘快捷键</h3>
+                    <p>使用 + / - 增加/减少计数，按 R 重置</p>
+                    <div style={{ fontSize: '48px', fontWeight: 'bold' }}>
+                        {count}
+                    </div>
+                    <p style={{ color: message ? '#007bff' : 'transparent' }}>
+                        {message || '按下按键查看效果'}
+                    </div>
+                </div>
+            );
+        }
+
+        // ========== 主应用组件 ==========
+        function App() {
+            return (
+                <div>
+                    <h1>事件处理练习题参考答案</h1>
+                    
+                    {/* 基础练习 */}
+                    <section className="section">
+                        <h2>基础练习：计算器</h2>
+                        <Calculator />
+                    </section>
+                    
+                    {/* 进阶练习 */}
+                    <section className="section">
+                        <h2>进阶练习：待办事项列表</h2>
+                        <TodoApp />
+                    </section>
+                    
+                    {/* 挑战练习 */}
+                    <section className="section">
+                        <h2>挑战练习：鼠标位置追踪器</h2>
+                        <MouseTracker />
+                    </section>
+                    
+                    {/* 额外示例 */}
+                    <section className="section">
+                        <h2>额外示例：键盘快捷键</h2>
+                        <KeyboardShortcuts />
+                    </section>
+                </div>
+            );
+        }
+
+        // 渲染应用
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 6: Class 与 Style 绑定 - JavaScript 示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .demo-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .demo-section h2 {
+      color: #42b883;
+      border-bottom: 2px solid #42b883;
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      margin: 10px 0;
+    }
+    
+    /* Class 绑定的示例样式 */
+    .demo-box {
+      padding: 20px;
+      margin: 10px 0;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    .demo-box.active {
+      background: #e8f5e9;
+      border-color: #42b883;
+      color: #2e7d32;
+    }
+    .demo-box.error {
+      background: #ffebee;
+      border-color: #e74c3c;
+      color: #c62828;
+    }
+    .demo-box.highlight {
+      box-shadow: 0 0 15px rgba(66, 184, 131, 0.5);
+      transform: scale(1.02);
+    }
+    .demo-box.large-text {
+      font-size: 20px;
+    }
+    
+    /* 控制面板 */
+    .control-panel {
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+    }
+    .control-panel label {
+      display: inline-block;
+      margin: 5px 15px 5px 0;
+    }
+    input[type="checkbox"] {
+      margin-right: 5px;
+    }
+    input[type="range"] {
+      width: 200px;
+    }
+    input[type="color"] {
+      width: 60px;
+      height: 30px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    /* 主题样式 */
+    .theme-demo {
+      padding: 30px;
+      border-radius: 12px;
+      transition: all 0.5s ease;
+    }
+    .theme-demo.light {
+      background: #fff;
+      color: #333;
+      border: 2px solid #ddd;
+    }
+    .theme-demo.dark {
+      background: #2c3e50;
+      color: #ecf0f1;
+      border: 2px solid #34495e;
+    }
+    .theme-demo.colorful {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+    
+    /* 状态徽章 */
+    .status-badge {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      margin: 10px 5px;
+    }
+    .status-success {
+      background: #d4edda;
+      color: #155724;
+      border: 2px solid #c3e6cb;
+    }
+    .status-warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 2px solid #ffeeba;
+    }
+    .status-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 2px solid #f5c6cb;
+    }
+    .status-loading {
+      background: #e2e3e5;
+      color: #383d41;
+      border: 2px solid #d6d8db;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    /* 交互卡片 */
+    .interactive-card {
+      padding: 30px;
+      margin: 20px 0;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .interactive-card.hovered {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .interactive-card.selected {
+      border-color: #42b883;
+      border-width: 3px;
+    }
+    
+    button {
+      padding: 8px 16px;
+      margin: 5px;
+      background: #42b883;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #369870;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1 style="text-align: center; color: #42b883;">🎨 Class 与 Style 绑定详解</h1>
+
+    <!-- 1. Class 绑定 - 对象语法 -->
+    <div class="demo-section">
+      <h2>1. Class 绑定 - 对象语法</h2>
+      
+      <div class="control-panel">
+        <label>
+          <input type="checkbox" v-model="classStates.active"> active
+        </label>
+        <label>
+          <input type="checkbox" v-model="classStates.error"> error
+        </label>
+        <label>
+          <input type="checkbox" v-model="classStates.highlight"> highlight
+        </label>
+        <label>
+          <input type="checkbox" v-model="classStates.largeText"> large-text
+        </label>
+      </div>
+      
+      <!-- 基础对象语法 -->
+      <div 
+        class="demo-box"
+        :class="{ 
+          active: classStates.active, 
+          error: classStates.error,
+          highlight: classStates.highlight,
+          'large-text': classStates.largeText
+        }"
+      >
+        <strong>基础对象语法</strong><br>
+        当前应用的 class: 
+        <code>{{ getActiveClasses }}</code>
+      </div>
+      
+      <!-- 绑定对象变量 -->
+      <div class="demo-box" :class="classObject">
+        <strong>绑定对象变量</strong><br>
+        直接绑定 classObject 对象
+      </div>
+      
+      <div class="code-block">
+// Class 对象语法
+// 模板中
+&lt;div :class="{ active: isActive, 'text-danger': hasError }"&gt;
+
+// 或绑定整个对象
+&lt;div :class="classObject"&gt;
+
+// data 中
+data() {
+  return {
+    classStates: {
+      active: true,
+      error: false,
+      highlight: false,
+      largeText: false
+    },
+    classObject: {
+      active: true,
+      highlight: true
+    }
+  }
+}
+      </div>
+    </div>
+
+    <!-- 2. Class 绑定 - 数组语法 -->
+    <div class="demo-section">
+      <h2>2. Class 绑定 - 数组语法</h2>
+      
+      <div class="control-panel">
+        <p>选择要应用的 class：</p>
+        <label>
+          <input type="checkbox" v-model="useActiveClass"> activeClass
+        </label>
+        <label>
+          <input type="checkbox" v-model="useErrorClass"> errorClass
+        </label>
+        <label>
+          <input type="checkbox" v-model="useHighlightClass"> highlightClass
+        </label>
+      </div>
+      
+      <!-- 基础数组语法 -->
+      <div class="demo-box" :class="[activeClass, errorClass, highlightClass]">
+        <strong>数组语法</strong><br>
+        直接应用三个 class 变量
+      </div>
+      
+      <!-- 数组 + 三元表达式 -->
+      <div class="demo-box" :class="[useActiveClass ? 'active' : '', useErrorClass ? 'error' : '']">
+        <strong>数组 + 三元表达式</strong><br>
+        根据条件动态选择
+      </div>
+      
+      <!-- 数组 + 对象语法 -->
+      <div class="demo-box" :class="['demo-box', { active: useActiveClass, error: useErrorClass }]">
+        <strong>数组 + 对象语法混合</strong><br>
+        静态 class + 动态对象
+      </div>
+      
+      <div class="code-block">
+// Class 数组语法
+
+// 基础用法
+&lt;div :class="[activeClass, errorClass]"&gt;
+
+// 三元表达式
+&lt;div :class="[isActive ? activeClass : '', errorClass]"&gt;
+
+// 数组中使用对象
+&lt;div :class="[classA, { active: isActive }]"&gt;
+
+data() {
+  return {
+    activeClass: 'active',
+    errorClass: 'error',
+    highlightClass: 'highlight'
+  }
+}
+      </div>
+    </div>
+
+    <!-- 3. Style 绑定 - 对象语法 -->
+    <div class="demo-section">
+      <h2>3. Style 绑定 - 对象语法</h2>
+      
+      <div class="control-panel">
+        <p>调整样式：</p>
+        <label>
+          文字颜色: 
+          <input type="color" v-model="styles.color">
+        </label>
+        <label>
+          背景颜色: 
+          <input type="color" v-model="styles.backgroundColor">
+        </label>
+        <label>
+          字体大小: {{ styles.fontSize }}px
+          <input type="range" v-model.number="styles.fontSize" min="12" max="32">
+        </label>
+        <label>
+          内边距: {{ styles.padding }}px
+          <input type="range" v-model.number="styles.padding" min="10" max="50">
+        </label>
+        <label>
+          圆角: {{ styles.borderRadius }}px
+          <input type="range" v-model.number="styles.borderRadius" min="0" max="20">
+        </label>
+      </div>
+      
+      <!-- 基础 style 对象绑定 -->
+      <div 
+        :style="{ 
+          color: styles.color, 
+          backgroundColor: styles.backgroundColor,
+          fontSize: styles.fontSize + 'px',
+          padding: styles.padding + 'px',
+          borderRadius: styles.borderRadius + 'px',
+          border: '2px solid #ddd'
+        }"
+      >
+        <strong>动态样式卡片</strong><br>
+        实时调整样式属性
+      </div>
+      
+      <!-- 绑定 style 对象 -->
+      <div :style="styleObject" style="margin-top: 15px;">
+        <strong>绑定 styleObject</strong><br>
+        直接绑定整个样式对象
+      </div>
+      
+      <div class="code-block">
+// Style 对象语法
+
+// 内联对象
+&lt;div :style="{ color: activeColor, fontSize: fontSize + 'px' }"&gt;
+
+// 驼峰命名或短横线命名（需引号）
+&lt;div :style="{ 
+  backgroundColor: bgColor,
+  'border-radius': '8px'
+}"&gt;
+
+// 绑定对象变量
+&lt;div :style="styleObject"&gt;
+
+data() {
+  return {
+    styles: {
+      color: '#42b883',
+      backgroundColor: '#f0f0f0',
+      fontSize: 16,
+      padding: 20,
+      borderRadius: 8
+    },
+    styleObject: {
+      color: '#764ba2',
+      fontSize: '18px',
+      padding: '15px',
+      backgroundColor: '#f3e5f5'
+    }
+  }
+}
+      </div>
+    </div>
+
+    <!-- 4. Style 绑定 - 数组语法 -->
+    <div class="demo-section">
+      <h2>4. Style 绑定 - 数组语法</h2>
+      
+      <div class="control-panel">
+        <p>样式合并示例：</p>
+        <p style="font-size: 12px; color: #666;">
+          baseStyles + overrideStyles，后面的属性会覆盖前面的
+        </p>
+      </div>
+      
+      <!-- 数组语法：多个 style 对象合并 -->
+      <div :style="[baseStyles, overrideStyles]" style="border: 2px dashed #42b883;">
+        <strong>数组合并样式</strong><br>
+        baseStyles 定义基础样式，overrideStyles 覆盖特定属性
+        <br><br>
+        <small>
+          baseStyles 颜色: {{ baseStyles.color }}<br>
+          overrideStyles 颜色: {{ overrideStyles.color }}<br>
+          最终颜色: {{ overrideStyles.color }}（被覆盖）
+        </small>
+      </div>
+      
+      <div class="code-block">
+// Style 数组语法
+// 多个对象合并，后面的属性覆盖前面的
+
+&lt;div :style="[baseStyles, overrideStyles]"&gt;
+
+data() {
+  return {
+    baseStyles: {
+      fontSize: '16px',
+      color: '#333',
+      backgroundColor: '#f5f5f5'
+    },
+    overrideStyles: {
+      color: '#42b883',  // 覆盖 baseStyles 中的 color
+      fontWeight: 'bold' // 新增属性
+    }
+  }
+}
+      </div>
+    </div>
+
+    <!-- 5. 实战案例：主题切换 -->
+    <div class="demo-section">
+      <h2>5. 实战案例：主题切换器</h2>
+      
+      <div class="control-panel">
+        <p>选择主题：</p>
+        <button @click="currentTheme = 'light'">☀️ 亮色</button>
+        <button @click="currentTheme = 'dark'">🌙 暗色</button>
+        <button @click="currentTheme = 'colorful'">🎨 彩色</button>
+      </div>
+      
+      <div :class="['theme-demo', currentTheme]">
+        <h3>{{ themeTitle }}</h3>
+        <p>这是一个应用了 {{ currentTheme }} 主题的容器</p>
+        <p>当前主题特点：</p>
+        <ul>
+          <li v-for="feature in themeFeatures" :key="feature">{{ feature }}</li>
+        </ul>
+      </div>
+      
+      <div class="code-block">
+// 主题切换实现
+&lt;div :class="['theme-demo', currentTheme]"&gt;
+
+&lt;style&gt;
+.theme-demo.light { background: #fff; color: #333; }
+.theme-demo.dark { background: #2c3e50; color: #ecf0f1; }
+.theme-demo.colorful { 
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+&lt;/style&gt;
+
+data() {
+  return {
+    currentTheme: 'light' // 'light' | 'dark' | 'colorful'
+  }
+}
+      </div>
+    </div>
+
+    <!-- 6. 实战案例：状态指示器 -->
+    <div class="demo-section">
+      <h2>6. 实战案例：状态指示器</h2>
+      
+      <div class="control-panel">
+        <p>选择状态：</p>
+        <button @click="status = 'success'">✓ 成功</button>
+        <button @click="status = 'warning'">⚠ 警告</button>
+        <button @click="status = 'error'">✗ 错误</button>
+        <button @click="status = 'loading'">⟳ 加载</button>
+      </div>
+      
+      <div 
+        class="status-badge"
+        :class="{
+          'status-success': status === 'success',
+          'status-warning': status === 'warning',
+          'status-error': status === 'error',
+          'status-loading': status === 'loading'
+        }"
+        :style="statusStyle"
+      >
+        {{ statusText }}
+      </div>
+      
+      <div class="code-block">
+// 状态指示器
+&lt;div 
+  class="status-badge"
+  :class="{
+    'status-success': status === 'success',
+    'status-warning': status === 'warning',
+    'status-error': status === 'error',
+    'status-loading': status === 'loading'
+  }"
+  :style="{ transform: status === 'loading' ? 'scale(1.1)' : 'scale(1)' }"
+&gt;
+  {{ statusText }}
+&lt;/div&gt;
+
+computed: {
+  statusText() {
+    const texts = {
+      success: '✓ 操作成功',
+      warning: '⚠ 需要注意',
+      error: '✗ 发生错误',
+      loading: '⟳ 加载中...'
+    }
+    return texts[this.status]
+  }
+}
+      </div>
+    </div>
+
+    <!-- 7. 交互式卡片 -->
+    <div class="demo-section">
+      <h2>7. 交互式卡片</h2>
+      
+      <div 
+        class="interactive-card"
+        :class="{
+          hovered: isHovered,
+          selected: isSelected
+        }"
+        :style="cardStyle"
+        @mouseenter="isHovered = true"
+        @mouseleave="isHovered = false"
+        @click="isSelected = !isSelected"
+      >
+        <h3>🎯 点击我！</h3>
+        <p>这是一个交互式卡片，支持：</p>
+        <ul>
+          <li>鼠标悬停效果 (hovered: {{ isHovered }})</li>
+          <li>点击选中效果 (selected: {{ isSelected }})</li>
+          <li>动态样式绑定</li>
+        </ul>
+        <p style="margin-top: 15px;">
+          <small>
+            背景色: {{ cardStyle.backgroundColor }} | 
+            圆角: {{ cardStyle.borderRadius }}
+          </small>
+        </p>
+      </div>
+      
+      <div class="control-panel">
+        <label>
+          背景颜色: 
+          <input type="color" v-model="cardColor">
+        </label>
+        <label>
+          圆角: {{ cardBorderRadius }}px
+          <input type="range" v-model.number="cardBorderRadius" min="0" max="30">
+        </label>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          // Class 绑定数据
+          classStates: {
+            active: false,
+            error: false,
+            highlight: false,
+            largeText: false
+          },
+          classObject: {
+            active: true,
+            highlight: false
+          },
+          
+          // 数组语法数据
+          useActiveClass: false,
+          useErrorClass: false,
+          useHighlightClass: false,
+          activeClass: 'active',
+          errorClass: 'error',
+          highlightClass: 'highlight',
+          
+          // Style 绑定数据
+          styles: {
+            color: '#42b883',
+            backgroundColor: '#f0f0f0',
+            fontSize: 16,
+            padding: 20,
+            borderRadius: 8
+          },
+          styleObject: {
+            color: '#764ba2',
+            fontSize: '18px',
+            padding: '15px',
+            backgroundColor: '#f3e5f5',
+            borderRadius: '8px'
+          },
+          
+          // 数组语法数据
+          baseStyles: {
+            fontSize: '16px',
+            color: '#333',
+            backgroundColor: '#f5f5f5',
+            padding: '15px',
+            borderRadius: '8px'
+          },
+          overrideStyles: {
+            color: '#42b883',
+            fontWeight: 'bold',
+            border: '2px solid #42b883'
+          },
+          
+          // 主题数据
+          currentTheme: 'light',
+          
+          // 状态指示器数据
+          status: 'success',
+          
+          // 交互卡片数据
+          isHovered: false,
+          isSelected: false,
+          cardColor: '#ffffff',
+          cardBorderRadius: 12
+        };
+      },
+
+      computed: {
+        // 获取当前激活的 class 列表
+        getActiveClasses() {
+          const classes = [];
+          if (this.classStates.active) classes.push('active');
+          if (this.classStates.error) classes.push('error');
+          if (this.classStates.highlight) classes.push('highlight');
+          if (this.classStates.largeText) classes.push('large-text');
+          return classes.length > 0 ? classes.join(', ') : '无';
+        },
+
+        // 主题标题
+        themeTitle() {
+          const titles = {
+            light: '☀️ 亮色主题',
+            dark: '🌙 暗色主题',
+            colorful: '🎨 彩色主题'
+          };
+          return titles[this.currentTheme];
+        },
+
+        // 主题特点
+        themeFeatures() {
+          const features = {
+            light: ['清晰易读', '适合日间使用', '简约风格'],
+            dark: ['护眼模式', '适合夜间使用', '现代风格'],
+            colorful: ['活泼有趣', '视觉冲击力强', '创意设计']
+          };
+          return features[this.currentTheme];
+        },
+
+        // 状态文本
+        statusText() {
+          const texts = {
+            success: '✓ 操作成功',
+            warning: '⚠ 需要注意',
+            error: '✗ 发生错误',
+            loading: '⟳ 加载中...'
+          };
+          return texts[this.status];
+        },
+
+        // 状态样式
+        statusStyle() {
+          return {
+            transform: this.status === 'loading' ? 'scale(1.1)' : 'scale(1)',
+            transition: 'all 0.3s ease'
+          };
+        },
+
+        // 卡片动态样式
+        cardStyle() {
+          return {
+            backgroundColor: this.cardColor,
+            borderRadius: this.cardBorderRadius + 'px'
+          };
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

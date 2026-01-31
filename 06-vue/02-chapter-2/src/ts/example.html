@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 2: 模板语法 - TypeScript 示例</title>
+  <!-- 引入 Vue 3 -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .demo-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .demo-section h2 {
+      color: #42b883;
+      border-bottom: 2px solid #42b883;
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+    .highlight {
+      background-color: #fffacd;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+    .user-card {
+      border: 2px solid #42b883;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 10px 0;
+    }
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+    .ts-badge {
+      background: #3178c6;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      margin-left: 10px;
+    }
+    input, select {
+      padding: 8px;
+      margin: 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      padding: 8px 16px;
+      background: #42b883;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #369870;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1 style="text-align: center; color: #42b883;">
+      📝 模板语法详解
+      <span class="ts-badge">TypeScript</span>
+    </h1>
+
+    <!-- 1. 文本插值演示 -->
+    <div class="demo-section">
+      <h2>1. 文本插值（Mustache 语法）</h2>
+      <p>最基本的文本绑定：{{ message }}</p>
+      <p>表达式计算：100 + 200 = {{ 100 + 200 }}</p>
+      <p>三元表达式：{{ isVip ? 'VIP会员' : '普通用户' }}</p>
+      <p>字符串操作：反转"{{ text }}" = "{{ text.split('').reverse().join('') }}"</p>
+      
+      <div class="code-block">
+// TypeScript 类型定义
+interface AppData {
+  message: string
+  isVip: boolean
+  text: string
+}
+      </div>
+    </div>
+
+    <!-- 2. v-html 原始 HTML -->
+    <div class="demo-section">
+      <h2>2. 原始 HTML 渲染（v-html）</h2>
+      <p>纯文本输出：{{ htmlContent }}</p>
+      <p>HTML渲染：<span v-html="htmlContent"></span></p>
+      
+      <div class="code-block">
+// TypeScript 中 v-html 内容应为 string 类型
+htmlContent: string = '&lt;strong&gt;内容&lt;/strong&gt;'
+      </div>
+    </div>
+
+    <!-- 3. 属性绑定 v-bind -->
+    <div class="demo-section">
+      <h2>3. 属性绑定（v-bind）</h2>
+      
+      <p :id="dynamicId">这个段落有动态 id: {{ dynamicId }}</p>
+      
+      <a :href="websiteUrl" target="_blank">访问 Vue 官网</a>
+      
+      <p>
+        <button :disabled="isDisabled" @click="toggleDisabled">
+          {{ isDisabled ? '已禁用' : '点击我' }}
+        </button>
+        <button @click="toggleDisabled">切换禁用状态</button>
+      </p>
+      
+      <div v-bind="containerAttrs">
+        这个 div 绑定了多个属性
+      </div>
+      
+      <div class="code-block">
+// TypeScript 接口定义容器属性
+interface ContainerAttrs {
+  id: string
+  class: string
+  'data-custom': string
+}
+
+containerAttrs: ContainerAttrs = {
+  id: 'container',
+  class: 'wrapper-class',
+  'data-custom': 'custom-value'
+}
+      </div>
+    </div>
+
+    <!-- 4. JavaScript 表达式 -->
+    <div class="demo-section">
+      <h2>4. JavaScript 表达式</h2>
+      <p>单价: ¥{{ price }}</p>
+      <p>数量: {{ quantity }}</p>
+      <p>总价: ¥{{ price * quantity }}</p>
+      <p>折扣后（9折）: ¥{{ (price * quantity * 0.9).toFixed(2) }}</p>
+      <p>库存状态: {{ quantity > 0 ? '有货' : '缺货' }}</p>
+      
+      <button @click="incrementQuantity()">增加数量</button>
+      <button @click="decrementQuantity()">减少数量</button>
+      
+      <div class="code-block">
+// TypeScript 类型安全的数据
+data(): {
+  price: number
+  quantity: number
+} {
+  return {
+    price: 99.99,
+    quantity: 1
+  }
+}
+
+// 方法也有类型定义
+methods: {
+  incrementQuantity(): void {
+    this.quantity++
+  },
+  
+  decrementQuantity(): void {
+    this.quantity = Math.max(0, this.quantity - 1)
+  }
+}
+      </div>
+    </div>
+
+    <!-- 5. 指令参数 -->
+    <div class="demo-section">
+      <h2>5. 指令参数</h2>
+      
+      <p>
+        <img :src="imageUrl" :alt="imageAlt" width="200">
+      </p>
+      
+      <p>
+        <button @click="sayHello">点击问候</button>
+        <button @mouseenter="showTip" @mouseleave="hideTip">悬停查看提示</button>
+      </p>
+      <p v-if="showTooltip" class="highlight">这是一个提示信息！</p>
+      
+      <div class="code-block">
+// TypeScript 中的事件处理程序
+methods: {
+  sayHello(): void {
+    alert(`你好! 当前消息: ${this.message}`)
+  },
+  
+  showTip(): void {
+    this.showTooltip = true
+  },
+  
+  hideTip(): void {
+    this.showTooltip = false
+  }
+}
+      </div>
+    </div>
+
+    <!-- 6. 动态参数 -->
+    <div class="demo-section">
+      <h2>6. 动态参数</h2>
+      
+      <p>选择要绑定的属性：</p>
+      <select v-model="selectedAttr">
+        <option value="href">href（链接）</option>
+        <option value="title">title（标题）</option>
+        <option value="id">id（标识）</option>
+      </select>
+      
+      <p>当前绑定属性: <strong>{{ selectedAttr }}</strong></p>
+      
+      <a :[selectedAttr]="dynamicValue">
+        动态属性绑定示例
+      </a>
+      
+      <div class="code-block">
+// TypeScript 中使用联合类型限制可选值
+type AttributeName = 'href' | 'title' | 'id'
+
+selectedAttr: AttributeName = 'href'
+dynamicValue: string = 'https://example.com'
+      </div>
+    </div>
+
+    <!-- 7. 修饰符 -->
+    <div class="demo-section">
+      <h2>7. 修饰符</h2>
+      
+      <form @submit.prevent="handleSubmit">
+        <label>
+          用户名（带.trim修饰符）:
+          <input v-model.trim="username" placeholder="输入带空格的名字">
+        </label>
+        <p>当前值: "{{ username }}"（长度: {{ username.length }}）</p>
+        
+        <label>
+          年龄（带.number修饰符）:
+          <input v-model.number="age" type="number" placeholder="输入数字">
+        </label>
+        <p>年龄值: {{ age }}，类型: {{ typeof age }}</p>
+        
+        <label>
+          简介（带.lazy修饰符）:
+          <input v-model.lazy="bio" placeholder="失去焦点后更新">
+        </label>
+        <p>简介: {{ bio }}</p>
+        
+        <button type="submit">提交表单</button>
+      </form>
+      
+      <div class="code-block">
+// TypeScript 中的表单数据类型
+interface FormData {
+  username: string
+  age: number | null
+  bio: string
+}
+
+// v-model.number 确保 age 是 number 类型
+// 避免了 JavaScript 中 input 值默认为 string 的问题
+      </div>
+    </div>
+
+    <!-- 综合示例：用户卡片 -->
+    <div class="demo-section">
+      <h2>综合示例：动态用户卡片</h2>
+      
+      <div class="user-card" :style="{ backgroundColor: cardColor }">
+        <h3>{{ user.name }}</h3>
+        <p>年龄: {{ user.age }} 岁</p>
+        <p>职业: {{ user.job }}</p>
+        <div v-html="user.bio"></div>
+      </div>
+      
+      <p>
+        <label>
+          选择卡片背景色:
+          <select v-model="cardColor">
+            <option value="#ffffff">白色</option>
+            <option value="#e3f2fd">淡蓝</option>
+            <option value="#f3e5f5">淡紫</option>
+            <option value="#e8f5e9">淡绿</option>
+          </select>
+        </label>
+      </p>
+      
+      <div class="code-block">
+// TypeScript 完整接口定义
+interface User {
+  name: string
+  age: number
+  job: string
+  bio: string
+}
+
+interface AppData {
+  user: User
+  cardColor: string
+}
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    /**
+     * 用户数据接口
+     * @interface User
+     */
+    /**
+     * @typedef {Object} User
+     * @property {string} name - 用户名
+     * @property {number} age - 年龄
+     * @property {string} job - 职业
+     * @property {string} bio - 个人简介（HTML格式）
+     */
+
+    /**
+     * 容器属性接口
+     * @typedef {Object} ContainerAttrs
+     * @property {string} id - 元素ID
+     * @property {string} class - CSS类名
+     * @property {string} data-custom - 自定义数据属性
+     */
+
+    createApp({
+      /**
+       * 数据函数 - 返回应用的所有响应式数据
+       * @returns {Object} 应用数据对象
+       */
+      data() {
+        return {
+          // 文本插值数据
+          /** @type {string} */
+          message: 'Hello, Vue 模板语法!',
+          /** @type {boolean} */
+          isVip: true,
+          /** @type {string} */
+          text: 'Vue',
+          
+          // v-html 数据
+          /** @type {string} */
+          htmlContent: '<strong style="color: #42b883;">这段文字使用了 v-html 渲染</strong>',
+          
+          // 属性绑定数据
+          /** @type {string} */
+          dynamicId: 'user-profile-123',
+          /** @type {string} */
+          websiteUrl: 'https://vuejs.org',
+          /** @type {boolean} */
+          isDisabled: false,
+          /** @type {ContainerAttrs} */
+          containerAttrs: {
+            id: 'container',
+            class: 'wrapper-class',
+            'data-custom': 'custom-value'
+          },
+          
+          // JavaScript 表达式数据
+          /** @type {number} */
+          price: 99.99,
+          /** @type {number} */
+          quantity: 1,
+          
+          // 指令参数数据
+          /** @type {string} */
+          imageUrl: 'https://vuejs.org/images/logo.png',
+          /** @type {string} */
+          imageAlt: 'Vue Logo',
+          /** @type {boolean} */
+          showTooltip: false,
+          
+          // 动态参数数据
+          /** @type {'href' | 'title' | 'id'} */
+          selectedAttr: 'href',
+          /** @type {string} */
+          dynamicValue: 'https://example.com',
+          
+          // 修饰符示例数据
+          /** @type {string} */
+          username: '',
+          /** @type {number | null} */
+          age: null,
+          /** @type {string} */
+          bio: '',
+          
+          // 综合示例数据
+          /** @type {User} */
+          user: {
+            name: '张三',
+            age: 28,
+            job: '前端工程师',
+            bio: '<p style="color: #666;">热爱编程，喜欢分享技术文章</p>'
+          },
+          /** @type {string} */
+          cardColor: '#e3f2fd'
+        };
+      },
+
+      /**
+       * 方法定义
+       */
+      methods: {
+        /**
+         * 切换按钮禁用状态
+         * @returns {void}
+         */
+        toggleDisabled() {
+          this.isDisabled = !this.isDisabled;
+        },
+
+        /**
+         * 点击问候
+         * @returns {void}
+         */
+        sayHello() {
+          alert(`你好! 当前消息: ${this.message}`);
+        },
+
+        /**
+         * 显示提示
+         * @returns {void}
+         */
+        showTip() {
+          this.showTooltip = true;
+        },
+
+        /**
+         * 隐藏提示
+         * @returns {void}
+         */
+        hideTip() {
+          this.showTooltip = false;
+        },
+
+        /**
+         * 增加数量
+         * @returns {void}
+         */
+        incrementQuantity() {
+          this.quantity++;
+        },
+
+        /**
+         * 减少数量
+         * @returns {void}
+         */
+        decrementQuantity() {
+          this.quantity = Math.max(0, this.quantity - 1);
+        },
+
+        /**
+         * 处理表单提交
+         * @returns {void}
+         */
+        handleSubmit() {
+          alert(`提交成功！\n用户名: ${this.username}\n年龄: ${this.age}\n简介: ${this.bio}`);
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

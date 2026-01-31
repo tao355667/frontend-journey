@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOM 选择示例</title>
+    <style>
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+        }
+        .container {
+            padding: 20px;
+            margin: 10px;
+            border: 1px solid #ccc;
+        }
+        #main-title {
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="main-title">DOM 选择示例</h1>
+    
+    <div class="container">
+        <h2>容器 1</h2>
+        <p>这是第一个段落。</p>
+        <p class="special">这是一个特殊的段落。</p>
+        <ul>
+            <li>项目 1</li>
+            <li>项目 2</li>
+            <li class="special">特殊项目 3</li>
+        </ul>
+    </div>
+    
+    <div class="container">
+        <h2>容器 2</h2>
+        <p>另一个段落在这里。</p>
+        <button id="select-btn">选择元素</button>
+        <button id="highlight-btn">高亮特殊元素</button>
+    </div>
+
+    <script>
+        // DOM 选择方法
+
+        // getElementById：通过 ID 选择元素
+        const title = document.getElementById('main-title');
+        console.log('通过 ID 获取的标题:', title.textContent);
+        
+        // getElementsByClassName：通过类名选择元素
+        const containers = document.getElementsByClassName('container');
+        console.log('容器数量:', containers.length);
+        
+        // getElementsByTagName：通过标签名选择元素
+        const paragraphs = document.getElementsByTagName('p');
+        console.log('段落数量:', paragraphs.length);
+        
+        // querySelector：使用 CSS 选择器选择第一个匹配的元素
+        const firstSpecial = document.querySelector('.special');
+        console.log('第一个特殊元素:', firstSpecial.textContent);
+        
+        // querySelectorAll：使用 CSS 选择器选择所有匹配的元素
+        const allSpecials = document.querySelectorAll('.special');
+        console.log('所有特殊元素数量:', allSpecials.length);
+        
+        // 为按钮添加事件监听器
+        document.getElementById('select-btn').addEventListener('click', function() {
+            console.clear();
+            
+            // 演示不同的选择方法
+            console.log('=== DOM 选择演示 ===');
+            
+            // 通过 ID 选择
+            const title = document.getElementById('main-title');
+            console.log('标题:', title.textContent);
+            
+            // 通过类名选择
+            const specials = document.getElementsByClassName('special');
+            console.log('特殊元素:');
+            Array.from(specials).forEach((el, i) => {
+                console.log(`  ${i + 1}. ${el.textContent}`);
+            });
+            
+            // 通过标签名选择
+            const listItems = document.getElementsByTagName('li');
+            console.log('列表项数量:', listItems.length);
+            
+            // 使用 CSS 选择器
+            const firstContainer = document.querySelector('.container');
+            console.log('第一个容器的标题:', firstContainer.querySelector('h2').textContent);
+            
+            const allContainers = document.querySelectorAll('.container');
+            console.log('所有容器数量:', allContainers.length);
+        });
+        
+        document.getElementById('highlight-btn').addEventListener('click', function() {
+            // 移除现有的高亮
+            document.querySelectorAll('.highlight').forEach(el => {
+                el.classList.remove('highlight');
+            });
+            
+            // 为特殊元素添加高亮
+            document.querySelectorAll('.special').forEach(el => {
+                el.classList.add('highlight');
+            });
+            
+            console.log('已高亮特殊元素');
+        });
+        
+        // 演示元素属性
+        console.log('=== 元素属性 ===');
+        const firstP = document.querySelector('p');
+        console.log('标签名:', firstP.tagName);
+        console.log('ID:', firstP.id);
+        console.log('类名:', firstP.className);
+        console.log('文本内容:', firstP.textContent);
+        console.log('HTML 内容:', firstP.innerHTML);
+    </script>
+</body>
+</html>

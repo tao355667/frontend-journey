@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 4: 计算属性 - JavaScript 示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .demo-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .demo-section h2 {
+      color: #42b883;
+      border-bottom: 2px solid #42b883;
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+    .highlight {
+      background-color: #fffacd;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      margin: 10px 0;
+    }
+    .comparison-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .comparison-item {
+      background: #f0f0f0;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    .cart-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .cart-table th, .cart-table td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+    .cart-table th {
+      background: #42b883;
+      color: white;
+    }
+    input[type="number"], input[type="text"], select {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin: 5px;
+    }
+    button {
+      padding: 8px 16px;
+      background: #42b883;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: white;
+    }
+    .badge-success { background: #42b883; }
+    .badge-warning { background: #f39c12; }
+    .badge-danger { background: #e74c3c; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1 style="text-align: center; color: #42b883;">🧮 计算属性详解</h1>
+
+    <!-- 1. 计算属性基础 -->
+    <div class="demo-section">
+      <h2>1. 计算属性基础</h2>
+      
+      <div style="margin-bottom: 20px;">
+        <label>姓: <input v-model="firstName"></label>
+        <label style="margin-left: 20px;">名: <input v-model="lastName"></label>
+      </div>
+      
+      <p><strong>原始数据:</strong></p>
+      <ul>
+        <li>firstName: {{ firstName }}</li>
+        <li>lastName: {{ lastName }}</li>
+      </ul>
+      
+      <p><strong>计算属性:</strong></p>
+      <ul>
+        <li>全名: <span class="highlight">{{ fullName }}</span></li>
+        <li>姓名长度: {{ nameLength }}</li>
+        <li>姓名反转: {{ reversedName }}</li>
+      </ul>
+      
+      <div class="code-block">
+// 计算属性定义
+computed: {
+  // 简单的字符串拼接
+  fullName() {
+    return this.firstName + ' ' + this.lastName
+  },
+  
+  // 基于计算属性再计算
+  nameLength() {
+    return this.fullName.length
+  },
+  
+  // 复杂操作
+  reversedName() {
+    return this.fullName.split('').reverse().join('')
+  }
+}
+      </div>
+    </div>
+
+    <!-- 2. computed vs methods 对比 -->
+    <div class="demo-section">
+      <h2>2. Computed vs Methods 对比</h2>
+      
+      <div class="comparison-box">
+        <div class="comparison-item">
+          <h4 style="color: #42b883;">Computed（有缓存）</h4>
+          <p>执行次数: {{ computedExecCount }}</p>
+          <p>结果: {{ computedRandom }}</p>
+          <p>再次访问: {{ computedRandom }}</p>
+          <p style="font-size: 12px; color: #666;">
+            注意控制台输出：只执行一次
+          </p>
+        </div>
+        
+        <div class="comparison-item">
+          <h4 style="color: #e74c3c;">Method（无缓存）</h4>
+          <p>执行次数: {{ methodExecCount }}</p>
+          <p>结果: {{ getMethodRandom() }}</p>
+          <p>再次调用: {{ getMethodRandom() }}</p>
+          <p style="font-size: 12px; color: #666;">
+            注意控制台输出：每次调用都执行
+          </p>
+        </div>
+      </div>
+      
+      <button @click="forceUpdate">强制刷新页面（查看执行次数）</button>
+      
+      <div class="code-block">
+// 计算属性 - 有缓存
+computed: {
+  computedRandom() {
+    console.log('计算属性执行了')  // 只执行一次
+    this.computedExecCount++
+    return Math.random()
+  }
+},
+
+// 方法 - 无缓存
+methods: {
+  getMethodRandom() {
+    console.log('方法执行了')  // 每次调用都执行
+    this.methodExecCount++
+    return Math.random()
+  }
+}
+      </div>
+    </div>
+
+    <!-- 3. 购物车计算属性 -->
+    <div class="demo-section">
+      <h2>3. 复杂示例：购物车计算</h2>
+      
+      <table class="cart-table">
+        <thead>
+          <tr>
+            <th>商品</th>
+            <th>单价</th>
+            <th>数量</th>
+            <th>小计</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in cart" :key="item.id">
+            <td>{{ item.name }}</td>
+            <td>¥{{ item.price }}</td>
+            <td>
+              <button @click="item.quantity--" :disabled="item.quantity <= 1">-</button>
+              {{ item.quantity }}
+              <button @click="item.quantity++">+</button>
+            </td>
+            <td>¥{{ item.price * item.quantity }}</td>
+            <td><button @click="removeItem(item.id)" style="background: #e74c3c;">删除</button></td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+        <h4>计算属性统计：</h4>
+        <p>商品总数: <span class="highlight">{{ totalItems }} 件</span></p>
+        <p>商品种类: {{ cart.length }} 种</p>
+        <p>小计金额: ¥{{ subtotal }}</p>
+        <p v-if="isVip">
+          VIP折扣: <span class="badge badge-success">9折</span>
+        </p>
+        <p style="font-size: 24px; color: #e74c3c;">
+          应付总额: <strong>¥{{ finalPrice }}</strong>
+        </p>
+      </div>
+      
+      <label>
+        <input type="checkbox" v-model="isVip"> 我是VIP会员（享受9折优惠）
+      </label>
+      
+      <div class="code-block">
+// 购物车计算属性
+computed: {
+  // 计算商品总数
+  totalItems() {
+    return this.cart.reduce((sum, item) => sum + item.quantity, 0)
+  },
+  
+  // 计算小计金额
+  subtotal() {
+    return this.cart.reduce((sum, item) => {
+      return sum + item.price * item.quantity
+    }, 0)
+  },
+  
+  // 计算最终价格（考虑VIP折扣）
+  finalPrice() {
+    return this.isVip 
+      ? (this.subtotal * 0.9).toFixed(2)
+      : this.subtotal.toFixed(2)
+  }
+}
+      </div>
+    </div>
+
+    <!-- 4. 可写计算属性 -->
+    <div class="demo-section">
+      <h2>4. 可写计算属性（Getter + Setter）</h2>
+      
+      <h4>示例1：全名分割</h4>
+      <div style="margin-bottom: 20px;">
+        <p>
+          <label>姓: <input v-model="splitFirstName"></label>
+        </p>
+        <p>
+          <label>名: <input v-model="splitLastName"></label>
+        </p>
+        <p>
+          <label>全名: <input v-model="writableFullName" style="width: 200px;"></label>
+        </p>
+      </div>
+      <p>当前全名: <span class="highlight">{{ writableFullName }}</span></p>
+      
+      <h4 style="margin-top: 30px;">示例2：价格转换</h4>
+      <div>
+        <p>
+          <label>人民币: <input type="number" v-model.number="rmbPrice"> 元</label>
+        </p>
+        <p>
+          <label>美元: <input type="number" v-model.number="usdPrice"> USD</label>
+        </p>
+        <p style="color: #666; font-size: 14px;">汇率: 1 USD = 7.2 RMB</p>
+      </div>
+      
+      <div class="code-block">
+// 可写计算属性
+computed: {
+  writableFullName: {
+    get() {
+      return this.splitFirstName + ' ' + this.splitLastName
+    },
+    set(newValue) {
+      // newValue 是赋给计算属性的值
+      // 比如输入 "李 四"，分割后分别设置 firstName 和 lastName
+      const parts = newValue.split(' ')
+      this.splitFirstName = parts[0] || ''
+      this.splitLastName = parts[1] || ''
+    }
+  },
+  
+  usdPrice: {
+    get() {
+      return (this.rmbPrice / 7.2).toFixed(2)
+    },
+    set(value) {
+      this.rmbPrice = (value * 7.2).toFixed(2)
+    }
+  }
+}
+      </div>
+    </div>
+
+    <!-- 5. 成绩统计系统 -->
+    <div class="demo-section">
+      <h2>5. 综合示例：成绩统计系统</h2>
+      
+      <div style="margin-bottom: 20px;">
+        <label v-for="(score, index) in scores" :key="index" style="display: block; margin: 10px 0;">
+          课程 {{ index + 1 }}: 
+          <input type="number" v-model.number="scores[index]" min="0" max="100" style="width: 80px;"> 分
+          <span :class="getScoreBadgeClass(score)">{{ getScoreLevel(score) }}</span>
+        </label>
+      </div>
+      
+      <div style="background: #f0f0f0; padding: 15px; border-radius: 8px;">
+        <h4>统计结果（计算属性）：</h4>
+        <p>总分: <span class="highlight">{{ totalScore }}</span></p>
+        <p>平均分: {{ averageScore }} 分</p>
+        <p>最高分: {{ maxScore }} 分</p>
+        <p>最低分: {{ minScore }} 分</p>
+        <p>
+          及格状态: 
+          <span :class="allPassed ? 'badge badge-success' : 'badge badge-danger'">
+            {{ allPassed ? '全部及格' : '有不及格科目' }}
+          </span>
+        </p>
+      </div>
+      
+      <div class="code-block">
+// 成绩统计计算属性
+computed: {
+  totalScore() {
+    return this.scores.reduce((sum, score) => sum + score, 0)
+  },
+  
+  averageScore() {
+    return (this.totalScore / this.scores.length).toFixed(1)
+  },
+  
+  maxScore() {
+    return Math.max(...this.scores)
+  },
+  
+  minScore() {
+    return Math.min(...this.scores)
+  },
+  
+  allPassed() {
+    return this.scores.every(score => score >= 60)
+  }
+}
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      // ============ data：原始数据 ============
+      data() {
+        return {
+          // 基础示例数据
+          firstName: '张',
+          lastName: '三',
+          
+          // 计数器（用于演示缓存）
+          computedExecCount: 0,
+          methodExecCount: 0,
+          
+          // 购物车数据
+          cart: [
+            { id: 1, name: '笔记本电脑', price: 5999, quantity: 1 },
+            { id: 2, name: '无线鼠标', price: 99, quantity: 2 },
+            { id: 3, name: '键盘', price: 299, quantity: 1 }
+          ],
+          isVip: false,
+          
+          // 可写计算属性数据
+          splitFirstName: '李',
+          splitLastName: '四',
+          rmbPrice: 720,
+          
+          // 成绩统计
+          scores: [85, 92, 78, 88, 95]
+        };
+      },
+
+      // ============ computed：计算属性 ============
+      computed: {
+        // ===== 基础计算属性 =====
+        
+        /**
+         * 全名 - 拼接姓和名
+         * 依赖: firstName, lastName
+         */
+        fullName() {
+          return this.firstName + ' ' + this.lastName;
+        },
+        
+        /**
+         * 姓名长度
+         * 依赖: fullName（另一个计算属性）
+         */
+        nameLength() {
+          return this.fullName.length;
+        },
+        
+        /**
+         * 反转姓名
+         */
+        reversedName() {
+          return this.fullName.split('').reverse().join('');
+        },
+        
+        // ===== 缓存演示计算属性 =====
+        
+        /**
+         * 随机数（演示缓存）
+         * 注意：没有依赖，所以值不会自动更新
+         */
+        computedRandom() {
+          console.log('%c 计算属性执行了', 'color: #42b883; font-weight: bold;');
+          this.computedExecCount++;
+          return Math.random().toFixed(4);
+        },
+        
+        // ===== 购物车计算属性 =====
+        
+        /**
+         * 商品总数
+         */
+        totalItems() {
+          return this.cart.reduce((sum, item) => sum + item.quantity, 0);
+        },
+        
+        /**
+         * 小计金额（未打折）
+         */
+        subtotal() {
+          return this.cart.reduce((sum, item) => {
+            return sum + item.price * item.quantity;
+          }, 0);
+        },
+        
+        /**
+         * 最终价格（考虑VIP折扣）
+         */
+        finalPrice() {
+          const price = this.isVip ? this.subtotal * 0.9 : this.subtotal;
+          return price.toFixed(2);
+        },
+        
+        // ===== 可写计算属性 =====
+        
+        /**
+         * 可写的全名
+         * getter: 读取时拼接
+         * setter: 设置时分割
+         */
+        writableFullName: {
+          get() {
+            return this.splitFirstName + ' ' + this.splitLastName;
+          },
+          set(newValue) {
+            const parts = newValue.split(' ');
+            this.splitFirstName = parts[0] || '';
+            this.splitLastName = parts[1] || '';
+          }
+        },
+        
+        /**
+         * 美元价格（可写）
+         * 汇率: 1 USD = 7.2 RMB
+         */
+        usdPrice: {
+          get() {
+            return Number((this.rmbPrice / 7.2).toFixed(2));
+          },
+          set(value) {
+            this.rmbPrice = Number((value * 7.2).toFixed(2));
+          }
+        },
+        
+        // ===== 成绩统计计算属性 =====
+        
+        /**
+         * 总分
+         */
+        totalScore() {
+          return this.scores.reduce((sum, score) => sum + score, 0);
+        },
+        
+        /**
+         * 平均分
+         */
+        averageScore() {
+          return (this.totalScore / this.scores.length).toFixed(1);
+        },
+        
+        /**
+         * 最高分
+         */
+        maxScore() {
+          return Math.max(...this.scores);
+        },
+        
+        /**
+         * 最低分
+         */
+        minScore() {
+          return Math.min(...this.scores);
+        },
+        
+        /**
+         * 是否全部及格
+         */
+        allPassed() {
+          return this.scores.every(score => score >= 60);
+        }
+      },
+
+      // ============ methods：方法 ============
+      methods: {
+        /**
+         * 获取方法随机数（演示无缓存）
+         */
+        getMethodRandom() {
+          console.log('%c 方法执行了', 'color: #e74c3c; font-weight: bold;');
+          this.methodExecCount++;
+          return Math.random().toFixed(4);
+        },
+        
+        /**
+         * 强制更新视图
+         */
+        forceUpdate() {
+          // 修改数据以触发视图更新
+          this.firstName = this.firstName + ' ';
+          this.firstName = this.firstName.trim();
+          alert('已刷新！查看控制台输出了解缓存机制。');
+        },
+        
+        /**
+         * 删除购物车商品
+         */
+        removeItem(id) {
+          this.cart = this.cart.filter(item => item.id !== id);
+        },
+        
+        /**
+         * 获取成绩等级
+         */
+        getScoreLevel(score) {
+          if (score >= 90) return 'A';
+          if (score >= 80) return 'B';
+          if (score >= 70) return 'C';
+          if (score >= 60) return 'D';
+          return 'F';
+        },
+        
+        /**
+         * 获取成绩徽章样式
+         */
+        getScoreBadgeClass(score) {
+          if (score >= 90) return 'badge badge-success';
+          if (score >= 60) return 'badge badge-warning';
+          return 'badge badge-danger';
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

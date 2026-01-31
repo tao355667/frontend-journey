@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch API 示例</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px 15px; margin: 5px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        .result { background-color: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 3px; white-space: pre-wrap; }
+        .loading { color: blue; }
+        .error { color: red; }
+        .success { color: green; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>Fetch API 示例</h1>
+    
+    <div class="container">
+        <h2>基本 GET 请求</h2>
+        <button onclick="fetchUsers()">获取用户</button>
+        <button onclick="fetchPosts()">获取帖子</button>
+        <div id="get-result" class="result">点击按钮获取数据...</div>
+    </div>
+    
+    <div class="container">
+        <h2>POST 请求</h2>
+        <input type="text" id="post-title" placeholder="帖子标题">
+        <input type="text" id="post-body" placeholder="帖子内容">
+        <button onclick="createPost()">创建帖子</button>
+        <div id="post-result" class="result">输入数据并点击创建帖子...</div>
+    </div>
+    
+    <div class="container">
+        <h2>错误处理</h2>
+        <button onclick="fetchValidData()">获取有效数据</button>
+        <button onclick="fetchInvalidData()">获取无效数据</button>
+        <div id="error-result" class="result">测试错误处理...</div>
+    </div>
+    
+    <div class="container">
+        <h2>Async/Await vs Promise</h2>
+        <button onclick="demonstratePromises()">使用 Promise</button>
+        <button onclick="demonstrateAsyncAwait()">使用 Async/Await</button>
+        <div id="comparison-result" class="result">比较两种方法...</div>
+    </div>
+
+    <script>
+        // 基本 GET 请求
+        function fetchUsers() {
+            const resultDiv = document.getElementById('get-result');
+            resultDiv.textContent = '加载中...';
+            resultDiv.className = 'result loading';
+            
+            fetch('https://jsonplaceholder.typicode.com/users')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP 错误! 状态码: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(users => {
+                    console.log('获取的用户:', users);
+                    const userNames = users.map(user => `${user.id}: ${user.name} (${user.email})`).join('\n');
+                    resultDiv.textContent = `获取了 ${users.length} 个用户:\n${userNames}`;
+                    resultDiv.className = 'result success';
+                })
+                .catch(error => {
+                    console.error('获取用户错误:', error);
+                    resultDiv.textContent = `错误: ${error.message}`;
+                    resultDiv.className = 'result error';
+                });
+        }
+        
+        function fetchPosts() {
+            const resultDiv = document.getElementById('get-result');
+            resultDiv.textContent = '加载中...';
+            resultDiv.className = 'result loading';
+            
+            fetch('https://jsonplaceholder.typicode.com/posts?_limit=5')
+                .then(response => response.json())
+                .then(posts => {
+                    const postTitles = posts.map(post => `${post.id}: ${post.title}`).join('\n');
+                    resultDiv.textContent = `获取了 ${posts.length} 个帖子:\n${postTitles}`;
+                    resultDiv.className = 'result success';
+                })
+                .catch(error => {
+                    resultDiv.textContent = `错误: ${error.message}`;
+                    resultDiv.className = 'result error';
+                });
+        }
+        
+        // POST 请求
+        function createPost() {
+            const title = document.getElementById('post-title').value;
+            const body = document.getElementById('post-body').value;
+            const resultDiv = document.getElementById('post-result');
+            
+            if (!title || !body) {
+                resultDiv.textContent = '请输入标题和内容';
+                resultDiv.className = 'result error';
+                return;
+            }
+            
+            resultDiv.textContent = '创建中...';
+            resultDiv.className = 'result loading';
+            
+            const postData = {
+                title: title,
+                body: body,
+                userId: 1
+            };
+            
+            fetch('https://jsonplaceholder.typicode.com/posts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(postData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('帖子创建成功:', data);
+                resultDiv.textContent = `帖子创建成功!\nID: ${data.id}\n标题: ${data.title}`;
+                resultDiv.className = 'result success';
+                
+                // 清空输入框
+                document.getElementById('post-title').value = '';
+                document.getElementById('post-body').value = '';
+            })
+            .catch(error => {
+                resultDiv.textContent = `创建帖子错误: ${error.message}`;
+                resultDiv.className = 'result error';
+            });
+        }
+        
+        // 错误处理示例
+        function fetchValidData() {
+            const resultDiv = document.getElementById('error-result');
+            resultDiv.textContent = '获取有效数据中...';
+            resultDiv.className = 'result loading';
+            
+            fetch('https://jsonplaceholder.typicode.com/users/1')
+                .then(response => {
+                    if (!response.ok) throw new Error('网络响应不正常');
+                    return response.json();
+                })
+                .then(data => {
+                    resultDiv.textContent = `成功！获取到用户: ${data.name} (${data.email})`;
+                    resultDiv.className = 'result success';
+                })
+                .catch(error => {
+                    resultDiv.textContent = `错误: ${error.message}`;
+                    resultDiv.className = 'result error';
+                });
+        }
+        
+        function fetchInvalidData() {
+            const resultDiv = document.getElementById('error-result');
+            resultDiv.textContent = '获取无效数据中...';
+            resultDiv.className = 'result loading';
+            
+            fetch('https://jsonplaceholder.typicode.com/nonexistent')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    resultDiv.textContent = `数据: ${JSON.stringify(data)}`;
+                    resultDiv.className = 'result success';
+                })
+                .catch(error => {
+                    resultDiv.textContent = `预期的错误已发生: ${error.message}`;
+                    resultDiv.className = 'result error';
+                });
+        }
+        
+        // Promise vs Async/Await 比较
+        function demonstratePromises() {
+            const resultDiv = document.getElementById('comparison-result');
+            resultDiv.textContent = '使用 Promise 中...';
+            resultDiv.className = 'result loading';
+            
+            fetch('https://jsonplaceholder.typicode.com/users/1')
+                .then(response => response.json())
+                .then(user => {
+                    return fetch(`https://jsonplaceholder.typicode.com/posts?userId=${user.id}`);
+                })
+                .then(response => response.json())
+                .then(posts => {
+                    resultDiv.textContent = `Promise 方法:\n使用 .then() 链获取了 ${posts.length} 个帖子`;
+                    resultDiv.className = 'result success';
+                })
+                .catch(error => {
+                    resultDiv.textContent = `Promise 错误: ${error.message}`;
+                    resultDiv.className = 'result error';
+                });
+        }
+        
+        async function demonstrateAsyncAwait() {
+            const resultDiv = document.getElementById('comparison-result');
+            resultDiv.textContent = '使用 Async/Await 中...';
+            resultDiv.className = 'result loading';
+            
+            try {
+                const userResponse = await fetch('https://jsonplaceholder.typicode.com/users/2');
+                const user = await userResponse.json();
+                
+                const postsResponse = await fetch(`https://jsonplaceholder.typicode.com/posts?userId=${user.id}`);
+                const posts = await postsResponse.json();
+                
+                resultDiv.textContent = `Async/Await 方法:\n使用 async/await 为用户 ${user.name} 获取了 ${posts.length} 个帖子`;
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.textContent = `Async/Await 错误: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+        
+        console.log('Fetch API 示例已加载');
+    </script>
+</body>
+</html>

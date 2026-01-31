@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第二十五章：script setup 语法糖 - TypeScript 示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; }
+    .demo-section { border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 8px; }
+    button { padding: 8px 16px; margin: 5px; background: #42b983; color: white; border: none; border-radius: 4px; }
+    .code-block { background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 4px; font-family: monospace; font-size: 13px; }
+    .user-card { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>第二十五章：script setup 语法糖（TypeScript）</h1>
+  <div id="app">
+    <script-setup-demo></script-setup-demo>
+  </div>
+
+  <script>
+    const { createApp, ref, computed, defineProps, defineEmits } = Vue;
+
+    /**
+     * @typedef {Object} User
+     * @property {string} name
+     * @property {number} age
+     * @property {string} [email]
+     */
+
+    // 子组件
+    const UserCard = {
+      props: {
+        name: { type: String, required: true },
+        age: { type: Number, default: 0 },
+        email: String
+      },
+      emits: ['update'],
+      setup(props, { emit }) {
+        /**
+         * @param {User} userData
+         */
+        const handleUpdate = (userData) => {
+          emit('update', userData);
+        };
+        
+        return { handleUpdate, props };
+      },
+      template: `
+        <div class="user-card">
+          <h4>{{ props.name }}</h4>
+          <p>年龄：{{ props.age }}</p>
+          <p v-if="props.email">邮箱：{{ props.email }}</p>
+          <button @click="handleUpdate({ name: props.name, age: props.age })">更新</button>
+        </div>
+      `
+    };
+
+    const ScriptSetupDemo = {
+      components: { UserCard },
+      setup() {
+        /** @type {import('vue').Ref<User[]>} */
+        const users = ref([
+          { name: '张三', age: 25, email: 'zhangsan@example.com' },
+          { name: '李四', age: 30 }
+        ]);
+        
+        const avgAge = computed(() => {
+          return users.value.reduce((sum, u) => sum + u.age, 0) / users.value.length;
+        });
+        
+        /**
+         * @param {User} userData
+         */
+        const updateUser = (userData) => {
+          console.log('更新用户：', userData);
+        };
+        
+        return { users, avgAge, updateUser };
+      },
+      template: `
+        <div class="demo-section">
+          <h3>script setup 风格组件</h3>
+          <p>平均年龄：{{ avgAge.toFixed(1) }}</p>
+          <user-card
+            v-for="(user, index) in users"
+            :key="index"
+            :name="user.name"
+            :age="user.age"
+            :email="user.email"
+            @update="updateUser"
+          />
+          
+          <div class="code-block">
+&lt;script setup lang="ts"&gt;
+interface User {
+  name: string;
+  age: number;
+  email?: string;
+}
+
+const users = ref&lt;User[]&gt;([
+  { name: '张三', age: 25, email: 'zhangsan@example.com' },
+  { name: '李四', age: 30 }
+]);
+
+const avgAge = computed(() => {
+  return users.value.reduce((sum, u) => sum + u.age, 0) / users.value.length;
+});
+&lt;/script&gt;
+          </div>
+        </div>
+      `
+    };
+
+    createApp({ components: { ScriptSetupDemo } }).mount('#app');
+  </script>
+</body>
+</html>

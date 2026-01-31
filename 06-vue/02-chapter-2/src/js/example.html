@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 2: 模板语法 - JavaScript 示例</title>
+  <!-- 引入 Vue 3 -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .demo-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .demo-section h2 {
+      color: #42b883;
+      border-bottom: 2px solid #42b883;
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+    .highlight {
+      background-color: #fffacd;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+    .user-card {
+      border: 2px solid #42b883;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 10px 0;
+    }
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+    input, select {
+      padding: 8px;
+      margin: 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      padding: 8px 16px;
+      background: #42b883;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #369870;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1 style="text-align: center; color: #42b883;">📝 模板语法详解</h1>
+
+    <!-- 1. 文本插值演示 -->
+    <div class="demo-section">
+      <h2>1. 文本插值（Mustache 语法）</h2>
+      <p>最基本的文本绑定：{{ message }}</p>
+      <p>表达式计算：100 + 200 = {{ 100 + 200 }}</p>
+      <p>三元表达式：{{ isVip ? 'VIP会员' : '普通用户' }}</p>
+      <p>字符串操作：反转"{{ text }}" = "{{ text.split('').reverse().join('') }}"</p>
+      
+      <div class="code-block">
+        // 双大括号 {{ }} 中的内容会被解析为 JavaScript 表达式
+        // 可以写：变量、计算、三元运算、方法调用等
+      </div>
+    </div>
+
+    <!-- 2. v-html 原始 HTML -->
+    <div class="demo-section">
+      <h2>2. 原始 HTML 渲染（v-html）</h2>
+      <p>纯文本输出：{{ htmlContent }}</p>
+      <p>HTML渲染：<span v-html="htmlContent"></span></p>
+      
+      <div class="code-block">
+        // v-html 会解析字符串中的 HTML 标签
+        // ⚠️ 注意：仅用于可信内容，防止 XSS 攻击
+      </div>
+    </div>
+
+    <!-- 3. 属性绑定 v-bind -->
+    <div class="demo-section">
+      <h2>3. 属性绑定（v-bind）</h2>
+      
+      <!-- 绑定 id 属性 -->
+      <p :id="dynamicId">这个段落有动态 id: {{ dynamicId }}</p>
+      
+      <!-- 绑定 href 属性 -->
+      <a :href="websiteUrl" target="_blank">访问 Vue 官网</a>
+      
+      <!-- 布尔属性 -->
+      <p>
+        <button :disabled="isDisabled" @click="toggleDisabled">
+          {{ isDisabled ? '已禁用' : '点击我' }}
+        </button>
+        <button @click="toggleDisabled">切换禁用状态</button>
+      </p>
+      
+      <!-- 绑定多个属性 -->
+      <div v-bind="containerAttrs">
+        这个 div 绑定了多个属性（查看页面源代码）
+      </div>
+      
+      <div class="code-block">
+        // v-bind 简写为 :
+        // :id="dynamicId" 表示 id 属性的值等于 dynamicId 变量的值
+        // :disabled="isDisabled" 布尔属性会根据真假值自动添加/移除
+      </div>
+    </div>
+
+    <!-- 4. JavaScript 表达式 -->
+    <div class="demo-section">
+      <h2>4. JavaScript 表达式</h2>
+      <p>单价: ¥{{ price }}</p>
+      <p>数量: {{ quantity }}</p>
+      <p>总价: ¥{{ price * quantity }}</p>
+      <p>折扣后（9折）: ¥{{ (price * quantity * 0.9).toFixed(2) }}</p>
+      <p>库存状态: {{ quantity > 0 ? '有货' : '缺货' }}</p>
+      
+      <button @click="quantity++">增加数量</button>
+      <button @click="quantity = Math.max(0, quantity - 1)">减少数量</button>
+      
+      <div class="code-block">
+        // 模板中只能使用表达式，不能使用语句
+        // ✓ {{ price * quantity }} - 表达式
+        // ✗ {{ var x = 1 }} - 语句（错误）
+        // ✗ {{ if (ok) return x }} - 语句（错误）
+      </div>
+    </div>
+
+    <!-- 5. 指令参数 -->
+    <div class="demo-section">
+      <h2>5. 指令参数</h2>
+      
+      <!-- v-bind 参数 -->
+      <p>
+        <img :src="imageUrl" :alt="imageAlt" width="200">
+      </p>
+      
+      <!-- v-on 参数 -->
+      <p>
+        <button @click="sayHello">点击问候</button>
+        <button @mouseenter="showTip" @mouseleave="hideTip">悬停查看提示</button>
+      </p>
+      <p v-if="showTooltip" class="highlight">这是一个提示信息！</p>
+      
+      <div class="code-block">
+        // 指令参数用冒号指定
+        // v-bind:href="url" 或简写 :href="url"
+        // v-on:click="handler" 或简写 @click="handler"
+      </div>
+    </div>
+
+    <!-- 6. 动态参数 -->
+    <div class="demo-section">
+      <h2>6. 动态参数</h2>
+      
+      <p>选择要绑定的属性：</p>
+      <select v-model="selectedAttr">
+        <option value="href">href（链接）</option>
+        <option value="title">title（标题）</option>
+        <option value="id">id（标识）</option>
+      </select>
+      
+      <p>当前绑定属性: <strong>{{ selectedAttr }}</strong></p>
+      
+      <!-- 动态属性名 -->
+      <a :[selectedAttr]="dynamicValue">
+        动态属性绑定示例（查看元素检查器）
+      </a>
+      
+      <div class="code-block">
+        // 动态参数用方括号包裹
+        // :[attributeName]="value"
+        // 这里的 attributeName 是变量，可以是 'href', 'src', 'id' 等
+      </div>
+    </div>
+
+    <!-- 7. 修饰符 -->
+    <div class="demo-section">
+      <h2>7. 修饰符</h2>
+      
+      <!-- .prevent 阻止默认行为 -->
+      <form @submit.prevent="handleSubmit">
+        <label>
+          用户名（带.trim修饰符）:
+          <input v-model.trim="username" placeholder="输入带空格的名字">
+        </label>
+        <p>当前值: "{{ username }}"（长度: {{ username.length }}）</p>
+        
+        <label>
+          年龄（带.number修饰符）:
+          <input v-model.number="age" type="number" placeholder="输入数字">
+        </label>
+        <p>年龄值: {{ age }}，类型: {{ typeof age }}</p>
+        
+        <label>
+          简介（带.lazy修饰符）:
+          <input v-model.lazy="bio" placeholder="失去焦点后更新">
+        </label>
+        <p>简介: {{ bio }}</p>
+        
+        <button type="submit">提交表单（.prevent阻止刷新）</button>
+      </form>
+      
+      <div class="code-block">
+        // 修饰符以 . 开头
+        // .prevent - 阻止默认事件
+        // .stop - 阻止事件冒泡
+        // .trim - 自动过滤首尾空格
+        // .number - 自动转换为数字
+        // .lazy - 失去焦点后更新（而非实时）
+      </div>
+    </div>
+
+    <!-- 综合示例：用户卡片 -->
+    <div class="demo-section">
+      <h2>综合示例：动态用户卡片</h2>
+      
+      <div class="user-card" :style="{ backgroundColor: cardColor }">
+        <h3>{{ user.name }}</h3>
+        <p>年龄: {{ user.age }} 岁</p>
+        <p>职业: {{ user.job }}</p>
+        <div v-html="user.bio"></div>
+      </div>
+      
+      <p>
+        <label>
+          选择卡片背景色:
+          <select v-model="cardColor">
+            <option value="#ffffff">白色</option>
+            <option value="#e3f2fd">淡蓝</option>
+            <option value="#f3e5f5">淡紫</option>
+            <option value="#e8f5e9">淡绿</option>
+          </select>
+        </label>
+      </p>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      // data 函数返回组件的数据对象
+      data() {
+        return {
+          // 文本插值数据
+          message: 'Hello, Vue 模板语法!',
+          isVip: true,
+          text: 'Vue',
+          
+          // v-html 数据
+          htmlContent: '<strong style="color: #42b883;">这段文字使用了 v-html 渲染</strong>',
+          
+          // 属性绑定数据
+          dynamicId: 'user-profile-123',
+          websiteUrl: 'https://vuejs.org',
+          isDisabled: false,
+          containerAttrs: {
+            id: 'container',
+            class: 'wrapper-class',
+            'data-custom': 'custom-value'
+          },
+          
+          // JavaScript 表达式数据
+          price: 99.99,
+          quantity: 1,
+          
+          // 指令参数数据
+          imageUrl: 'https://vuejs.org/images/logo.png',
+          imageAlt: 'Vue Logo',
+          showTooltip: false,
+          
+          // 动态参数数据
+          selectedAttr: 'href',
+          dynamicValue: 'https://example.com',
+          
+          // 修饰符示例数据
+          username: '',
+          age: null,
+          bio: '',
+          
+          // 综合示例数据
+          user: {
+            name: '张三',
+            age: 28,
+            job: '前端工程师',
+            bio: '<p style="color: #666;">热爱编程，喜欢分享技术文章</p>'
+          },
+          cardColor: '#e3f2fd'
+        };
+      },
+
+      // methods 定义组件的方法
+      methods: {
+        // 切换按钮禁用状态
+        toggleDisabled() {
+          this.isDisabled = !this.isDisabled;
+        },
+
+        // 点击问候
+        sayHello() {
+          alert(`你好! 当前消息: ${this.message}`);
+        },
+
+        // 显示提示
+        showTip() {
+          this.showTooltip = true;
+        },
+
+        // 隐藏提示
+        hideTip() {
+          this.showTooltip = false;
+        },
+
+        // 处理表单提交（被.prevent修饰符阻止默认刷新）
+        handleSubmit() {
+          alert(`提交成功！\n用户名: ${this.username}\n年龄: ${this.age}\n简介: ${this.bio}`);
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

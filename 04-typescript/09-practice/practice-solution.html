@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第九章练习题答案</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #31708f;
+            border-bottom: 2px solid #31708f;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #3c763d;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #31708f;
+            margin-top: 25px;
+        }
+        .exercise {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #31708f;
+        }
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .output {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 4px solid #4caf50;
+        }
+        .note {
+            background-color: #e7f3ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+        }
+        .file-tree {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            white-space: pre;
+        }
+    </style>
+</head>
+<body>
+    <h1>第九章：综合实践 - 练习题答案</h1>
+
+    <div class="exercise">
+        <h3>练习 9.1：任务归档功能</h3>
+        <p><strong>题目：</strong>扩展任务服务，添加任务归档功能。</p>
+        <p><strong>实现思路：</strong></p>
+        <p>在 Task 接口中添加 `archived` 字段，添加 `archive()` 和 `unarchive()` 方法，并在过滤时默认排除已归档任务。</p>
+        <p><strong>核心代码：</strong></p>
+        <pre><code>// 在 Task 接口中添加
+export interface Task {
+  // ... 其他字段
+  archived?: boolean;
+}
+
+// 添加归档方法
+archive(id: string): Task | undefined {
+  return this.update(id, { archived: true });
+}
+
+unarchive(id: string): Task | undefined {
+  return this.update(id, { archived: false });
+}
+
+// 过滤时默认排除已归档任务
+filter(filter: TaskFilter): Task[] {
+  let tasks = this.storage.load();
+  
+  // 默认排除已归档任务
+  if (filter.archived === undefined) {
+    filter.archived = false;
+  }
+  
+  // ... 其他过滤逻辑
+}
+
+// 使用示例
+app.archiveTask(task1.id);  // 归档任务
+app.getTasks();             // 默认不包含已归档任务
+app.getTasks({ archived: true });  // 显式查询已归档任务</code></pre>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 9.2：任务评论功能</h3>
+        <p><strong>题目：</strong>为任务添加评论功能。</p>
+        <p><strong>实现代码：</strong></p>
+        <pre><code>// Comment 接口定义
+export interface Comment {
+  id: string;
+  taskId: string;
+  userId: string;
+  content: string;
+  createdAt: Date;
+}
+
+// Comment 服务
+export class CommentService {
+  private storage: StorageService<Comment>;
+
+  constructor() {
+    this.storage = new StorageService<Comment>("comments");
+  }
+
+  create(taskId: string, userId: string, content: string): Comment {
+    const comment: Comment = {
+      id: `comment-${Date.now()}`,
+      taskId,
+      userId,
+      content,
+      createdAt: new Date()
+    };
+
+    this.storage.addItem(comment);
+    return comment;
+  }
+
+  getByTaskId(taskId: string): Comment[] {
+    return this.storage.load().filter(c => c.taskId === taskId);
+  }
+
+  update(id: string, content: string): Comment | undefined {
+    const comment = this.storage.getItem(id);
+    if (!comment) return undefined;
+
+    const updated = { ...comment, content };
+    this.storage.updateItem(id, updated);
+    return updated;
+  }
+
+  delete(id: string): boolean {
+    return this.storage.deleteItem(id);
+  }
+}
+
+// 在 TaskManagementApp 中使用
+class TaskManagementApp {
+  private commentService: CommentService;
+
+  constructor() {
+    // ...
+    this.commentService = new CommentService();
+  }
+
+  addComment(taskId: string, userId: string, content: string): Comment {
+    return this.commentService.create(taskId, userId, content);
+  }
+
+  getComments(taskId: string): Comment[] {
+    return this.commentService.getByTaskId(taskId);
+  }
+}
+
+// 使用示例
+const comment = app.addComment(task1.id, user.id, "这是一个评论");
+const comments = app.getComments(task1.id);</code></pre>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 9.3：任务搜索功能</h3>
+        <p><strong>题目：</strong>实现任务搜索功能。</p>
+        <p><strong>实现代码：</strong></p>
+        <pre><code>// 在 TaskService 中添加搜索方法
+search(query: string): Task[] {
+  if (!query || query.trim() === "") {
+    return this.getAll();
+  }
+
+  const searchLower = query.toLowerCase().trim();
+
+  return this.storage.load().filter(task => {
+    // 搜索标题
+    if (task.title.toLowerCase().includes(searchLower)) {
+      return true;
+    }
+
+    // 搜索描述
+    if (task.description.toLowerCase().includes(searchLower)) {
+      return true;
+    }
+
+    // 搜索标签
+    if (task.tags.some(tag => tag.toLowerCase().includes(searchLower))) {
+      return true;
+    }
+
+    // 搜索指派人
+    if (task.assignee && task.assignee.toLowerCase().includes(searchLower)) {
+      return true;
+    }
+
+    return false;
+  });
+}
+
+// 支持多关键词搜索
+searchAdvanced(queries: string[]): Task[] {
+  if (queries.length === 0) {
+    return this.getAll();
+  }
+
+  return this.storage.load().filter(task => {
+    return queries.every(query => {
+      const searchLower = query.toLowerCase();
+      return (
+        task.title.toLowerCase().includes(searchLower) ||
+        task.description.toLowerCase().includes(searchLower) ||
+        task.tags.some(tag => tag.toLowerCase().includes(searchLower))
+      );
+    });
+  });
+}
+
+// 使用示例
+const results1 = app.searchTasks("TypeScript");
+const results2 = app.searchTasks("学习 教程");
+const results3 = app.searchAdvanced(["学习", "重要"]);</code></pre>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 9.4：任务排序功能</h3>
+        <p><strong>题目：</strong>实现任务排序功能。</p>
+        <p><strong>实现代码：</strong></p>
+        <pre><code>// 排序类型
+type SortBy = "created" | "dueDate" | "priority" | "status" | "title";
+type SortOrder = "asc" | "desc";
+
+// 优先级映射
+const priorityOrder: Record<TaskPriority, number> = {
+  urgent: 4,
+  high: 3,
+  medium: 2,
+  low: 1
+};
+
+// 状态映射
+const statusOrder: Record<TaskStatus, number> = {
+  todo: 0,
+  in_progress: 1,
+  review: 2,
+  done: 3
+};
+
+// 排序方法
+sort(tasks: Task[], by: SortBy, order: SortOrder = "asc"): Task[] {
+  const sorted = [...tasks].sort((a, b) => {
+    let comparison = 0;
+
+    switch (by) {
+      case "created":
+        comparison = a.createdAt.getTime() - b.createdAt.getTime();
+        break;
+
+      case "dueDate":
+        // 处理无截止日期的情况
+        if (!a.dueDate && !b.dueDate) comparison = 0;
+        else if (!a.dueDate) comparison = 1;  // 无截止日期排后面
+        else if (!b.dueDate) comparison = -1;
+        else comparison = a.dueDate.getTime() - b.dueDate.getTime();
+        break;
+
+      case "priority":
+        comparison = priorityOrder[a.priority] - priorityOrder[b.priority];
+        break;
+
+      case "status":
+        comparison = statusOrder[a.status] - statusOrder[b.status];
+        break;
+
+      case "title":
+        comparison = a.title.localeCompare(b.title, "zh-CN");
+        break;
+    }
+
+    return order === "asc" ? comparison : -comparison;
+  });
+
+  return sorted;
+}
+
+// 组合过滤和排序
+filterAndSort(filter: TaskFilter, sortBy: SortBy, sortOrder: SortOrder): Task[] {
+  const filtered = this.filter(filter);
+  return this.sort(filtered, sortBy, sortOrder);
+}
+
+// 使用示例
+const tasks1 = app.sortTasks(allTasks, "priority", "desc");  // 按优先级降序
+const tasks2 = app.sortTasks(allTasks, "created", "asc");    // 按创建时间升序
+const tasks3 = app.sortTasks(allTasks, "dueDate", "asc");    // 按截止日期升序</code></pre>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 9.5：完整 Todo 应用</h3>
+        <p><strong>题目：</strong>构建一个完整的 Todo 应用。</p>
+        <p><strong>HTML 实现：</strong></p>
+        <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="zh-CN"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Todo 应用&lt;/title&gt;
+  &lt;style&gt;
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+    .todo-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+    .todo-item.completed { text-decoration: line-through; color: #999; }
+    .todo-item input[type="checkbox"] { margin-right: 10px; }
+    .filters { margin: 20px 0; }
+    .filters button { margin-right: 10px; padding: 5px 10px; }
+    .filters button.active { background-color: #007bff; color: white; }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Todo 应用&lt;/h1&gt;
+  
+  &lt;div class="input-group"&gt;
+    &lt;input type="text" id="todoInput" placeholder="添加新任务..."&gt;
+    &lt;button onclick="addTodo()"&gt;添加&lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;div class="filters"&gt;
+    &lt;button onclick="filterTodos('all')" class="active" id="btn-all"&gt;全部&lt;/button&gt;
+    &lt;button onclick="filterTodos('active')" id="btn-active"&gt;进行中&lt;/button&gt;
+    &lt;button onclick="filterTodos('completed')" id="btn-completed"&gt;已完成&lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;div id="todoList"&gt;&lt;/div&gt;
+
+  &lt;div class="stats"&gt;
+    &lt;span id="totalCount"&gt;0&lt;/span&gt; 个任务， 
+    &lt;span id="completedCount"&gt;0&lt;/span&gt; 已完成
+  &lt;/div&gt;
+
+  &lt;script src="todo.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        <p><strong>JavaScript 实现：</strong></p>
+        <pre><code>// todo.js - 完整实现
+
+class TodoApp {
+  constructor() {
+    this.todos = JSON.parse(localStorage.getItem("todos") || "[]");
+    this.filter = "all";
+    this.render();
+  }
+
+  add(title) {
+    if (!title.trim()) return;
+    
+    const todo = {
+      id: Date.now().toString(),
+      title: title.trim(),
+      completed: false,
+      createdAt: new Date()
+    };
+    
+    this.todos.unshift(todo);
+    this.save();
+    this.render();
+  }
+
+  toggle(id) {
+    const todo = this.todos.find(t => t.id === id);
+    if (todo) {
+      todo.completed = !todo.completed;
+      this.save();
+      this.render();
+    }
+  }
+
+  delete(id) {
+    this.todos = this.todos.filter(t => t.id !== id);
+    this.save();
+    this.render();
+  }
+
+  save() {
+    localStorage.setItem("todos", JSON.stringify(this.todos));
+  }
+
+  get filteredTodos() {
+    switch (this.filter) {
+      case "active":
+        return this.todos.filter(t => !t.completed);
+      case "completed":
+        return this.todos.filter(t => t.completed);
+      default:
+        return this.todos;
+    }
+  }
+
+  render() {
+    const list = document.getElementById("todoList");
+    list.innerHTML = this.filteredTodos.map(todo => `
+      &lt;div class="todo-item ${todo.completed ? 'completed' : ''}"&gt;
+        &lt;input type="checkbox" ${todo.completed ? "checked" : ""} 
+          onchange="app.toggle('${todo.id}')"&gt;
+        &lt;span&gt;${todo.title}&lt;/span&gt;
+        &lt;button onclick="app.delete('${todo.id}')"&gt;删除&lt;/button&gt;
+      &lt;/div&gt;
+    `).join("");
+
+    // 更新统计
+    document.getElementById("totalCount").textContent = this.todos.length;
+    document.getElementById("completedCount").textContent = 
+      this.todos.filter(t => t.completed).length;
+
+    // 更新过滤器按钮状态
+    document.querySelectorAll(".filters button").forEach(btn => {
+      btn.classList.remove("active");
+    });
+    document.getElementById(`btn-${this.filter}`).classList.add("active");
+  }
+
+  filterTodos(filter) {
+    this.filter = filter;
+    this.render();
+  }
+}
+
+const app = new TodoApp();
+
+function addTodo() {
+  const input = document.getElementById("todoInput");
+  app.add(input.value);
+  input.value = "";
+}</code></pre>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 9.6：团队协作功能</h3>
+        <p><strong>题目：</strong>实现团队协作功能。</p>
+        <p><strong>实现要点：</strong></p>
+        <div class="note">
+            <strong>需要实现的功能：</strong><br>
+            1. 多用户注册和登录<br>
+            2. 用户角色权限管理<br>
+            3. 任务分配和指派<br>
+            4. 操作日志记录<br>
+            5. 实时协作（可选，使用 WebSocket）
+        </div>
+        <p><strong>用户角色定义：</strong></p>
+        <pre><code>export type UserRole = "admin" | "manager" | "member" | "guest";
+
+export interface Permission {
+  createTask: boolean;
+  editTask: boolean;
+  deleteTask: boolean;
+  assignTask: boolean;
+  manageUsers: boolean;
+  viewAllTasks: boolean;
+}
+
+export const RolePermissions: Record<UserRole, Permission> = {
+  admin: {
+    createTask: true,
+    editTask: true,
+    deleteTask: true,
+    assignTask: true,
+    manageUsers: true,
+    viewAllTasks: true
+  },
+  manager: {
+    createTask: true,
+    editTask: true,
+    deleteTask: true,
+    assignTask: true,
+    manageUsers: false,
+    viewAllTasks: true
+  },
+  member: {
+    createTask: true,
+    editTask: true,
+    deleteTask: false,
+    assignTask: false,
+    manageUsers: false,
+    viewAllTasks: false
+  },
+  guest: {
+    createTask: false,
+    editTask: false,
+    deleteTask: false,
+    assignTask: false,
+    manageUsers: false,
+    viewAllTasks: false
+  }
+};</code></pre>
+        <p><strong>权限检查装饰器：</strong></p>
+        <pre><code>// 权限检查装饰器
+function requirePermission(permission: keyof Permission) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    const originalMethod = descriptor.value;
+
+    descriptor.value = function (...args: any[]) {
+      const user = this.getCurrentUser();
+      if (!user) {
+        throw new Error("请先登录");
+      }
+
+      const permissions = RolePermissions[user.role];
+      if (!permissions[permission]) {
+        throw new Error(`权限不足：需要 ${permission} 权限`);
+      }
+
+      return originalMethod.apply(this, args);
+    };
+
+    return descriptor;
+  };
+}
+
+// 使用示例
+class TaskService {
+  @requirePermission("createTask")
+  create(input: CreateTaskInput): Task {
+    // 创建任务逻辑
+  }
+
+  @requirePermission("deleteTask")
+  delete(id: string): boolean {
+    // 删除任务逻辑
+  }
+
+  @requirePermission("assignTask")
+  assign(taskId: string, userId: string): Task | undefined {
+    // 指派任务逻辑
+  }
+}</code></pre>
+    </div>
+
+    <p style="text-align: center; color: #666; margin-top: 40px;">
+        练习题答案仅供参考，建议自己动手实践加深理解。
+    </p>
+</body>
+</html>

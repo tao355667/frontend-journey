@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>条件渲染 - JavaScript 版本</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 36px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .demo-card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    
+    .demo-title {
+      color: #667eea;
+      font-size: 24px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 3px solid #667eea;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      background: #42b883;
+      color: white;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(66, 184, 131, 0.4);
+    }
+    
+    button.secondary {
+      background: #6c757d;
+    }
+    
+    button.secondary:hover {
+      background: #5a6268;
+    }
+    
+    button.warning {
+      background: #ffc107;
+      color: #212529;
+    }
+    
+    button.danger {
+      background: #dc3545;
+    }
+    
+    .message-box {
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: 600;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    .success {
+      background: #d4edda;
+      color: #155724;
+      border: 2px solid #c3e6cb;
+    }
+    
+    .info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 2px solid #bee5eb;
+    }
+    
+    .warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 2px solid #ffeaa7;
+    }
+    
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 2px solid #f5c6cb;
+    }
+    
+    .user-card {
+      background: #f8f9fa;
+      padding: 25px;
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+    
+    .user-card h3 {
+      color: #667eea;
+      margin-bottom: 15px;
+    }
+    
+    .user-card p {
+      color: #666;
+      margin: 8px 0;
+    }
+    
+    .permission-badge {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+    
+    .admin { background: #dc3545; color: white; }
+    .user { background: #28a745; color: white; }
+    .guest { background: #6c757d; color: white; }
+    
+    .toggle-box {
+      background: #e9ecef;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+    
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    .detail-item:last-child {
+      border-bottom: none;
+    }
+    
+    .code-block {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #d63384;
+      margin-top: 15px;
+      overflow-x: auto;
+    }
+    
+    .info-section {
+      background: #e7f3ff;
+      border-left: 4px solid #667eea;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 0 8px 8px 0;
+    }
+    
+    .info-section h4 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+    
+    .info-section p {
+      color: #666;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>🎭 条件渲染演示</h1>
+      
+      <!-- Demo 1: 基础 v-if -->
+      <div class="demo-card">
+        <h2 class="demo-title">1. 基础 v-if / v-else</h2>
+        
+        <div class="controls">
+          <button @click="toggleLogin">
+            {{ isLoggedIn ? '退出登录' : '点击登录' }}
+          </button>
+        </div>
+        
+        <div v-if="isLoggedIn" class="message-box success">
+          ✅ 欢迎回来！您已登录
+        </div>
+        <div v-else class="message-box info">
+          ℹ️ 请先登录以查看内容
+        </div>
+        
+        <div class="code-block">
+          &lt;div v-if="isLoggedIn"&gt;欢迎回来！&lt;/div&gt;
+          &lt;div v-else&gt;请先登录&lt;/div&gt;
+        </div>
+      </div>
+      
+      <!-- Demo 2: 多级条件 v-if / v-else-if / v-else -->
+      <div class="demo-card">
+        <h2 class="demo-title">2. 多级条件 v-if / v-else-if / v-else</h2>
+        
+        <div class="controls">
+          <button @click="setRole('admin')">设为管理员</button>
+          <button @click="setRole('user')" class="secondary">设为用户</button>
+          <button @click="setRole('guest')" class="warning">设为访客</button>
+        </div>
+        
+        <div class="user-card">
+          <div v-if="userRole === 'admin'">
+            <h3>👑 管理员控制台</h3>
+            <p>您拥有系统的所有权限</p>
+            <p>可以管理用户、配置系统、查看报表</p>
+            <span class="permission-badge admin">管理员权限</span>
+          </div>
+          <div v-else-if="userRole === 'user'">
+            <h3>👤 用户中心</h3>
+            <p>您可以使用基础功能</p>
+            <p>可以查看内容、发表评论、编辑个人资料</p>
+            <span class="permission-badge user">普通用户</span>
+          </div>
+          <div v-else>
+            <h3>🚪 访客模式</h3>
+            <p>您只能浏览公开内容</p>
+            <p>请登录或注册以使用更多功能</p>
+            <span class="permission-badge guest">访客权限</span>
+          </div>
+        </div>
+        
+        <div class="code-block">
+          &lt;div v-if="role === 'admin'"&gt;...&lt;/div&gt;
+          &lt;div v-else-if="role === 'user'"&gt;...&lt;/div&gt;
+          &lt;div v-else&gt;...&lt;/div&gt;
+        </div>
+      </div>
+      
+      <!-- Demo 3: v-show -->
+      <div class="demo-card">
+        <h2 class="demo-title">3. v-show 切换显示</h2>
+        
+        <div class="controls">
+          <button @click="showDetails = !showDetails" class="secondary">
+            {{ showDetails ? '隐藏详情' : '显示详情' }}
+          </button>
+        </div>
+        
+        <div v-show="showDetails" class="toggle-box">
+          <h4>用户详细信息</h4>
+          <div class="detail-item">
+            <span>用户名：</span>
+            <span>zhangsan123</span>
+          </div>
+          <div class="detail-item">
+            <span>注册时间：</span>
+            <span>2024-01-15</span>
+          </div>
+          <div class="detail-item">
+            <span>最后登录：</span>
+            <span>2024-01-30 14:30</span>
+          </div>
+          <div class="detail-item">
+            <span>账户状态：</span>
+            <span style="color: #28a745;">正常</span>
+          </div>
+        </div>
+        
+        <div class="code-block">
+          &lt;div v-show="showDetails"&gt;...详细内容...&lt;/div&gt;
+        </div>
+        
+        <div class="info-section">
+          <h4>💡 v-show vs v-if</h4>
+          <p>v-show 只是切换 CSS 的 display 属性，元素始终存在于 DOM 中，适合频繁切换的场景。</p>
+        </div>
+      </div>
+      
+      <!-- Demo 4: 对比 v-if 和 v-show -->
+      <div class="demo-card">
+        <h2 class="demo-title">4. v-if 与 v-show 性能对比</h2>
+        
+        <div class="controls">
+          <button @click="toggleBoth">
+            同时切换两者
+          </button>
+          <button @click="rapidToggle" class="danger">
+            快速切换 10 次
+          </button>
+        </div>
+        
+        <div class="toggle-box">
+          <p><strong>v-if 控制的内容（切换 10 次耗时较长）：</strong></p>
+          <div v-if="showBoth" class="message-box info" style="margin-top: 10px;">
+            这是 v-if 控制的元素（创建/销毁）
+          </div>
+        </div>
+        
+        <div class="toggle-box" style="margin-top: 15px;">
+          <p><strong>v-show 控制的内容（切换 10 次几乎瞬间完成）：</strong></p>
+          <div v-show="showBoth" class="message-box warning" style="margin-top: 10px;">
+            这是 v-show 控制的元素（CSS 切换）
+          </div>
+        </div>
+        
+        <div class="info-section">
+          <h4>🎯 使用建议</h4>
+          <p>• <strong>v-if</strong>：条件很少改变，或初始条件为 false 时<br>
+             • <strong>v-show</strong>：需要频繁切换显示/隐藏时</p>
+        </div>
+      </div>
+      
+      <!-- Demo 5: 在 template 上使用 -->
+      <div class="demo-card">
+        <h2 class="demo-title">5. 在 &lt;template&gt; 上使用条件</h2>
+        
+        <div class="controls">
+          <button @click="showTemplate = !showTemplate">
+            {{ showTemplate ? '隐藏' : '显示' }} 多元素组
+          </button>
+        </div>
+        
+        <template v-if="showTemplate">
+          <div class="message-box success">
+            ✅ 元素 1：标题
+          </div>
+          <div class="message-box info">
+            ℹ️ 元素 2：描述信息
+          </div>
+          <div class="message-box warning">
+            ⚠️ 元素 3：警告提示
+          </div>
+        </template>
+        
+        <div class="code-block">
+          &lt;template v-if="condition"&gt;
+            &lt;div&gt;元素 1&lt;/div&gt;
+            &lt;div&gt;元素 2&lt;/div&gt;
+            &lt;div&gt;元素 3&lt;/div&gt;
+          &lt;/template&gt;
+        </div>
+        
+        <div class="info-section">
+          <h4>💡 &lt;template&gt; 的作用</h4>
+          <p>&lt;template&gt; 不会渲染为实际的 DOM 元素，可以用来包裹多个元素进行条件渲染，避免额外的包装 div。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref } = Vue
+
+    createApp({
+      setup() {
+        // Demo 1: 登录状态
+        const isLoggedIn = ref(false)
+        const toggleLogin = () => {
+          isLoggedIn.value = !isLoggedIn.value
+        }
+
+        // Demo 2: 用户角色
+        const userRole = ref('guest')
+        const setRole = (role) => {
+          userRole.value = role
+        }
+
+        // Demo 3: 显示详情
+        const showDetails = ref(true)
+
+        // Demo 4: 性能对比
+        const showBoth = ref(true)
+        const toggleBoth = () => {
+          showBoth.value = !showBoth.value
+        }
+        const rapidToggle = () => {
+          let count = 0
+          const interval = setInterval(() => {
+            showBoth.value = !showBoth.value
+            count++
+            if (count >= 10) {
+              clearInterval(interval)
+            }
+          }, 100)
+        }
+
+        // Demo 5: template 条件
+        const showTemplate = ref(true)
+
+        return {
+          isLoggedIn,
+          toggleLogin,
+          userRole,
+          setRole,
+          showDetails,
+          showBoth,
+          toggleBoth,
+          rapidToggle,
+          showTemplate
+        }
+      }
+    }).mount('#app')
+  </script>
+</body>
+</html>

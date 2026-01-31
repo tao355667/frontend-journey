@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 5: 侦听器 - TypeScript 示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .demo-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .demo-section h2 {
+      color: #42b883;
+      border-bottom: 2px solid #42b883;
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+    .ts-badge {
+      background: #3178c6;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      margin-left: 10px;
+    }
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      margin: 10px 0;
+    }
+    input {
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      width: 250px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1 style="text-align: center; color: #42b883;">
+      👂 侦听器详解
+      <span class="ts-badge">TypeScript</span>
+    </h1>
+
+    <!-- TypeScript 类型定义 -->
+    <div class="demo-section">
+      <h2>TypeScript 类型定义</h2>
+      <div class="code-block">
+// TypeScript 接口定义
+
+interface User {
+  name: string
+  age: number
+  email: string
+}
+
+interface ValidationState {
+  valid: boolean
+  message: string
+}
+
+interface AppData {
+  user: User
+  validation: {
+    name: ValidationState
+    email: ValidationState
+  }
+  searchQuery: string
+  searchResults: SearchResult[]
+}
+
+interface SearchResult {
+  id: number
+  title: string
+}
+
+// Watch 处理器类型
+interface WatchHandler<T> {
+  (newVal: T, oldVal: T): void
+}
+      </div>
+    </div>
+
+    <!-- 带类型的侦听器 -->
+    <div class="demo-section">
+      <h2>带类型的侦听器</h2>
+      
+      <p>当前用户: {{ user.name }} ({{ user.age }}岁)</p>
+      <input v-model="user.name" placeholder="修改姓名...">
+      
+      <div class="code-block">
+// TypeScript 带类型参数的侦听器
+watch: {
+  // 基础类型侦听
+  'user.name'(newName: string, oldName: string) {
+    console.log(`姓名变化: ${oldName} → ${newName}`)
+  },
+  
+  // 对象类型侦听
+  user: {
+    handler(newUser: User, oldUser: User) {
+      console.log('用户对象变化:', newUser)
+    },
+    deep: true
+  },
+  
+  // 数组类型侦听
+  searchResults(newResults: SearchResult[], oldResults: SearchResult[]) {
+    console.log(`结果数量: ${oldResults.length} → ${newResults.length}`)
+  }
+}
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    /**
+     * @typedef {Object} User
+     * @property {string} name
+     * @property {number} age
+     * @property {string} email
+     */
+
+    /**
+     * @typedef {Object} ValidationState
+     * @property {boolean} valid
+     * @property {string} message
+     */
+
+    /**
+     * @typedef {Object} SearchResult
+     * @property {number} id
+     * @property {string} title
+     */
+
+    createApp({
+      /**
+       * @returns {Object}
+       */
+      data() {
+        return {
+          /** @type {User} */
+          user: {
+            name: '张三',
+            age: 25,
+            email: 'zhangsan@example.com'
+          },
+          
+          /** @type {Object} */
+          validation: {
+            name: { valid: true, message: '' },
+            email: { valid: true, message: '' }
+          },
+          
+          /** @type {string} */
+          searchQuery: '',
+          
+          /** @type {SearchResult[]} */
+          searchResults: []
+        };
+      },
+
+      watch: {
+        /**
+         * 侦听用户名变化
+         * @param {string} newName
+         * @param {string} oldName
+         */
+        'user.name'(newName, oldName) {
+          console.log(`姓名从 "${oldName}" 变为 "${newName}"`);
+        },
+
+        /**
+         * 深度侦听用户对象
+         * @param {User} newUser
+         * @param {User} oldUser
+         */
+        user: {
+          handler(newUser, oldUser) {
+            console.log('用户对象变化:', newUser);
+          },
+          deep: true
+        },
+
+        /**
+         * 侦听搜索结果
+         * @param {SearchResult[]} newResults
+         * @param {SearchResult[]} oldResults
+         */
+        searchResults(newResults, oldResults) {
+          console.log(`搜索结果: ${oldResults.length} → ${newResults.length}`);
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

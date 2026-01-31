@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>外部样式表演示</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header" aria-label="外部样式表演示头部">
+            <h1>外部样式表演示</h1>
+            <p>这是使用外部样式表的示例。CSS规则写在单独的.css文件中。</p>
+        </header>
+        
+        <main class="main-content" aria-label="外部样式表内容">
+            <section class="card" aria-label="外部样式的优势">
+                <h2>外部样式的优势</h2>
+                <ul class="feature-list">
+                    <li>样式与内容完全分离</li>
+                    <li>可以在多个页面间复用</li>
+                    <li>便于维护和更新</li>
+                    <li>有利于浏览器缓存</li>
+                </ul>
+            </section>
+            
+            <section class="card" aria-label="外部样式最佳实践">
+                <h2>最佳实践</h2>
+                <p class="tip">使用外部样式表是开发网站的标准做法，它提供了最好的可维护性和性能。</p>
+                <button class="btn btn-primary" type="button" aria-label="主要按钮">主要按钮</button>
+                <button class="btn btn-secondary" type="button" aria-label="次要按钮">次要按钮</button>
+            </section>
+        </main>
+        
+        <footer class="footer">
+            <p>&copy; <time datetime="2024">2024</time> CSS学习教程</p>
+        </footer>
+    </div>
+</body>
+</html>

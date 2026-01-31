@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第二章练习题答案</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #31708f;
+            border-bottom: 2px solid #31708f;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #3c763d;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #31708f;
+            margin-top: 25px;
+        }
+        .exercise {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #31708f;
+        }
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .output {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 4px solid #4caf50;
+        }
+        .file-tree {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            white-space: pre;
+        }
+        .note {
+            background-color: #e7f3ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <h1>第二章：安装与配置 - 练习题答案</h1>
+
+    <div class="exercise">
+        <h3>练习 2.2：创建 TypeScript 项目并实现圆面积计算</h3>
+        <p><strong>步骤：</strong></p>
+        <p>1. 创建项目目录并初始化：</p>
+        <pre><code>mkdir circle-project
+cd circle-project
+npm init -y
+npm install typescript --save-dev
+npx tsc --init</code></pre>
+
+        <p>2. 创建目录结构：</p>
+        <div class="file-tree">circle-project/
+├── src/
+│   └── index.ts
+├── dist/
+├── tsconfig.json
+└── package.json</div>
+
+        <p>3. src/index.ts 代码：</p>
+        <pre><code>// 计算圆面积的函数
+function calculateCircleArea(radius: number): number {
+  // 圆面积公式：π × r²
+  const pi = Math.PI;
+  return pi * radius * radius;
+}
+
+// 测试
+const radius1 = 5;
+const area1 = calculateCircleArea(radius1);
+console.log(`半径为 ${radius1} 的圆面积: ${area1.toFixed(4)}`);
+
+const radius2 = 10;
+const area2 = calculateCircleArea(radius2);
+console.log(`半径为 ${radius2} 的圆面积: ${area2.toFixed(4)}`);
+
+// 计算多个圆的面积
+const radii = [1, 2, 3, 4, 5];
+console.log("\n多个圆的面积：");
+radii.forEach(r => {
+  const area = calculateCircleArea(r);
+  console.log(`r = ${r}: A = ${area.toFixed(4)}`);
+});</code></pre>
+
+        <p>4. 编译并运行：</p>
+        <pre><code>npx tsc
+node dist/index.js</code></pre>
+
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            半径为 5 的圆面积: 78.5398<br>
+            半径为 10 的圆面积: 314.1593<br><br>
+            多个圆的面积：<br>
+            r = 1: A = 3.1416<br>
+            r = 2: A = 12.5664<br>
+            r = 3: A = 28.2743<br>
+            r = 4: A = 50.2655<br>
+            r = 5: A = 78.5398
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 2.3：配置 tsconfig.json</h3>
+        <p><strong>要求：</strong></p>
+        <ul>
+            <li>编译目标为 ES2020</li>
+            <li>启用严格模式</li>
+            <li>输出目录为 `./dist`</li>
+            <li>源文件目录为 `./src`</li>
+            <li>生成声明文件（`.d.ts`）</li>
+        </ul>
+        <p><strong>配置文件：</strong></p>
+        <pre><code>{
+  "compilerOptions": {
+    /* 基本选项 */
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": ["ES2020"],
+
+    /* 输出配置 */
+    "outDir": "./dist",
+    "rootDir": "./src",
+
+    /* 严格模式 */
+    "strict": true,
+
+    /* 生成声明文件 */
+    "declaration": true,
+
+    /* 模块解析 */
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+
+    /* 其他选项 */
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}</code></pre>
+
+        <div class="note">
+            <strong>说明：</strong><br>
+            - <code>"strict": true</code> 启用所有严格类型检查<br>
+            - <code>"declaration": true</code> 生成 .d.ts 声明文件<br>
+            - <code>"sourceMap": true</code> 生成 .map 源映射文件，便于调试
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 2.4：配置 npm 脚本</h3>
+        <p><strong>package.json scripts 配置：</strong></p>
+        <pre><code>{
+  "name": "my-typescript-project",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc -w",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist",
+    "rebuild": "npm run clean && npm run build"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}</code></pre>
+
+        <p><strong>使用方式：</strong></p>
+        <pre><code># 编译项目
+npm run build
+
+# 监视模式编译（开发时使用）
+npm run build:watch
+
+# 运行编译后的文件
+npm start
+
+# 清理并重新编译
+npm run rebuild</code></pre>
+
+        <div class="note">
+            <strong>提示：</strong><code>start</code> 脚本可以直接用 <code>npm start</code> 运行，不需要 <code>run</code> 命令。
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 2.5：创建多文件 TypeScript 项目</h3>
+        <p><strong>项目结构：</strong></p>
+        <div class="file-tree">my-project/
+├── src/
+│   ├── utils/
+│   │   ├── math.ts
+│   │   └── string.ts
+│   └── index.ts
+├── dist/
+│   ├── utils/
+│   │   ├── math.js
+│   │   ├── math.d.ts
+│   │   ├── string.js
+│   │   └── string.d.ts
+│   ├── index.js
+│   ├── index.d.ts
+│   └── index.map
+├── tsconfig.json
+└── package.json</div>
+
+        <p><strong>src/utils/math.ts：</strong></p>
+        <pre><code>// 数学工具函数
+
+export function add(a: number, b: number): number {
+  return a + b;
+}
+
+export function subtract(a: number, b: number): number {
+  return a - b;
+}
+
+export function multiply(a: number, b: number): number {
+  return a * b;
+}
+
+export function divide(a: number, b: number): number {
+  if (b === 0) {
+    throw new Error("除数不能为零");
+  }
+  return a / b;
+}
+
+export function factorial(n: number): number {
+  if (n < 0) {
+    throw new Error("负数没有阶乘");
+  }
+  if (n <= 1) return 1;
+  return n * factorial(n - 1);
+}</code></pre>
+
+        <p><strong>src/utils/string.ts：</strong></p>
+        <pre><code>// 字符串工具函数
+
+export function capitalize(str: string): string {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export function reverseString(str: string): string {
+  return str.split("").reverse().join("");
+}
+
+export function truncate(str: string, maxLength: number): string {
+  if (str.length <= maxLength) return str;
+  return str.slice(0, maxLength) + "...";
+}
+
+export function countWords(str: string): number {
+  return str.trim().split(/\s+/).filter(word => word.length > 0).length;
+}
+
+export function isPalindrome(str: string): boolean {
+  const normalized = str.toLowerCase().replace(/[^a-z0-9]/g, "");
+  return normalized === normalized.split("").reverse().join("");
+}</code></pre>
+
+        <p><strong>src/index.ts：</strong></p>
+        <pre><code>// 项目入口文件
+
+import { add, multiply, factorial } from "./utils/math";
+import { capitalize, truncate, isPalindrome } from "./utils/string";
+
+console.log("=== 数学运算 ===");
+console.log(`10 + 20 = ${add(10, 20)}`);
+console.log(`10 × 20 = ${multiply(10, 20)}`);
+console.log(`5! = ${factorial(5)}`);
+
+console.log("\n=== 字符串处理 ===");
+const words = "hello typescript world";
+console.log(`原字符串: "${words}"`);
+console.log(`首字母大写: "${capitalize(words)}"`);
+console.log(`截取前15字符: "${truncate(words, 15)}"`);
+console.log(`单词数量: ${countWords(words)}`);
+
+console.log("\n=== 回文检测 ===");
+console.log(`"radar" 是回文: ${isPalindrome("radar")}`);
+console.log(`"hello" 是回文: ${isPalindrome("hello")}`);
+
+console.log("\n=== 导入导出测试 ===");
+console.log("模块导入导出功能正常！");</code></pre>
+
+        <p><strong>tsconfig.json 配置：</strong></p>
+        <pre><code>{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "declaration": true,
+    "sourceMap": true,
+    "esModuleInterop": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}</code></pre>
+
+        <p><strong>package.json 配置：</strong></p>
+        <pre><code>{
+  "name": "my-project",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "watch": "tsc -w"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}</code></pre>
+
+        <p><strong>运行步骤：</strong></p>
+        <pre><code># 1. 创建项目结构
+mkdir -p my-project/src/utils
+cd my-project
+
+# 2. 初始化并安装
+npm init -y
+npm install typescript --save-dev
+
+# 3. 创建配置文件和源码
+#（复制上面的配置文件和源码）
+
+# 4. 编译运行
+npm run build
+npm start</code></pre>
+
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === 数学运算 ===<br>
+            10 + 20 = 30<br>
+            10 × 20 = 200<br>
+            5! = 120<br><br>
+            === 字符串处理 ===<br>
+            原字符串: "hello typescript world"<br>
+            首字母大写: "Hello typescript world"<br>
+            截取前15字符: "hello typescri..."<br>
+            单词数量: 3<br><br>
+            === 回文检测 ===<br>
+            "radar" 是回文: true<br>
+            "hello" 是回文: false<br><br>
+            === 导入导出测试 ===<br>
+            模块导入导出功能正常！
+        </div>
+    </div>
+
+    <p style="text-align: center; color: #666; margin-top: 40px;">
+        练习题答案仅供参考，建议自己动手实践加深理解。
+    </p>
+</body>
+</html>

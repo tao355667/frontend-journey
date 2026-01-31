@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>媒体与其他常用标签</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; line-height: 1.6; max-width: 900px; margin: 0 auto; padding: 20px; background-color: #f5f5f5; }
+    
+    h1 { color: #667eea; margin-bottom: 30px; text-align: center; }
+    h2 { color: #764ba2; margin: 40px 0 20px 0; font-size: 24px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+    
+    section { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    
+    /* Audio */
+    audio { width: 100%; margin: 10px 0; }
+    
+    /* Video */
+    video { width: 100%; border-radius: 8px; }
+    
+    /* Figure */
+    figure { margin: 0; text-align: center; }
+    figure img { max-width: 100%; border-radius: 8px; }
+    figcaption { font-size: 0.9em; color: #666; margin-top: 10px; font-style: italic; }
+    
+    /* Details */
+    details { background: #f8f9fa; padding: 15px; border-radius: 4px; margin: 10px 0; }
+    summary { cursor: pointer; font-weight: 600; color: #667eea; transition: color 0.3s; }
+    summary:hover { color: #764ba2; }
+    details p { margin-top: 10px; color: #555; }
+    
+    /* Address */
+    address { font-style: normal; background: #f8f9fa; padding: 15px; border-radius: 4px; border-left: 4px solid #667eea; }
+    address p { margin: 5px 0; }
+    
+    /* Time */
+    time { color: #667eea; font-weight: 500; }
+    
+    /* Noscript */
+    noscript { display: block; background: #fff3cd; color: #856404; padding: 15px; border-radius: 4px; border-left: 4px solid #ffc107; }
+    
+    /* Responsive */
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      h1 { font-size: 24px; }
+      h2 { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>媒体与其他常用标签</h1>
+
+  <section>
+    <h2>音频</h2>
+    <p>示例：使用 <code>&lt;audio&gt;</code> 标签播放音频文件</p>
+    <audio controls>
+      <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3" type="audio/mpeg" />
+      <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.ogg" type="audio/ogg" />
+      你的浏览器不支持音频播放。
+    </audio>
+  </section>
+
+  <section>
+    <h2>视频（含字幕）</h2>
+    <p>示例：使用 <code>&lt;video&gt;</code> 标签播放视频，并包含字幕轨道</p>
+    <video controls width="640" poster="https://via.placeholder.com/640x360/667eea/ffffff?text=Video+Poster">
+      <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
+      <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm" type="video/webm" />
+      <track kind="captions" srclang="en" label="English" src="https://interactive-examples.mdn.mozilla.net/media/examples/flower.vtt" default />
+      你的浏览器不支持视频播放。
+    </video>
+  </section>
+
+  <section>
+    <h2>图文与说明</h2>
+    <p>示例：使用 <code>&lt;figure&gt;</code> 和 <code>&lt;figcaption&gt;</code> 为图片添加说明</p>
+    <figure>
+      <img src="https://via.placeholder.com/400x220/667eea/ffffff?text=示例图片" alt="示例占位图" />
+      <figcaption>使用 figure/figcaption 为图片或代码块添加说明，提升可访问性和 SEO。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>响应式图片</h2>
+    <p>示例：使用 <code>&lt;picture&gt;</code> 和 <code>&lt;source&gt;</code> 根据屏幕宽度加载不同尺寸的图片</p>
+    <figure>
+      <picture>
+        <source media="(min-width: 800px)" srcset="https://via.placeholder.com/800x450/667eea/ffffff?text=Large+Image" />
+        <source media="(min-width: 400px)" srcset="https://via.placeholder.com/400x225/764ba2/ffffff?text=Medium+Image" />
+        <img src="https://via.placeholder.com/320x180/667eea/ffffff?text=Small+Image" alt="响应式图片示例" />
+      </picture>
+      <figcaption>调整浏览器窗口大小，查看不同屏幕宽度下的图片变化。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>折叠内容</h2>
+    <p>示例：使用 <code>&lt;details&gt;</code> 和 <code>&lt;summary&gt;</code> 创建可折叠的内容区块</p>
+    
+    <details>
+      <summary>点击展开常见问题 1</summary>
+      <p>这是一个常见问题的答案。details/summary 非常适合用于 FAQ、帮助文档等场景。</p>
+    </details>
+    
+    <details>
+      <summary>点击展开常见问题 2</summary>
+      <p>这是另一个问题的答案。不需要 JavaScript 就能实现折叠效果。</p>
+    </details>
+    
+    <details open>
+      <summary>默认展开的内容</summary>
+      <p>添加 <code>open</code> 属性可以让内容默认展开。</p>
+    </details>
+  </section>
+
+  <section>
+    <h2>时间与联系信息</h2>
+    <p>示例：使用 <code>&lt;time&gt;</code> 标记时间，使用 <code>&lt;address&gt;</code> 标记联系信息</p>
+    
+    <p>文章发布日期：<time datetime="2026-01-24">2026 年 1 月 24 日</time></p>
+    <p>会议时间：<time datetime="2026-02-15T14:30">2026 年 2 月 15 日下午 2:30</time></p>
+    <p>有效期限：<time datetime="P7D">7 天</time></p>
+    
+    <address>
+      <strong>作者信息：</strong>
+      <p>姓名：前端同学</p>
+      <p>邮箱：<a href="mailto:example@example.com">example@example.com</a></p>
+      <p>地址：北京市朝阳区某某大厦</p>
+    </address>
+  </section>
+
+  <section>
+    <h2>模板与无脚本提示</h2>
+    <p>示例：使用 <code>&lt;template&gt;</code> 定义可复用模板，使用 <code>&lt;noscript&gt;</code> 提供无脚本时的提示</p>
+    
+    <details>
+      <summary>查看模板内容（不会在页面中直接渲染）</summary>
+      <pre><code>&lt;template id="card-template"&gt;
+  &lt;div class="card"&gt;
+    &lt;h3 class="card-title"&gt;标题&lt;/h3&gt;
+    &lt;p class="card-content"&gt;内容&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;</code></pre>
+      <p>提示：模板内容不会在页面中显示，需要用 JavaScript 的 <code>cloneNode()</code> 方法克隆后才能使用。</p>
+    </details>
+    
+    <noscript>
+      <p><strong>提示：</strong>您的浏览器未启用 JavaScript，部分功能（如动态内容加载）可能无法正常使用。</p>
+      <p>建议启用 JavaScript 以获得最佳浏览体验。</p>
+    </noscript>
+  </section>
+</body>
+</html>

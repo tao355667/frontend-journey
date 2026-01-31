@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 6: Class 与 Style 绑定 - TypeScript 示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .demo-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .demo-section h2 {
+      color: #42b883;
+      border-bottom: 2px solid #42b883;
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+    .ts-badge {
+      background: #3178c6;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      margin-left: 10px;
+    }
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      margin: 10px 0;
+    }
+    .demo-box {
+      padding: 20px;
+      margin: 10px 0;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+    }
+    .demo-box.active {
+      background: #e8f5e9;
+      border-color: #42b883;
+    }
+    input[type="checkbox"] {
+      margin-right: 5px;
+    }
+    input[type="color"] {
+      width: 60px;
+      height: 30px;
+      border: none;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1 style="text-align: center; color: #42b883;">
+      🎨 Class 与 Style 绑定详解
+      <span class="ts-badge">TypeScript</span>
+    </h1>
+
+    <!-- TypeScript 类型定义 -->
+    <div class="demo-section">
+      <h2>TypeScript 类型定义</h2>
+      <div class="code-block">
+// TypeScript 接口定义
+
+// 样式对象类型
+interface StyleObject {
+  color?: string
+  backgroundColor?: string
+  fontSize?: string
+  padding?: string
+  borderRadius?: string
+  [key: string]: string | undefined
+}
+
+// Class 对象类型
+interface ClassObject {
+  active?: boolean
+  disabled?: boolean
+  highlighted?: boolean
+  [key: string]: boolean | undefined
+}
+
+// 主题类型
+ type ThemeType = 'light' | 'dark' | 'colorful'
+
+// 状态类型
+type StatusType = 'success' | 'warning' | 'error' | 'loading'
+
+// 组件数据接口
+interface AppData {
+  currentTheme: ThemeType
+  status: StatusType
+  classObject: ClassObject
+  styleObject: StyleObject
+}
+      </div>
+    </div>
+
+    <!-- 带类型的 Class 绑定 -->
+    <div class="demo-section">
+      <h2>带类型的 Class 绑定</h2>
+      
+      <div :class="classObject" class="demo-box">
+        <strong>TypeScript ClassObject 类型绑定</strong><br>
+        当前状态: {{ JSON.stringify(classObject) }}
+      </div>
+      
+      <div style="margin: 15px 0;">
+        <label>
+          <input type="checkbox" v-model="classObject.active"> active
+        </label>
+        <label style="margin-left: 15px;">
+          <input type="checkbox" v-model="classObject.disabled"> disabled
+        </label>
+        <label style="margin-left: 15px;">
+          <input type="checkbox" v-model="classObject.highlighted"> highlighted
+        </label>
+      </div>
+      
+      <div class="code-block">
+// TypeScript Class 绑定
+data() {
+  return {
+    classObject: {
+      active: true,
+      disabled: false,
+      highlighted: false
+    } as ClassObject
+  }
+}
+
+// 或使用 Record 类型
+data() {
+  return {
+    classObject: {} as Record<string, boolean>
+  }
+}
+      </div>
+    </div>
+
+    <!-- 带类型的 Style 绑定 -->
+    <div class="demo-section">
+      <h2>带类型的 Style 绑定</h2>
+      
+      <div :style="styleObject" class="demo-box">
+        <strong>TypeScript StyleObject 类型绑定</strong><br>
+        动态样式演示
+      </div>
+      
+      <div style="margin: 15px 0;">
+        <label>
+          文字颜色: <input type="color" v-model="styleObject.color">
+        </label>
+        <label style="margin-left: 15px;">
+          背景颜色: <input type="color" v-model="styleObject.backgroundColor">
+        </label>
+      </div>
+      
+      <div class="code-block">
+// TypeScript Style 绑定
+data() {
+  return {
+    styleObject: {
+      color: '#42b883',
+      backgroundColor: '#f0f0f0',
+      fontSize: '16px'
+    } as StyleObject
+  }
+}
+      </div>
+    </div>
+
+    <!-- 主题切换 -->
+    <div class="demo-section">
+      <h2>带类型的主题切换</h2>
+      
+      <p>当前主题: <strong>{{ currentTheme }}</strong></p>
+      
+      <div style="margin: 15px 0;">
+        <button @click="currentTheme = 'light'">☀️ 亮色</button>
+        <button @click="currentTheme = 'dark'">🌙 暗色</button>
+        <button @click="currentTheme = 'colorful'">🎨 彩色</button>
+      </div>
+      
+      <div 
+        :class="currentTheme"
+        style="padding: 20px; border-radius: 8px; transition: all 0.3s;"
+        :style="getThemeStyles(currentTheme)"
+      >
+        主题演示区域 - {{ currentTheme }}
+      </div>
+      
+      <div class="code-block">
+// TypeScript 严格类型检查
+type ThemeType = 'light' | 'dark' | 'colorful'
+
+data() {
+  return {
+    currentTheme: 'light' as ThemeType
+  }
+},
+
+methods: {
+  getThemeStyles(theme: ThemeType): StyleObject {
+    const styles: Record<ThemeType, StyleObject> = {
+      light: { backgroundColor: '#fff', color: '#333' },
+      dark: { backgroundColor: '#333', color: '#fff' },
+      colorful: { 
+        backgroundColor: 'linear-gradient(135deg, #667eea, #764ba2)',
+        color: 'white'
+      }
+    }
+    return styles[theme]
+  }
+}
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    /**
+     * @typedef {Object} StyleObject
+     * @property {string} [color]
+     * @property {string} [backgroundColor]
+     * @property {string} [fontSize]
+     * @property {string} [padding]
+     * @property {string} [borderRadius]
+     */
+
+    /**
+     * @typedef {Object} ClassObject
+     * @property {boolean} [active]
+     * @property {boolean} [disabled]
+     * @property {boolean} [highlighted]
+     */
+
+    /**
+     * @typedef {'light'|'dark'|'colorful'} ThemeType
+     */
+
+    /**
+     * @typedef {'success'|'warning'|'error'|'loading'} StatusType
+     */
+
+    createApp({
+      /**
+       * @returns {Object}
+       */
+      data() {
+        return {
+          /** @type {ClassObject} */
+          classObject: {
+            active: true,
+            disabled: false,
+            highlighted: false
+          },
+          
+          /** @type {StyleObject} */
+          styleObject: {
+            color: '#42b883',
+            backgroundColor: '#f0f0f0',
+            fontSize: '16px',
+            padding: '20px'
+          },
+          
+          /** @type {ThemeType} */
+          currentTheme: 'light',
+          
+          /** @type {StatusType} */
+          status: 'success'
+        };
+      },
+
+      methods: {
+        /**
+         * 获取主题样式
+         * @param {ThemeType} theme
+         * @returns {StyleObject}
+         */
+        getThemeStyles(theme) {
+          /** @type {Record<ThemeType, StyleObject>} */
+          const styles = {
+            light: {
+              backgroundColor: '#ffffff',
+              color: '#333333'
+            },
+            dark: {
+              backgroundColor: '#2c3e50',
+              color: '#ecf0f1'
+            },
+            colorful: {
+              backgroundColor: '#667eea',
+              color: 'white'
+            }
+          };
+          return styles[theme];
+        },
+
+        /**
+         * 设置状态
+         * @param {StatusType} newStatus
+         */
+        setStatus(newStatus) {
+          this.status = newStatus;
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第16章：自定义指令 - TypeScript示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #f5f5f5; }
+    h1 { text-align: center; color: #333; margin-bottom: 30px; }
+    h2 { color: #42b883; margin: 30px 0 15px; border-bottom: 2px solid #42b883; padding-bottom: 10px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    .type-hint { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 12px; margin: 10px 0; border-radius: 0 4px 4px 0; font-size: 13px; }
+    .type-hint code { background: rgba(255,255,255,0.7); padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }
+    
+    .card { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin: 5px; transition: all 0.2s; }
+    .btn-primary { background: #42b883; color: white; }
+    .btn-default { background: #e0e0e0; color: #333; }
+    .btn:hover { opacity: 0.8; }
+    
+    input, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; width: 100%; max-width: 300px; }
+    
+    .typed-input { border: 2px solid #42b883; }
+    .directive-tag { display: inline-block; padding: 2px 8px; background: #e8f5e9; color: #2e7d32; border-radius: 4px; font-size: 12px; margin-left: 8px; }
+    
+    .tooltip { position: absolute; background: #333; color: white; padding: 8px 12px; border-radius: 4px; font-size: 13px; white-space: nowrap; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s; }
+    .tooltip.show { opacity: 1; visibility: visible; }
+    .tooltip.top { bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 8px; }
+    .tooltip.top::before { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #333; }
+    
+    .loading-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
+    .loading-spinner { width: 40px; height: 40px; border: 3px solid #e0e0e0; border-top-color: #42b883; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    .watermark-box { width: 100%; height: 150px; border: 2px dashed #ddd; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>Vue 3 + TypeScript 自定义指令</h1>
+      
+      <div class="type-hint">
+        <strong>TypeScript 类型提示：</strong><br>
+        <code>interface DirectiveBinding&lt;T = any&gt; { value: T; arg?: string; modifiers?: Record&lt;string, boolean&gt; }</code><br>
+        使用类型参数可以确保指令值获得正确的类型推断
+      </div>
+      
+      <h2>1. 类型化的自动聚焦 <span class="directive-tag">v-typed-focus</span></h2>
+      
+      <div class="card">
+        <input v-typed-focus class="typed-input" placeholder="TypeScript 类型安全的聚焦指令" />
+        <p style="color: #666; font-size: 13px; margin-top: 10px;">此指令使用了 DirectiveBinding 类型确保类型安全</p>
+      </div>
+      
+      <h2>2. 类型化的颜色指令 <span class="directive-tag">v-typed-color</span></h2>
+      
+      <div class="card">
+        <div v-typed-color="typedColor" style="padding: 15px; border-radius: 4px; border: 1px solid #ddd;">
+          TypeScript 类型安全的颜色设置
+        </div>
+        <input v-model="typedColor" placeholder="输入颜色" style="margin-top: 10px;" />
+      </div>
+      
+      <h2>3. 类型化的提示框 <span class="directive-tag">v-typed-tooltip</span></h2>
+      
+      <div class="card">
+        <div style="display: flex; gap: 10px;">
+          <button v-typed-tooltip="'类型安全的提示'" class="btn btn-primary">悬停查看</button>
+          <button v-typed-tooltip:top="'顶部提示'" class="btn btn-default">顶部</button>
+        </div>
+      </div>
+      
+      <h2>4. 类型化的防抖 <span class="directive-tag">v-typed-debounce</span></h2>
+      
+      <div class="card">
+        <input v-typed-debounce:typedDebounceDelay="handleTypedSearch" v-model="typedSearch" placeholder="带类型推断的防抖输入" />
+        <p style="margin-top: 10px; color: #666; font-size: 13px;">
+          搜索次数: {{ typedSearchCount }} | 延迟: {{ typedDebounceDelay }}ms
+        </p>
+      </div>
+      
+      <h2>5. 类型化的加载状态 <span class="directive-tag">v-typed-loading</span></h2>
+      
+      <div class="card">
+        <div v-typed-loading="typedLoading" class="watermark-box">
+          <p>类型化的加载指令演示</p>
+        </div>
+        <button class="btn btn-primary" style="margin-top: 10px;" @click="toggleTypedLoading">
+          {{ typedLoading ? '停止' : '开始' }} 加载
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // TypeScript 类型定义（运行时模拟）
+    /**
+     * @typedef {Object} DirectiveBinding
+     * @property {any} value
+     * @property {string} [arg]
+     * @property {Record<string, boolean>} [modifiers]
+     * @property {import('vue').ComponentInternalInstance} instance
+     * @property {Object} dir
+     */
+
+    /**
+     * @typedef {(binding: DirectiveBinding) => void} DirectiveHook
+     */
+
+    const { createApp, ref, defineComponent } = Vue;
+
+    createApp({
+      setup() {
+        // 局部类型化指令
+        /** @type {import('vue').Directive<HTMLElement, string>} */
+        const vTypedHighlight = {
+          mounted(el, binding) {
+            el.style.backgroundColor = binding.value || 'yellow';
+          },
+          updated(el, binding) {
+            el.style.backgroundColor = binding.value || 'yellow';
+          }
+        };
+
+        // 类型化的数据
+        /** @type {import('vue').Ref<string>} */
+        const typedColor = ref('#42b883');
+        
+        /** @type {import('vue').Ref<string>} */
+        const typedSearch = ref('');
+        
+        /** @type {import('vue').Ref<number>} */
+        const typedSearchCount = ref(0);
+        
+        /** @type {import('vue').Ref<number>} */
+        const typedDebounceDelay = ref(500);
+        
+        /** @type {import('vue').Ref<boolean>} */
+        const typedLoading = ref(false);
+
+        /**
+         * @param {string} query
+         */
+        const handleTypedSearch = () => {
+          typedSearchCount.value++;
+          console.log('类型化搜索:', typedSearch.value);
+        };
+
+        const toggleTypedLoading = () => {
+          typedLoading.value = !typedLoading.value;
+          if (typedLoading.value) {
+            setTimeout(() => {
+              typedLoading.value = false;
+            }, 2000);
+          }
+        };
+
+        return {
+          vTypedHighlight,
+          typedColor,
+          typedSearch,
+          typedSearchCount,
+          typedDebounceDelay,
+          typedLoading,
+          handleTypedSearch,
+          toggleTypedLoading
+        };
+      }
+    })
+    // 类型化的全局指令
+    .directive('typed-focus', {
+      /** @param {HTMLElement} el */
+      mounted(el) {
+        // TypeScript 会推断 el 为 HTMLElement
+        if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+          el.focus();
+        }
+      }
+    })
+    .directive('typed-color', {
+      /** @param {HTMLElement} el @param {DirectiveBinding} binding */
+      mounted(el, binding) {
+        el.style.color = binding.value;
+      },
+      /** @param {HTMLElement} el @param {DirectiveBinding} binding */
+      updated(el, binding) {
+        el.style.color = binding.value;
+      }
+    })
+    .directive('typed-tooltip', {
+      /** @param {HTMLElement} el @param {DirectiveBinding} binding */
+      mounted(el, binding) {
+        /** @type {HTMLDivElement} */
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip top';
+        tooltip.textContent = binding.value;
+        
+        el.style.position = 'relative';
+        el.appendChild(tooltip);
+        
+        const show = () => tooltip.classList.add('show');
+        const hide = () => tooltip.classList.remove('show');
+        
+        el.addEventListener('mouseenter', show);
+        el.addEventListener('mouseleave', hide);
+        
+        // 存储引用以便清理
+        /** @type {any} */(el)._tooltip = tooltip;
+        /** @type {any} */(el)._showHandler = show;
+        /** @type {any} */(el)._hideHandler = hide;
+      },
+      /** @param {HTMLElement} el @param {DirectiveBinding} binding */
+      updated(el, binding) {
+        const tooltip = /** @type {any} */(el)._tooltip;
+        if (tooltip) {
+          tooltip.textContent = binding.value;
+        }
+      },
+      /** @param {HTMLElement} el */
+      unmounted(el) {
+        el.removeEventListener('mouseenter', /** @type {any} */(el)._showHandler);
+        el.removeEventListener('mouseleave', /** @type {any} */(el)._hideHandler);
+        /** @type {any} */(el)._tooltip?.remove();
+      }
+    })
+    .directive('typed-debounce', {
+      /** @param {HTMLInputElement} el @param {DirectiveBinding} binding */
+      mounted(el, binding) {
+        /** @type {ReturnType<typeof setTimeout> | null} */
+        let timer = null;
+        /** @type {number} */
+        const delay = parseInt(binding.arg || '300', 10);
+        
+        /** @type {() => void} */
+        const handler = () => {
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            binding.value();
+          }, delay);
+        };
+        
+        el.addEventListener('input', handler);
+        /** @type {any} */(el)._debounceHandler = handler;
+      },
+      /** @param {HTMLInputElement} el */
+      unmounted(el) {
+        el.removeEventListener('input', /** @type {any} */(el)._debounceHandler);
+      }
+    })
+    .directive('typed-loading', {
+      /** @param {HTMLElement} el @param {DirectiveBinding<boolean>} binding */
+      mounted(el, binding) {
+        /** @type {HTMLDivElement} */
+        const overlay = document.createElement('div');
+        overlay.className = 'loading-overlay';
+        overlay.innerHTML = `
+          <div class="loading-spinner"></div>
+          <div style="color: #666; margin-top: 10px;">加载中...</div>
+        `;
+        
+        /** @type {any} */(el)._loadingOverlay = overlay;
+        
+        if (binding.value) {
+          el.appendChild(overlay);
+        }
+      },
+      /** @param {HTMLElement} el @param {DirectiveBinding<boolean>} binding */
+      updated(el, binding) {
+        const overlay = /** @type {any} */(el)._loadingOverlay;
+        if (binding.value && overlay && !el.contains(overlay)) {
+          el.appendChild(overlay);
+        } else if (!binding.value && overlay && el.contains(overlay)) {
+          el.removeChild(overlay);
+        }
+      },
+      /** @param {HTMLElement} el */
+      unmounted(el) {
+        const overlay = /** @type {any} */(el)._loadingOverlay;
+        if (overlay && el.contains(overlay)) {
+          el.removeChild(overlay);
+        }
+      }
+    })
+    .mount('#app');
+  </script>
+</body>
+</html>

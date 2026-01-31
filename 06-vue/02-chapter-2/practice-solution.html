@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 2: 模板语法 - 练习题答案</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .level-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 10px;
+    }
+    .basic { background: #42b883; }
+    .advanced { background: #f39c12; }
+    .challenge { background: #e74c3c; }
+    .solution-card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .solution-card h2 {
+      color: #2c3e50;
+      margin-top: 0;
+    }
+    .demo-area {
+      background: #f8f9fa;
+      border: 2px dashed #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 15px 0;
+    }
+    .user-card {
+      border: 2px solid #42b883;
+      border-radius: 12px;
+      padding: 20px;
+      background: white;
+      transition: all 0.3s ease;
+    }
+    .user-card h3 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+    .form-group {
+      margin: 15px 0;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+      font-weight: 500;
+    }
+    input, select {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      width: 200px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #42b883;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #369870;
+    }
+    .code-explanation {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 15px 0;
+    }
+    .dynamic-element {
+      padding: 15px;
+      border: 2px solid #764ba2;
+      border-radius: 8px;
+      margin: 10px 0;
+      background: #f3e5f5;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1 style="text-align: center; color: white; margin-bottom: 30px;">
+      📚 模板语法练习题答案
+    </h1>
+
+    <!-- 基础练习答案 -->
+    <div class="solution-card">
+      <span class="level-badge basic">基础练习</span>
+      <h2>用户信息展示卡片</h2>
+      <p>创建一个用户信息展示卡片，使用文本插值、v-html 和属性绑定。</p>
+      
+      <div class="demo-area">
+        <!-- 用户卡片实现 -->
+        <div class="user-card" :style="{ backgroundColor: userCardColor }">
+          <h3>👤 {{ userInfo.name }}</h3>
+          <p><strong>年龄:</strong> {{ userInfo.age }} 岁</p>
+          <p><strong>职业:</strong> {{ userInfo.job }}</p>
+          <div v-html="userInfo.bio"></div>
+        </div>
+        
+        <!-- 控制面板 -->
+        <div style="margin-top: 20px;">
+          <label>
+            选择卡片背景色:
+            <select v-model="userCardColor">
+              <option value="#ffffff">⚪ 白色</option>
+              <option value="#e3f2fd">🔵 淡蓝</option>
+              <option value="#f3e5f5">🟣 淡紫</option>
+              <option value="#e8f5e9">🟢 淡绿</option>
+              <option value="#fff3e0">🟠 淡橙</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      
+      <div class="code-explanation">
+        <strong>核心代码解析：</strong><br><br>
+        // 1. 文本插值 - 显示用户名和年龄<br>
+        &lt;h3&gt;{{ userInfo.name }}&lt;/h3&gt;<br>
+        &lt;p&gt;年龄: {{ userInfo.age }} 岁&lt;/p&gt;<br><br>
+        
+        // 2. v-html - 渲染带有样式的个人简介<br>
+        &lt;div v-html="userInfo.bio"&gt;&lt;/div&gt;<br><br>
+        
+        // 3. 属性绑定 - 动态设置背景色<br>
+        &lt;div :style="{ backgroundColor: userCardColor }"&gt;...&lt;/div&gt;
+      </div>
+    </div>
+
+    <!-- 进阶练习答案 -->
+    <div class="solution-card">
+      <span class="level-badge advanced">进阶练习</span>
+      <h2>动态表单配置器</h2>
+      <p>使用动态参数、修饰符创建可配置的表单元素。</p>
+      
+      <div class="demo-area">
+        <!-- 动态输入框类型 -->
+        <div class="form-group">
+          <label>选择输入框类型:</label>
+          <select v-model="inputType">
+            <option value="text">文本 (text)</option>
+            <option value="password">密码 (password)</option>
+            <option value="email">邮箱 (email)</option>
+            <option value="number">数字 (number)</option>
+          </select>
+        </div>
+        
+        <!-- 动态输入框 - 使用 :type 动态参数 -->
+        <div class="form-group">
+          <label>
+            输入内容（{{ inputType }} 类型，带.trim修饰符）:
+          </label>
+          <input :type="inputType" v-model.trim="inputValue" :placeholder="'请输入' + inputType">
+        </div>
+        <p>
+          当前值: "<strong>{{ inputValue }}</strong>"<br>
+          长度: {{ inputValue.length }} 字符（自动去除首尾空格）
+        </p>
+        
+        <!-- .lazy 修饰符演示 -->
+        <div class="form-group">
+          <label>简介（带.lazy修饰符 - 失去焦点后更新）:</label>
+          <input v-model.lazy="lazyBio" placeholder="输入后点击其他地方">
+        </div>
+        <p>简介内容: {{ lazyBio || '（暂无内容）' }}</p>
+        
+        <!-- .number 修饰符演示 -->
+        <div class="form-group">
+          <label>年龄（带.number修饰符）:</label>
+          <input v-model.number="userAge" type="text" placeholder="输入数字">
+        </div>
+        <p>
+          年龄值: {{ userAge }}<br>
+          数据类型: {{ typeof userAge }}
+        </p>
+      </div>
+      
+      <div class="code-explanation">
+        <strong>核心代码解析：</strong><br><br>
+        // 1. 动态参数 :type 切换输入框类型<br>
+        &lt;input :type="inputType" v-model.trim="inputValue"&gt;<br><br>
+        
+        // 2. .trim 修饰符自动去除首尾空格<br>
+        v-model.trim="inputValue"<br><br>
+        
+        // 3. .lazy 修饰符延迟更新（失去焦点后）<br>
+        v-model.lazy="lazyBio"<br><br>
+        
+        // 4. .number 修饰符自动转换为数字<br>
+        v-model.number="userAge" // typeof userAge === 'number'
+      </div>
+    </div>
+
+    <!-- 挑战练习答案 -->
+    <div class="solution-card">
+      <span class="level-badge challenge">挑战练习</span>
+      <h2>动态组件渲染器</h2>
+      <p>使用动态属性绑定和动态事件绑定创建可配置元素。</p>
+      
+      <div class="demo-area">
+        <!-- 配置面板 -->
+        <h4>🎛️ 元素配置器</h4>
+        
+        <div class="form-group">
+          <label>选择 HTML 标签:</label>
+          <select v-model="elementConfig.tag">
+            <option value="button">按钮 (button)</option>
+            <option value="a">链接 (a)</option>
+            <option value="input">输入框 (input)</option>
+            <option value="div">容器 (div)</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>选择动态属性:</label>
+          <select v-model="elementConfig.attrName">
+            <option value="class">class（样式类）</option>
+            <option value="style">style（行内样式）</option>
+            <option value="title">title（提示文本）</option>
+            <option value="data-id">data-id（自定义数据）</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>属性值:</label>
+          <input v-model="elementConfig.attrValue" placeholder="输入属性值">
+        </div>
+        
+        <div class="form-group">
+          <label>选择事件类型:</label>
+          <select v-model="elementConfig.eventName">
+            <option value="click">点击 (click)</option>
+            <option value="mouseenter">鼠标进入 (mouseenter)</option>
+            <option value="dblclick">双击 (dblclick)</option>
+          </select>
+        </div>
+        
+        <!-- 动态元素渲染 -->
+        <h4>📦 渲染结果</h4>
+        <div class="dynamic-element">
+          <!-- 动态组件 - 使用动态标签、动态属性、动态事件 -->
+          <component 
+            :is="elementConfig.tag" 
+            :[elementConfig.attrName]="elementConfig.attrValue"
+            :@[elementConfig.eventName]="handleDynamicEvent"
+            :placeholder="elementConfig.tag === 'input' ? '动态输入框' : undefined"
+          >
+            {{ elementConfig.tag === 'button' || elementConfig.tag === 'a' ? '点击我触发 ' + elementConfig.eventName + ' 事件' : '' }}
+          </component>
+        </div>
+        
+        <p style="color: #666; font-size: 14px;">
+          💡 提示: {{ elementConfig.eventName }} 事件触发次数: {{ eventCount }}
+        </p>
+        
+        <!-- 配置代码预览 -->
+        <div class="code-explanation">
+          <strong>当前配置代码：</strong><br><br>
+          &lt;{{ elementConfig.tag }}<br>
+          &nbsp;&nbsp;{{ elementConfig.attrName }}="{{ elementConfig.attrValue }}"<br>
+          &nbsp;&nbsp;@{{ elementConfig.eventName }}="handleDynamicEvent"&gt;<br>
+          点击我触发 {{ elementConfig.eventName }} 事件<br>
+          &lt;/{{ elementConfig.tag }}&gt;
+        </div>
+      </div>
+      
+      <div class="code-explanation">
+        <strong>核心技术解析：</strong><br><br>
+        // 1. 动态组件 - :is 指定标签类型<br>
+        &lt;component :is="elementConfig.tag"&gt;...&lt;/component&gt;<br><br>
+        
+        // 2. 动态属性绑定 - 方括号语法<br>
+        :[elementConfig.attrName]="elementConfig.attrValue"<br><br>
+        
+        // 3. 动态事件绑定 - 方括号语法<br>
+        :@[elementConfig.eventName]="handleDynamicEvent"<br><br>
+        
+        // 组合使用实现完全动态的组件！
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          // 基础练习数据
+          userInfo: {
+            name: '张三',
+            age: 28,
+            job: '前端工程师',
+            bio: `
+              <div style="margin-top: 10px; padding: 10px; background: #f0f0f0; border-radius: 6px;">
+                <p style="margin: 0; color: #666;">
+                  <strong>个人简介：</strong><br>
+                  热爱编程，专注于前端开发。喜欢分享技术文章，
+                  擅长 Vue、React 等现代前端框架。
+                </p>
+                <p style="margin: 8px 0 0 0; color: #42b883;">
+                  ✨ 技能标签: Vue · TypeScript · Node.js
+                </p>
+              </div>
+            `
+          },
+          userCardColor: '#e3f2fd',
+          
+          // 进阶练习数据
+          inputType: 'text',
+          inputValue: '',
+          lazyBio: '',
+          userAge: null,
+          
+          // 挑战练习数据
+          elementConfig: {
+            tag: 'button',
+            attrName: 'class',
+            attrValue: 'dynamic-btn',
+            eventName: 'click'
+          },
+          eventCount: 0
+        };
+      },
+
+      methods: {
+        // 基础练习方法
+        
+        // 进阶练习方法
+        
+        // 挑战练习方法
+        handleDynamicEvent() {
+          this.eventCount++;
+          const messages = {
+            click: '点击事件触发！',
+            mouseenter: '鼠标进入事件触发！',
+            dblclick: '双击事件触发！'
+          };
+          alert(`${messages[this.elementConfig.eventName]}\n当前触发次数: ${this.eventCount}`);
+        }
+      },
+
+      // 监听 elementConfig 变化，重置计数
+      watch: {
+        'elementConfig.eventName'() {
+          this.eventCount = 0;
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

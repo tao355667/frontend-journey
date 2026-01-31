@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>组合选择器演示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        /* 后代选择器 (空格) */
+        .container p {
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+        
+        /* 子选择器 (>) */
+        .direct-child > p {
+            background-color: #e8f5e8;
+            padding: 10px;
+            border-left: 3px solid #27ae60;
+        }
+        
+        /* 相邻兄弟选择器 (+) */
+        h2 + p {
+            font-weight: bold;
+            color: #e74c3c;
+            font-size: 1.1em;
+        }
+        
+        /* 通用兄弟选择器 (~) */
+        h2 ~ p {
+            border-bottom: 1px dashed #bdc3c7;
+            padding-bottom: 5px;
+        }
+        
+        /* 多个选择器组合 */
+        .container .highlight > span {
+            color: #3498db;
+            font-weight: bold;
+        }
+        
+        /* 演示样式 */
+        .demo-box {
+            border: 2px solid #3498db;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .nested {
+            border: 1px solid #95a5a6;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .highlight {
+            background-color: #fff3cd;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>组合选择器演示</h1>
+    </header>
+    
+    <main class="container" aria-label="组合选择器演示内容">
+        <section aria-label="后代选择器示例">
+            <h2>后代选择器示例</h2>
+            <p>这是.container内的段落，会被选择</p>
+            
+            <div class="demo-box">
+                <p>这也是.container内的段落（后代），会被选择</p>
+                <div class="nested">
+                    <p>这是嵌套在.nested内的段落，但仍然是.container的后代，会被选择</p>
+                </div>
+            </div>
+        </section>
+        
+        <section aria-label="子选择器示例">
+            <h2>子选择器示例</h2>
+            <div class="direct-child">
+                <p>这是.direct-child的直接子元素段落，会被选择</p>
+                <div class="nested">
+                    <p>这是.nested内的段落，不是.direct-child的直接子元素，不会被选择</p>
+                </div>
+                <p>这是另一个直接子元素段落，会被选择</p>
+            </div>
+        </section>
+        
+        <section aria-label="相邻兄弟选择器示例">
+            <h2>相邻兄弟选择器示例</h2>
+            <p>这个段落紧跟在h2后面，会被选择（加粗红色）</p>
+            <div>这是一个div，不是段落</div>
+            <p>这个段落不紧跟在h2后面，不会被相邻兄弟选择器选择</p>
+        </section>
+        
+        <section aria-label="通用兄弟选择器示例">
+            <h2>通用兄弟选择器示例</h2>
+            <p>这个段落是h2的兄弟元素，会被选择（有下边框）</p>
+            <div>这是一个div，不是段落</div>
+            <p>这个段落也是h2的兄弟元素，会被选择（有下边框）</p>
+        </section>
+        
+        <section aria-label="复杂组合示例">
+            <h2>复杂组合示例</h2>
+            <div class="container highlight">
+                <p>这个段落包含 <span>这个span元素</span> 会被选择（蓝色加粗）</p>
+                <div>
+                    <span>这个span不是highlight的直接子元素，不会被选择</span>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

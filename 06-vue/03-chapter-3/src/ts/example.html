@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 3: data 与 methods - TypeScript 示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .demo-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .demo-section h2 {
+      color: #42b883;
+      border-bottom: 2px solid #42b883;
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+    .ts-badge {
+      background: #3178c6;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      margin-left: 10px;
+    }
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      margin: 10px 0;
+    }
+    .calculator {
+      display: inline-block;
+      background: #f0f0f0;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    .calc-display {
+      background: #333;
+      color: #0f0;
+      padding: 10px;
+      font-size: 24px;
+      text-align: right;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      font-family: monospace;
+    }
+    .calc-btn {
+      width: 50px;
+      height: 50px;
+      margin: 5px;
+      font-size: 18px;
+      background: #42b883;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    input[type="text"], input[type="number"] {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin: 5px;
+    }
+    button {
+      padding: 8px 16px;
+      background: #42b883;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      background: #f9f9f9;
+      margin: 5px 0;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1 style="text-align: center; color: #42b883;">
+      🧠 data 与 methods 详解
+      <span class="ts-badge">TypeScript</span>
+    </h1>
+
+    <!-- TypeScript 接口定义展示 -->
+    <div class="demo-section">
+      <h2>TypeScript 类型定义示例</h2>
+      <div class="code-block">
+// TypeScript 接口定义
+
+interface User {
+  name: string
+  age: number
+}
+
+interface Product {
+  id: number
+  name: string
+  price: number
+}
+
+interface CartItem extends Product {
+  quantity: number
+}
+
+interface Cart {
+  items: CartItem[]
+  total: number
+  isVip: boolean
+}
+
+interface AppData {
+  count: number
+  user: User
+  products: Product[]
+  cart: Cart
+  // ... 其他数据
+}
+      </div>
+    </div>
+
+    <!-- data 响应式数据 -->
+    <div class="demo-section">
+      <h2>1. data 响应式数据（带类型）</h2>
+      <p>计数器: {{ count }}</p>
+      <p>用户信息: {{ user.name }} ({{ user.age }}岁)</p>
+      <p>商品数量: {{ products.length }} 件</p>
+      
+      <button @click="incrementCount()">增加计数</button>
+      <button @click="updateUserAge()">用户年龄+1</button>
+      
+      <div class="code-block">
+// TypeScript data 定义
+data(): AppData {
+  return {
+    count: 0,
+    user: { name: '张三', age: 25 },
+    products: [],
+    cart: {
+      items: [],
+      total: 0,
+      isVip: false
+    }
+  }
+}
+      </div>
+    </div>
+
+    <!-- methods 类型定义 -->
+    <div class="demo-section">
+      <h2>2. methods 方法（带类型）</h2>
+      
+      <div class="calculator">
+        <div class="calc-display">{{ calcResult !== null ? calcResult : calcDisplay }}</div>
+        <div>
+          <input type="number" v-model.number="num1" placeholder="数字1" style="width: 80px;">
+          <select v-model="operator" style="padding: 8px; margin: 5px;">
+            <option value="+">+</option>
+            <option value="-">-</option>
+            <option value="*">×</option>
+            <option value="/">÷</option>
+          </select>
+          <input type="number" v-model.number="num2" placeholder="数字2" style="width: 80px;">
+        </div>
+        <div style="margin-top: 10px;">
+          <button class="calc-btn" @click="calculate()">=</button>
+          <button class="calc-btn" @click="resetCalc()" style="background: #e74c3c;">C</button>
+        </div>
+      </div>
+      
+      <div class="code-block">
+// TypeScript 方法定义
+methods: {
+  // 无参数，无返回值
+  incrementCount(): void {
+    this.count++
+  },
+  
+  // 带参数，无返回值
+  setUserName(name: string): void {
+    this.user.name = name
+  },
+  
+  // 带返回值
+  getProductCount(): number {
+    return this.products.length
+  },
+  
+  // 复杂参数
+  addProduct(product: Product): void {
+    this.products.push(product)
+  }
+}
+      </div>
+    </div>
+
+    <!-- 购物车示例 -->
+    <div class="demo-section">
+      <h2>3. 完整购物车示例</h2>
+      
+      <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px;">
+        <h4>购物车</h4>
+        <p>会员状态: {{ cart.isVip ? 'VIP会员' : '普通用户' }}</p>
+        <p>商品数量: {{ cart.items.length }}</p>
+        <p>总价: ¥{{ cart.total }}</p>
+        
+        <div v-for="(item, index) in cart.items" :key="index" class="cart-item">
+          <span>{{ item.name }}</span>
+          <span>¥{{ item.price }} × {{ item.quantity }}</span>
+        </div>
+      </div>
+      
+      <button @click="toggleVipStatus()">切换会员状态</button>
+      <button @click="addToCart({name: '键盘', price: 299})">添加键盘</button>
+      <button @click="addToCart({name: '鼠标', price: 99})">添加鼠标</button>
+      <button @click="checkout()">结算</button>
+      
+      <div class="code-block">
+// TypeScript 购物车方法
+methods: {
+  addToCart(product: Product): void {
+    const existingItem = this.cart.items.find(
+      (item: CartItem) => item.name === product.name
+    )
+    
+    if (existingItem) {
+      existingItem.quantity++
+    } else {
+      this.cart.items.push({
+        ...product,
+        quantity: 1
+      } as CartItem)
+    }
+    
+    this.updateCartTotal()
+  },
+  
+  updateCartTotal(): void {
+    let total: number = this.cart.items.reduce(
+      (sum: number, item: CartItem) => sum + item.price * item.quantity,
+      0
+    )
+    
+    if (this.cart.isVip) {
+      total = total * 0.9
+    }
+    
+    this.cart.total = Number(total.toFixed(2))
+  }
+}
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    /**
+     * @typedef {Object} User
+     * @property {string} name
+     * @property {number} age
+     */
+
+    /**
+     * @typedef {Object} Product
+     * @property {number} id
+     * @property {string} name
+     * @property {number} price
+     */
+
+    /**
+     * @typedef {Product} CartItem
+     * @property {number} quantity
+     */
+
+    /**
+     * @typedef {Object} Cart
+     * @property {CartItem[]} items
+     * @property {number} total
+     * @property {boolean} isVip
+     */
+
+    /**
+     * @typedef {Object} AppData
+     * @property {number} count
+     * @property {User} user
+     * @property {Product[]} products
+     * @property {Cart} cart
+     * @property {number} num1
+     * @property {number} num2
+     * @property {string} operator
+     * @property {number|null} calcResult
+     */
+
+    createApp({
+      /**
+       * data 函数 - 返回类型化的应用数据
+       * @returns {AppData}
+       */
+      data() {
+        return {
+          /** @type {number} */
+          count: 0,
+          
+          /** @type {User} */
+          user: {
+            name: '张三',
+            age: 25
+          },
+          
+          /** @type {Product[]} */
+          products: [
+            { id: 1, name: '苹果', price: 5 },
+            { id: 2, name: '香蕉', price: 3 }
+          ],
+          
+          /** @type {Cart} */
+          cart: {
+            items: [],
+            total: 0,
+            isVip: false
+          },
+          
+          // 计算器数据
+          /** @type {number} */
+          num1: 0,
+          /** @type {number} */
+          num2: 0,
+          /** @type {string} */
+          operator: '+',
+          /** @type {number|null} */
+          calcResult: null
+        };
+      },
+
+      computed: {
+        /**
+         * 计算器显示文本
+         * @returns {string}
+         */
+        calcDisplay() {
+          return `${this.num1} ${this.operator} ${this.num2}`;
+        }
+      },
+
+      methods: {
+        /**
+         * 增加计数
+         * @returns {void}
+         */
+        incrementCount() {
+          this.count++;
+        },
+
+        /**
+         * 更新用户年龄
+         * @returns {void}
+         */
+        updateUserAge() {
+          this.user.age++;
+        },
+
+        /**
+         * 设置用户名
+         * @param {string} name - 新用户名
+         * @returns {void}
+         */
+        setUserName(name) {
+          this.user.name = name;
+        },
+
+        /**
+         * 获取商品数量
+         * @returns {number}
+         */
+        getProductCount() {
+          return this.products.length;
+        },
+
+        /**
+         * 添加商品
+         * @param {Product} product - 要添加的商品
+         * @returns {void}
+         */
+        addProduct(product) {
+          this.products.push(product);
+        },
+
+        /**
+         * 计算结果
+         * @returns {void}
+         */
+        calculate() {
+          const { num1, num2, operator } = this;
+          switch(operator) {
+            case '+':
+              this.calcResult = num1 + num2;
+              break;
+            case '-':
+              this.calcResult = num1 - num2;
+              break;
+            case '*':
+              this.calcResult = num1 * num2;
+              break;
+            case '/':
+              this.calcResult = num2 !== 0 ? (num1 / num2).toFixed(2) : '除数不能为0';
+              break;
+          }
+        },
+
+        /**
+         * 重置计算器
+         * @returns {void}
+         */
+        resetCalc() {
+          this.num1 = 0;
+          this.num2 = 0;
+          this.operator = '+';
+          this.calcResult = null;
+        },
+
+        /**
+         * 切换会员状态
+         * @returns {void}
+         */
+        toggleVipStatus() {
+          this.cart.isVip = !this.cart.isVip;
+          this.updateCartTotal();
+        },
+
+        /**
+         * 添加商品到购物车
+         * @param {Product} product - 商品信息
+         * @returns {void}
+         */
+        addToCart(product) {
+          const existingItem = this.cart.items.find(
+            item => item.name === product.name
+          );
+          
+          if (existingItem) {
+            existingItem.quantity++;
+          } else {
+            this.cart.items.push({
+              ...product,
+              quantity: 1
+            });
+          }
+          
+          this.updateCartTotal();
+        },
+
+        /**
+         * 更新购物车总价
+         * @returns {void}
+         */
+        updateCartTotal() {
+          let total = this.cart.items.reduce((sum, item) => {
+            return sum + item.price * item.quantity;
+          }, 0);
+          
+          if (this.cart.isVip) {
+            total = total * 0.9;
+          }
+          
+          this.cart.total = Number(total.toFixed(2));
+        },
+
+        /**
+         * 结算购物车
+         * @returns {void}
+         */
+        checkout() {
+          if (this.cart.items.length === 0) {
+            alert('购物车是空的！');
+            return;
+          }
+          
+          const discountText = this.cart.isVip ? '（已享受VIP 9折优惠）' : '';
+          alert(`结算成功！${discountText}\n总价: ¥${this.cart.total}`);
+          
+          this.cart.items = [];
+          this.cart.total = 0;
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

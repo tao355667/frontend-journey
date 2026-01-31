@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第16章练习答案 - 自定义指令应用</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #f5f5f5; }
+    h1 { text-align: center; color: #333; margin-bottom: 30px; }
+    h2 { color: #42b883; margin: 30px 0 15px; border-bottom: 2px solid #42b883; padding-bottom: 10px; }
+    .container { max-width: 1000px; margin: 0 auto; }
+    
+    .exercise-card { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0; }
+    .exercise-card h3 { color: #1976d2; margin-bottom: 10px; }
+    .exercise-card code { background: rgba(255,255,255,0.7); padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 13px; }
+    
+    .card { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin: 5px; transition: all 0.2s; }
+    .btn-primary { background: #42b883; color: white; }
+    .btn-danger { background: #ff5252; color: white; }
+    .btn-default { background: #e0e0e0; color: #333; }
+    .btn:hover { opacity: 0.8; }
+    
+    /* 练习1：Tooltip */
+    .tooltip-target { padding: 10px 20px; background: #f8f8f8; border: 1px solid #ddd; border-radius: 4px; cursor: help; display: inline-block; }
+    .custom-tooltip { position: fixed; background: #333; color: white; padding: 8px 12px; border-radius: 4px; font-size: 13px; white-space: nowrap; z-index: 10000; pointer-events: none; opacity: 0; visibility: hidden; transition: all 0.2s; }
+    .custom-tooltip.show { opacity: 1; visibility: visible; }
+    .custom-tooltip::after { content: ''; position: absolute; border: 6px solid transparent; }
+    .custom-tooltip.top::after { top: 100%; left: 50%; transform: translateX(-50%); border-top-color: #333; }
+    .custom-tooltip.bottom::after { bottom: 100%; left: 50%; transform: translateX(-50%); border-bottom-color: #333; }
+    .custom-tooltip.left::after { left: 100%; top: 50%; transform: translateY(-50%); border-left-color: #333; }
+    .custom-tooltip.right::after { right: 100%; top: 50%; transform: translateY(-50%); border-right-color: #333; }
+    
+    /* 练习2：Resize */
+    .resize-container { background: #f8f8f8; padding: 30px; border-radius: 8px; border: 2px solid #e0e0e0; resize: both; overflow: auto; min-width: 200px; min-height: 100px; max-width: 100%; }
+    .resize-info { font-family: monospace; background: #e8f5e9; color: #2e7d32; padding: 10px; border-radius: 4px; margin-top: 15px; }
+    
+    /* 练习3：Loading */
+    .loading-wrapper { position: relative; min-height: 200px; border: 2px dashed #ddd; border-radius: 8px; padding: 20px; }
+    .loading-fullscreen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
+    .loading-spinner-large { width: 60px; height: 60px; border: 5px solid #e0e0e0; border-top-color: #42b883; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { margin-top: 15px; color: #666; font-size: 16px; }
+    .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 4px; }
+    @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    
+    .content-area h4 { margin-bottom: 15px; color: #333; }
+    .content-area ul { padding-left: 20px; }
+    .content-area li { margin: 8px 0; color: #666; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>第16章练习题答案</h1>
+      
+      <!-- 练习1：v-tooltip 指令 -->
+      <div class="exercise-card">
+        <h3>练习 1：v-tooltip 提示框指令</h3>
+        <p>鼠标悬停显示提示文字 | 支持自定义内容和位置 (top/bottom/left/right) | 离开时隐藏</p>
+      </div>
+      
+      <div class="card">
+        <h4>基础提示</h4>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
+          <span v-exercise1-tooltip="'这是一个提示'" class="tooltip-target">默认提示</span>
+          <span v-exercise1-tooltip:top="'上方提示'" class="tooltip-target">上方</span>
+          <span v-exercise1-tooltip:bottom="'下方提示'" class="tooltip-target">下方</span>
+          <span v-exercise1-tooltip:left="'左侧提示'" class="tooltip-target">左侧</span>
+          <span v-exercise1-tooltip:right="'右侧提示'" class="tooltip-target">右侧</span>
+        </div>
+        
+        <h4>带 HTML 内容的提示</h4>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+          <button v-exercise1-tooltip="buttonTooltip" class="btn btn-primary">按钮提示</button>
+          <span v-exercise1-tooltip:top="dynamicTooltip" class="tooltip-target">动态提示</span>
+        </div>
+        <input v-model="dynamicTooltip" placeholder="修改提示内容" style="margin-top: 15px;" />
+      </div>
+      
+      <!-- 练习2：v-resize 指令 -->
+      <div class="exercise-card">
+        <h3>练习 2：v-resize 尺寸监听指令</h3>
+        <p>监听元素大小变化 | 变化时触发回调函数 | 使用 ResizeObserver API</p>
+      </div>
+      
+      <div class="card">
+        <p style="margin-bottom: 15px; color: #666;">拖动右下角的调整手柄改变下方区域大小：</p>
+        <div v-exercise2-resize="onResize" class="resize-container">
+          <h4>可调整大小的区域</h4>
+          <p>这个区域使用了 resize: both CSS 属性，可以直接拖动调整大小</p>
+        </div>
+        <div class="resize-info">
+          当前尺寸: {{ resizeInfo.width }}px × {{ resizeInfo.height }}px | 
+          变化次数: {{ resizeCount }}
+        </div>
+      </div>
+      
+      <!-- 练习3：v-loading 指令 -->
+      <div class="exercise-card">
+        <h3>练习 3：v-loading 加载状态指令</h3>
+        <p>显示加载动画覆盖层 | 支持自定义加载文字 | 值变为 false 时移除 | 支持全屏/局部两种模式</p>
+      </div>
+      
+      <div class="card">
+        <div style="margin-bottom: 15px;">
+          <label style="margin-right: 15px;">
+            <input type="radio" v-model="loadingMode" value="local"> 局部加载
+          </label>
+          <label>
+            <input type="radio" v-model="loadingMode" value="fullscreen"> 全屏加载
+          </label>
+        </div>
+        
+        <div v-if="loadingMode === 'local'">
+          <div v-exercise3-loading="isLoading" v-exercise3-loading-text="loadingText" class="loading-wrapper content-area">
+            <h4>内容区域</h4>
+            <ul>
+              <li>数据项 1</li>
+              <li>数据项 2</li>
+              <li>数据项 3</li>
+              <li>数据项 4</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div v-if="loadingMode === 'fullscreen'" style="position: relative;">
+          <div class="content-area" style="padding: 20px; background: #f8f8f8; border-radius: 4px;">
+            <h4>页面内容</h4>
+            <p>全屏加载会覆盖整个视口</p>
+          </div>
+          <div v-if="isLoading && loadingMode === 'fullscreen'" class="loading-fullscreen">
+            <div class="loading-spinner-large"></div>
+            <div class="loading-text">{{ loadingText }}</div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 15px;">
+          <input v-model="loadingText" placeholder="加载提示文字" style="margin-right: 10px;" />
+          <button class="btn btn-primary" @click="toggleLoading">
+            {{ isLoading ? '停止' : '开始' }} 加载
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, nextTick } = Vue;
+
+    // 全局 tooltip 元素（避免重复创建）
+    let globalTooltip = null;
+    let currentTarget = null;
+
+    function getGlobalTooltip() {
+      if (!globalTooltip) {
+        globalTooltip = document.createElement('div');
+        globalTooltip.className = 'custom-tooltip';
+        document.body.appendChild(globalTooltip);
+      }
+      return globalTooltip;
+    }
+
+    createApp({
+      setup() {
+        // 练习1数据
+        const dynamicTooltip = ref('动态提示内容');
+        const buttonTooltip = ref('<strong>富文本</strong><br>支持 HTML');
+
+        // 练习2数据
+        const resizeInfo = ref({ width: 0, height: 0 });
+        const resizeCount = ref(0);
+
+        const onResize = (size) => {
+          resizeInfo.value = size;
+          resizeCount.value++;
+        };
+
+        // 练习3数据
+        const isLoading = ref(false);
+        const loadingText = ref('正在加载数据...');
+        const loadingMode = ref('local');
+
+        const toggleLoading = () => {
+          isLoading.value = !isLoading.value;
+          if (isLoading.value && loadingMode.value === 'fullscreen') {
+            // 全屏模式 3 秒后自动停止
+            setTimeout(() => {
+              isLoading.value = false;
+            }, 3000);
+          }
+        };
+
+        return {
+          dynamicTooltip,
+          buttonTooltip,
+          resizeInfo,
+          resizeCount,
+          onResize,
+          isLoading,
+          loadingText,
+          loadingMode,
+          toggleLoading
+        };
+      }
+    })
+    // 练习1：v-exercise1-tooltip
+    .directive('exercise1-tooltip', {
+      mounted(el, binding) {
+        const tooltip = getGlobalTooltip();
+        
+        const showTooltip = () => {
+          currentTarget = el;
+          
+          // 设置内容
+          tooltip.innerHTML = binding.value;
+          tooltip.className = 'custom-tooltip show';
+          
+          // 设置位置
+          const position = binding.arg || 'top';
+          tooltip.classList.add(position);
+          
+          // 计算位置
+          const rect = el.getBoundingClientRect();
+          const tooltipRect = tooltip.getBoundingClientRect();
+          
+          let top, left;
+          
+          switch (position) {
+            case 'top':
+              top = rect.top - tooltipRect.height - 8;
+              left = rect.left + rect.width / 2 - tooltipRect.width / 2;
+              break;
+            case 'bottom':
+              top = rect.bottom + 8;
+              left = rect.left + rect.width / 2 - tooltipRect.width / 2;
+              break;
+            case 'left':
+              top = rect.top + rect.height / 2 - tooltipRect.height / 2;
+              left = rect.left - tooltipRect.width - 8;
+              break;
+            case 'right':
+              top = rect.top + rect.height / 2 - tooltipRect.height / 2;
+              left = rect.right + 8;
+              break;
+            default:
+              top = rect.top - tooltipRect.height - 8;
+              left = rect.left + rect.width / 2 - tooltipRect.width / 2;
+          }
+          
+          tooltip.style.top = top + 'px';
+          tooltip.style.left = left + 'px';
+        };
+        
+        const hideTooltip = () => {
+          if (currentTarget === el) {
+            tooltip.classList.remove('show');
+            currentTarget = null;
+          }
+        };
+        
+        el.addEventListener('mouseenter', showTooltip);
+        el.addEventListener('mouseleave', hideTooltip);
+        
+        el._tooltipShow = showTooltip;
+        el._tooltipHide = hideTooltip;
+      },
+      updated(el, binding) {
+        // 如果当前显示的是此元素的提示，更新内容
+        if (currentTarget === el && globalTooltip) {
+          globalTooltip.innerHTML = binding.value;
+        }
+      },
+      unmounted(el) {
+        el.removeEventListener('mouseenter', el._tooltipShow);
+        el.removeEventListener('mouseleave', el._tooltipHide);
+        if (currentTarget === el && globalTooltip) {
+          globalTooltip.classList.remove('show');
+        }
+      }
+    })
+    // 练习2：v-exercise2-resize
+    .directive('exercise2-resize', {
+      mounted(el, binding) {
+        const callback = binding.value;
+        
+        // 立即获取初始尺寸
+        const rect = el.getBoundingClientRect();
+        callback({
+          width: Math.round(rect.width),
+          height: Math.round(rect.height)
+        });
+        
+        // 创建 ResizeObserver
+        const observer = new ResizeObserver((entries) => {
+          const entry = entries[0];
+          const { width, height } = entry.contentRect;
+          callback({
+            width: Math.round(width),
+            height: Math.round(height)
+          });
+        });
+        
+        observer.observe(el);
+        el._resizeObserver = observer;
+      },
+      unmounted(el) {
+        el._resizeObserver?.disconnect();
+      }
+    })
+    // 练习3：v-exercise3-loading
+    .directive('exercise3-loading', {
+      mounted(el, binding) {
+        const text = el.getAttribute('v-exercise3-loading-text') || '加载中...';
+        
+        const createLoadingOverlay = () => {
+          const overlay = document.createElement('div');
+          overlay.className = 'loading-fullscreen';
+          overlay.style.position = 'absolute';
+          overlay.innerHTML = `
+            <div class="loading-spinner-large" style="width: 40px; height: 40px; border-width: 3px;"></div>
+            <div class="loading-text" style="font-size: 14px;">${text}</div>
+          `;
+          return overlay;
+        };
+        
+        el._loadingOverlay = createLoadingOverlay();
+        el.style.position = 'relative';
+        
+        if (binding.value) {
+          el.appendChild(el._loadingOverlay);
+        }
+      },
+      updated(el, binding) {
+        const overlay = el._loadingOverlay;
+        if (!overlay) return;
+        
+        // 更新文字
+        const text = el.getAttribute('v-exercise3-loading-text') || '加载中...';
+        const textEl = overlay.querySelector('.loading-text');
+        if (textEl) textEl.textContent = text;
+        
+        // 显示/隐藏
+        if (binding.value && !el.contains(overlay)) {
+          el.appendChild(overlay);
+        } else if (!binding.value && el.contains(overlay)) {
+          el.removeChild(overlay);
+        }
+      },
+      unmounted(el) {
+        if (el._loadingOverlay && el.contains(el._loadingOverlay)) {
+          el.removeChild(el._loadingOverlay);
+        }
+      }
+    })
+    .mount('#app');
+  </script>
+</body>
+</html>

@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第七章练习题答案</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #31708f;
+            border-bottom: 2px solid #31708f;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #3c763d;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #31708f;
+            margin-top: 25px;
+        }
+        .exercise {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #31708f;
+        }
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .output {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 4px solid #4caf50;
+        }
+        .note {
+            background-color: #e7f3ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <h1>第七章：泛型 - 练习题答案</h1>
+
+    <div class="exercise">
+        <h3>练习 7.1：获取数组第一个元素</h3>
+        <p><strong>题目：</strong>编写一个泛型函数 `getFirst`，接受数组参数，返回第一个元素。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 获取数组第一个元素
+function getFirst<T>(arr: T[]): T | undefined {
+  return arr[0];
+}
+
+// 测试
+const numbers = [1, 2, 3, 4, 5];
+const strings = ["apple", "banana", "cherry"];
+const emptyArray: number[] = [];
+
+console.log("getFirst(numbers):", getFirst(numbers));
+console.log("getFirst(strings):", getFirst(strings));
+console.log("getFirst(emptyArray):", getFirst(emptyArray));
+
+// 进阶：支持元组
+function getFirstElement<T extends readonly any[]>(arr: T): T[0] | undefined {
+  return arr[0];
+}
+
+const tuple = [1, "hello", true] as const;
+console.log("getFirstElement(tuple):", getFirstElement(tuple));</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            getFirst(numbers): 1<br>
+            getFirst(strings): apple<br>
+            getFirst(emptyArray): undefined<br>
+            getFirstElement(tuple): 1
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 7.2：交换元素</h3>
+        <p><strong>题目：</strong>编写一个泛型函数 `swap`，接受两个参数，返回交换后的元组。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 交换两个元素
+function swap<T, U>(a: T, b: U): [U, T] {
+  return [b, a];
+}
+
+// 测试
+const [a, b] = swap(1, "hello");
+console.log("swap(1, 'hello'):", a, b);  // "hello", 1
+
+const [c, d] = swap(true, 42);
+console.log("swap(true, 42):", c, d);    // 42, true
+
+const [e, f] = swap({ name: "Alice" }, [1, 2, 3]);
+console.log("swap({...}, [...]):", e, f);
+
+// 进阶：支持数组交换
+function swapArrayElements<T>(arr: T[], i: number, j: number): T[] {
+  if (i < 0 || i >= arr.length || j < 0 || j >= arr.length) {
+    throw new Error("Invalid index");
+  }
+
+  const newArr = [...arr];
+  [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+  return newArr;
+}
+
+const arr = [1, 2, 3, 4, 5];
+console.log("swapArrayElements([1,2,3,4,5], 0, 4):", swapArrayElements(arr, 0, 4));</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            swap(1, 'hello'): hello 1<br>
+            swap(true, 42): 42 true<br>
+            swap({...}, [...]): [ 1, 2, 3 ] { name: 'Alice' }<br>
+            swapArrayElements([1,2,3,4,5], 0, 4): [ 5, 2, 3, 4, 1 ]
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 7.3：泛型队列类</h3>
+        <p><strong>题目：</strong>创建一个泛型类 `Queue`，包含 `enqueue`、`dequeue`、`peek`、`isEmpty` 方法。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 泛型队列类
+class Queue<T> {
+  private items: T[] = [];
+
+  // 入队
+  enqueue(item: T): void {
+    this.items.push(item);
+  }
+
+  // 出队
+  dequeue(): T | undefined {
+    return this.items.shift();
+  }
+
+  // 查看队首元素
+  peek(): T | undefined {
+    return this.items[0];
+  }
+
+  // 队列是否为空
+  isEmpty(): boolean {
+    return this.items.length === 0;
+  }
+
+  // 队列大小
+  getSize(): number {
+    return this.items.length;
+  }
+
+  // 清空队列
+  clear(): void {
+    this.items = [];
+  }
+
+  // 获取所有元素
+  toArray(): T[] {
+    return [...this.items];
+  }
+
+  // 批量入队
+  enqueueAll(items: T[]): void {
+    this.items.push(...items);
+  }
+}
+
+// 测试
+const numberQueue = new Queue<number>();
+console.log("=== 数字队列测试 ===");
+console.log("是否为空:", numberQueue.isEmpty());
+
+numberQueue.enqueue(1);
+numberQueue.enqueue(2);
+numberQueue.enqueue(3);
+console.log("入队 1, 2, 3 后的队列:", numberQueue.toArray());
+console.log("队首元素:", numberQueue.peek());
+console.log("出队:", numberQueue.dequeue());
+console.log("出队后队列:", numberQueue.toArray());
+console.log("队列大小:", numberQueue.getSize());
+
+// 字符串队列
+const stringQueue = new Queue<string>();
+stringQueue.enqueue("a");
+stringQueue.enqueue("b");
+stringQueue.enqueueAll(["c", "d", "e"]);
+console.log("\n=== 字符串队列测试 ===");
+console.log("队列:", stringQueue.toArray());
+console.log("清空前大小:", stringQueue.getSize());
+stringQueue.clear();
+console.log("清空后是否为空:", stringQueue.isEmpty());
+
+// 优先队列（进阶）
+class PriorityQueue<T> {
+  private items: { item: T; priority: number }[] = [];
+
+  enqueue(item: T, priority: number): void {
+    this.items.push({ item, priority });
+    this.items.sort((a, b) => a.priority - b.priority);
+  }
+
+  dequeue(): T | undefined {
+    return this.items.shift()?.item;
+  }
+
+  peek(): T | undefined {
+    return this.items[0]?.item;
+  }
+
+  isEmpty(): boolean {
+    return this.items.length === 0;
+  }
+}
+
+const priorityQueue = new PriorityQueue<string>();
+priorityQueue.enqueue("低优先级任务", 3);
+priorityQueue.enqueue("高优先级任务", 1);
+priorityQueue.enqueue("中优先级任务", 2);
+
+console.log("\n=== 优先队列测试 ===");
+while (!priorityQueue.isEmpty()) {
+  console.log("处理:", priorityQueue.dequeue());
+}</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === 数字队列测试 ===<br>
+            是否为空: true<br>
+            入队 1, 2, 3 后的队列: [ 1, 2, 3 ]<br>
+            队首元素: 1<br>
+            出队: 1<br>
+            出队后队列: [ 2, 3 ]<br>
+            队列大小: 2<br><br>
+            === 字符串队列测试 ===<br>
+            队列: [ 'a', 'b', 'c', 'd', 'e' ]<br>
+            清空前大小: 5<br>
+            清空后是否为空: true<br><br>
+            === 优先队列测试 ===<br>
+            处理: 高优先级任务<br>
+            处理: 中优先级任务<br>
+            处理: 低优先级任务
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 7.4：分组函数</h3>
+        <p><strong>题目：</strong>创建一个泛型函数 `groupBy`，接受数组和分组函数，返回按分组函数结果组织的对象。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 分组函数
+function groupBy<T, K extends string | number>(
+  array: T[],
+  keyGetter: (item: T) => K
+): Record<K, T[]> {
+  return array.reduce((groups, item) => {
+    const key = keyGetter(item);
+    if (!groups[key]) {
+      groups[key] = [];
+    }
+    groups[key].push(item);
+    return groups;
+  }, {} as Record<K, T[]>);
+}
+
+// 测试
+interface User {
+  name: string;
+  department: string;
+  age: number;
+}
+
+const users: User[] = [
+  { name: "Alice", department: "Engineering", age: 25 },
+  { name: "Bob", department: "Marketing", age: 30 },
+  { name: "Charlie", department: "Engineering", age: 28 },
+  { name: "Diana", department: "HR", age: 35 },
+  { name: "Eve", department: "Marketing", age: 32 }
+];
+
+// 按部门分组
+const byDepartment = groupBy(users, (user) => user.department);
+console.log("按部门分组:");
+console.log(byDepartment);
+
+// 按年龄段分组
+const byAgeGroup = groupBy(users, (user) => {
+  if (user.age < 30) return "young";
+  if (user.age < 35) return "middle";
+  return "senior";
+});
+
+console.log("\n按年龄段分组:");
+console.log(byAgeGroup);
+
+// 进阶：支持自定义分隔符
+function groupByWithSeparator<T>(
+  array: T[],
+  keyGetter: (item: T) => string,
+  separator: string = "_"
+): Record<string, T[]> {
+  return array.reduce((groups, item) => {
+    const key = keyGetter(item).replace(/\s+/g, separator).toLowerCase();
+    if (!groups[key]) {
+      groups[key] = [];
+    }
+    groups[key].push(item);
+    return groups;
+  }, {} as Record<string, T[]>);
+}
+
+const byFirstLetter = groupByWithSeparator(
+  ["Apple", "Banana", "Apricot", "Cherry", "Avocado"],
+  (s) => s
+);
+console.log("\n按首字母分组:");
+console.log(byFirstLetter);</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            按部门分组:<br>
+            { Engineering: [ [Object], [Object] ],<br>
+            &nbsp;&nbsp;Marketing: [ [Object], [Object] ],<br>
+            &nbsp;&nbsp;HR: [ [Object] ] }<br><br>
+            按年龄段分组:<br>
+            { young: [ [Object], [Object] ],<br>
+            &nbsp;&nbsp;middle: [ [Object] ],<br>
+            &nbsp;&nbsp;senior: [ [Object] ] }<br><br>
+            按首字母分组:<br>
+            { apple: [ 'Apple', 'Apricot' ],<br>
+            &nbsp;&nbsp;banana: [ 'Banana' ],<br>
+            &nbsp;&nbsp;cherry: [ 'Cherry' ],<br>
+            &nbsp;&nbsp;avocado: [ 'Avocado' ] }
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 7.5：DeepPartial 工具类型</h3>
+        <p><strong>题目：</strong>创建一个泛型工具类型 `DeepPartial`，可以将对象的所有嵌套属性都变为可选。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// DeepPartial 工具类型
+type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+};
+
+// 测试
+interface Company {
+  name: string;
+  address: {
+    street: string;
+    city: string;
+    zipCode: string;
+  };
+  employees: {
+    id: number;
+    name: string;
+    contact: {
+      email: string;
+      phone: string;
+    };
+  }[];
+}
+
+type PartialCompany = DeepPartial<Company>;
+
+// 完整对象
+const company: Company = {
+  name: "Tech Corp",
+  address: {
+    street: "123 Main St",
+    city: "Beijing",
+    zipCode: "100000"
+  },
+  employees: [
+    {
+      id: 1,
+      name: "Alice",
+      contact: {
+        email: "alice@example.com",
+        phone: "1234567890"
+      }
+    }
+  ]
+};
+
+// 部分对象（所有属性都是可选的）
+const partialCompany: PartialCompany = {
+  name: "New Tech",
+  address: {
+    city: "Shanghai"
+  },
+  employees: [
+    {
+      id: 1,
+      contact: {
+        email: "new@example.com"
+      }
+    }
+  ]
+};
+
+console.log("完整公司:", company);
+console.log("部分公司:", partialCompany);
+
+// 验证类型安全
+const testPartial: DeepPartial<Company> = {
+  address: {
+    // city 是可选的
+  },
+  employees: [
+    {
+      // 只有 email 是必填的
+      contact: {
+        email: "test@example.com"
+      }
+    }
+  ]
+};
+
+console.log("测试部分对象:", testPartial);</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            完整公司: { name: 'Tech Corp', address: { ... }, employees: [...] }<br>
+            部分公司: { name: 'New Tech', address: { city: 'Shanghai' }, employees: [...] }<br>
+            测试部分对象: { address: {}, employees: [...] }
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 7.6：Observable 观察者类</h3>
+        <p><strong>题目：</strong>实现一个泛型 `Observable` 类，支持订阅、取消订阅和发布事件。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 观察者模式实现
+type Subscription<T> = {
+  unsubscribe: () => void;
+};
+
+type Observer<T> = (data: T) => void;
+
+class Observable<T> {
+  private observers: Map<string, Observer<T>[]> = new Map();
+  private globalObservers: Observer<T>[] = [];
+
+  // 订阅特定事件
+  subscribe(event: string, observer: Observer<T>): Subscription<T> {
+    if (!this.observers.has(event)) {
+      this.observers.set(event, []);
+    }
+    this.observers.get(event)!.push(observer);
+
+    return {
+      unsubscribe: () => {
+        const observers = this.observers.get(event);
+        if (observers) {
+          const index = observers.indexOf(observer);
+          if (index !== -1) {
+            observers.splice(index, 1);
+          }
+        }
+      }
+    };
+  }
+
+  // 订阅所有事件
+  subscribeAll(observer: Observer<T>): Subscription<T> {
+    this.globalObservers.push(observer);
+
+    return {
+      unsubscribe: () => {
+        const index = this.globalObservers.indexOf(observer);
+        if (index !== -1) {
+          this.globalObservers.splice(index, 1);
+        }
+      }
+    };
+  }
+
+  // 发布事件
+  next(event: string, data: T): void {
+    // 通知特定事件订阅者
+    const eventObservers = this.observers.get(event);
+    if (eventObservers) {
+      eventObservers.forEach(observer => observer(data));
+    }
+
+    // 通知全局订阅者
+    this.globalObservers.forEach(observer => observer(data));
+  }
+
+  // 获取观察者数量
+  getObserverCount(event?: string): number {
+    if (event) {
+      return this.observers.get(event)?.length || 0;
+    }
+    return this.globalObservers.length;
+  }
+}
+
+// 测试
+console.log("=== Observable 测试 ===");
+
+interface EventData {
+  type: string;
+  message: string;
+  timestamp: number;
+}
+
+const observable = new Observable<EventData>();
+
+const sub1 = observable.subscribe("login", (data) => {
+  console.log(`登录事件: ${data.message}`);
+});
+
+const sub2 = observable.subscribe("message", (data) => {
+  console.log(`消息事件: ${data.message}`);
+});
+
+const sub3 = observable.subscribeAll((data) => {
+  console.log(`全局事件 [${data.type}]: ${data.message}`);
+});
+
+console.log("\n发布登录事件：");
+observable.next("login", { type: "login", message: "用户 Alice 登录", timestamp: Date.now() });
+
+console.log("\n发布消息事件：");
+observable.next("message", { type: "message", message: "收到新消息", timestamp: Date.now() });
+
+console.log("\n取消登录订阅后：");
+sub1.unsubscribe();
+observable.next("login", { type: "login", message: "用户 Bob 登录", timestamp: Date.now() });
+
+console.log("\n观察者数量:", observable.getObserverCount());
+
+// 进阶：带过滤的观察者
+class FilteredObservable<T> extends Observable<T> {
+  filter(predicate: (data: T) => boolean): Observable<T> {
+    const filtered = new Observable<T>();
+
+    const sub = this.subscribeAll((data) => {
+      if (predicate(data)) {
+        filtered.next("filtered", data);
+      }
+    });
+
+    return filtered;
+  }
+}
+
+console.log("\n=== FilteredObservable 测试 ===");
+const filtered = new FilteredObservable<EventData>();
+const errorStream = filtered.filter(d => d.type === "error");
+
+errorStream.subscribe("filtered", (data) => {
+  console.log(`错误事件: ${data.message}`);
+});
+
+filtered.next("login", { type: "login", message: "用户登录", timestamp: Date.now() });
+filtered.next("error", { type: "error", message: "系统错误", timestamp: Date.now() });</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === Observable 测试 ===<br><br>
+            发布登录事件：<br>
+            登录事件: 用户 Alice 登录<br>
+            全局事件 [login]: 用户 Alice 登录<br><br>
+            发布消息事件：<br>
+            消息事件: 收到新消息<br>
+            全局事件 [message]: 收到新消息<br><br>
+            取消登录订阅后：<br>
+            全局事件 [login]: 用户 Bob 登录<br><br>
+            观察者数量: 1<br><br>
+            === FilteredObservable 测试 ===<br>
+            错误事件: 系统错误
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 7.7：泛型表单验证器</h3>
+        <p><strong>题目：</strong>创建一个泛型表单验证器类 `FormValidator`。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 表单验证器
+type ValidationRule<T> = {
+  field: keyof T;
+  validate: (value: any) => boolean;
+  message: string;
+};
+
+type ValidationResult<T> = {
+  isValid: boolean;
+  errors: Partial<Record<keyof T, string[]>>;
+  data?: T;
+};
+
+class FormValidator<T extends object> {
+  private rules: ValidationRule<T>[] = [];
+
+  addRule(rule: ValidationRule<T>): this {
+    this.rules.push(rule);
+    return this;
+  }
+
+  addRules(rules: ValidationRule<T>[]): this {
+    this.rules.push(...rules);
+    return this;
+  }
+
+  validate(data: T): ValidationResult<T> {
+    const errors: Partial<Record<keyof T, string[]>> = {};
+
+    this.rules.forEach(rule => {
+      const value = data[rule.field];
+      if (!rule.validate(value)) {
+        if (!errors[rule.field]) {
+          errors[rule.field] = [];
+        }
+        errors[rule.field]!.push(rule.message);
+      }
+    });
+
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors,
+      data: Object.keys(errors).length === 0 ? data : undefined
+    };
+  }
+
+  // 静态工厂方法
+  static create<T extends object>(): FormValidator<T> {
+    return new FormValidator<T>();
+  }
+}
+
+// 预定义验证规则
+const Validators = {
+  required<T>(field: keyof T, message: string = "此字段必填") {
+    return {
+      field,
+      validate: (value: any) => value !== undefined && value !== null && value !== "",
+      message
+    };
+  },
+
+  minLength<T>(field: keyof T, min: number, message?: string) {
+    return {
+      field,
+      validate: (value: string) => value.length >= min,
+      message: message || `最少 ${min} 个字符`
+    };
+  },
+
+  maxLength<T>(field: keyof T, max: number, message?: string) {
+    return {
+      field,
+      validate: (value: string) => value.length <= max,
+      message: message || `最多 ${max} 个字符`
+    };
+  },
+
+  email<T>(field: keyof T, message: string = "请输入有效的邮箱地址") {
+    return {
+      field,
+      validate: (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+      message
+    };
+  },
+
+  min<T>(field: keyof T, min: number, message?: string) {
+    return {
+      field,
+      validate: (value: number) => value >= min,
+      message: message || `最小值为 ${min}`
+    };
+  },
+
+  max<T>(field: keyof T, max: number, message?: string) {
+    return {
+      field,
+      validate: (value: number) => value <= max,
+      message: message || `最大值为 ${max}`
+    };
+  },
+
+  pattern<T>(field: keyof T, regex: RegExp, message: string = "格式不正确") {
+    return {
+      field,
+      validate: (value: string) => regex.test(value),
+      message
+    };
+  }
+};
+
+// 测试
+interface UserForm {
+  username: string;
+  email: string;
+  age: number;
+  password: string;
+}
+
+console.log("=== FormValidator 测试 ===");
+
+const validator = FormValidator.create<UserForm>()
+  .addRule(Validators.required("username", "用户名必填"))
+  .addRule(Validators.minLength("username", 3, "用户名至少3个字符"))
+  .addRule(Validators.maxLength("username", 20, "用户名最多20个字符"))
+  .addRule(Validators.required("email", "邮箱必填"))
+  .addRule(Validators.email("email"))
+  .addRule(Validators.required("age", "年龄必填"))
+  .addRule(Validators.min("age", 18, "年龄必须大于等于18"))
+  .addRule(Validators.required("password", "密码必填"))
+  .addRule(Validators.minLength("password", 6, "密码至少6个字符"));
+
+// 有效的表单数据
+const validData: UserForm = {
+  username: "alice123",
+  email: "alice@example.com",
+  age: 25,
+  password: "password123"
+};
+
+const validResult = validator.validate(validData);
+console.log("\n有效数据验证结果:");
+console.log("是否有效:", validResult.isValid);
+console.log("错误:", validResult.errors);
+
+// 无效的表单数据
+const invalidData: UserForm = {
+  username: "a",  // 太短
+  email: "invalid-email",  // 无效邮箱
+  age: 16,  // 小于18
+  password: "123"  // 太短
+};
+
+const invalidResult = validator.validate(invalidData);
+console.log("\n无效数据验证结果:");
+console.log("是否有效:", invalidResult.isValid);
+console.log("错误:", invalidResult.errors);</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === FormValidator 测试 ===<br><br>
+            有效数据验证结果:<br>
+            是否有效: true<br>
+            错误: {}<br><br>
+            无效数据验证结果:<br>
+            是否有效: false<br>
+            错误: {<br>
+            &nbsp;&nbsp;username: [ '用户名至少3个字符' ],<br>
+            &nbsp;&nbsp;email: [ '请输入有效的邮箱地址' ],<br>
+            &nbsp;&nbsp;age: [ '年龄必须大于等于18' ],<br>
+            &nbsp;&nbsp;password: [ '密码至少6个字符' ]<br>
+            }
+        </div>
+    </div>
+
+    <p style="text-align: center; color: #666; margin-top: 40px;">
+        练习题答案仅供参考，建议自己动手实践加深理解。
+    </p>
+</body>
+</html>

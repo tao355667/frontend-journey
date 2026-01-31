@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>伪类选择器演示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        /* 动态伪类 */
+        a:hover {
+            color: #e74c3c;
+            text-decoration: underline;
+        }
+        
+        a:active {
+            color: #27ae60;
+        }
+        
+        a:focus {
+            outline: 2px solid #3498db;
+            outline-offset: 2px;
+        }
+        
+        /* 表单伪类 */
+        input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+        
+        input:required {
+            border-color: #e74c3c;
+        }
+        
+        input:valid {
+            border-color: #27ae60;
+        }
+        
+        input:invalid {
+            border-color: #e74c3c;
+            background-color: #ffe6e6;
+        }
+        
+        /* 结构性伪类 */
+        li:first-child {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        li:last-child {
+            font-style: italic;
+            color: #7f8c8d;
+        }
+        
+        li:nth-child(odd) {
+            background-color: #f8f9fa;
+        }
+        
+        li:nth-child(even) {
+            background-color: #e9ecef;
+        }
+        
+        li:nth-child(3n) {
+            color: #3498db;
+        }
+        
+        /* 否定伪类 */
+        li:not(.special) {
+            padding-left: 20px;
+        }
+        
+        .special {
+            background-color: #fff3cd;
+            padding: 5px 10px;
+            border-radius: 3px;
+        }
+        
+        /* UI状态伪类 */
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        input[type="checkbox"]:checked + label {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        /* 演示样式 */
+        .demo-section {
+            border: 1px solid #dee2e6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .nav-links a {
+            display: inline-block;
+            padding: 10px 15px;
+            margin: 5px;
+            background-color: #f8f9fa;
+            color: #495057;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            background-color: #3498db;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .form-group {
+            margin: 15px 0;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input {
+            padding: 8px 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>伪类选择器演示</h1>
+    </header>
+    
+    <main aria-label="伪类选择器演示内容">
+        <section class="demo-section" aria-label="动态伪类示例">
+            <h2>动态伪类 (:hover, :active, :focus)</h2>
+            <div class="nav-links">
+                <a href="#">链接1 - 悬停查看效果</a>
+                <a href="#">链接2 - 点击查看效果</a>
+                <a href="#">链接3 - Tab键聚焦查看效果</a>
+            </div>
+        </section>
+        
+        <section class="demo-section" aria-label="表单伪类示例">
+            <h2>表单伪类</h2>
+            <div class="form-group">
+                <label for="required-input">必填字段:</label>
+                <input type="text" id="required-input" required placeholder="这是必填字段">
+            </div>
+            
+            <div class="form-group">
+                <label for="email-input">邮箱验证:</label>
+                <input type="email" id="email-input" placeholder="请输入有效邮箱">
+            </div>
+            
+            <div class="form-group">
+                <label for="number-input">数字验证:</label>
+                <input type="number" id="number-input" min="1" max="100" placeholder="1-100之间的数字">
+            </div>
+        </section>
+        
+        <section class="demo-section" aria-label="结构性伪类示例">
+            <h2>结构性伪类</h2>
+            <ul>
+                <li>第一个项目 (first-child - 加粗)</li>
+                <li>第二个项目</li>
+                <li class="special">第三个项目 (特殊样式)</li>
+                <li>第四个项目</li>
+                <li>第五个项目</li>
+                <li>第六个项目</li>
+                <li class="special">第七个项目 (特殊样式)</li>
+                <li>第八个项目</li>
+                <li>第九个项目</li>
+                <li>第十个项目 (last-child - 斜体)</li>
+            </ul>
+            <p><strong>说明：</strong>奇数行有浅灰背景，偶数行有深灰背景，每3个项目有蓝色文字。</p>
+        </section>
+        
+        <section class="demo-section" aria-label="否定伪类示例">
+            <h2>否定伪类 (:not)</h2>
+            <ul>
+                <li>普通项目1 (有左边距)</li>
+                <li class="special">特殊项目 (无左边距)</li>
+                <li>普通项目2 (有左边距)</li>
+                <li class="special">特殊项目 (无左边距)</li>
+                <li>普通项目3 (有左边距)</li>
+            </ul>
+        </section>
+        
+        <section class="demo-section" aria-label="UI状态伪类示例">
+            <h2>UI状态伪类</h2>
+            <div>
+                <input type="checkbox" id="check1">
+                <label for="check1">勾选我查看效果</label>
+            </div>
+            <div style="margin-top: 10px;">
+                <button type="button">正常按钮</button>
+                <button type="button" disabled>禁用按钮</button>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第17章练习答案 - 过渡动画应用</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #f5f5f5; }
+    h1 { text-align: center; color: #333; margin-bottom: 30px; }
+    h2 { color: #42b883; margin: 30px 0 15px; border-bottom: 2px solid #42b883; padding-bottom: 10px; }
+    .container { max-width: 1000px; margin: 0 auto; }
+    
+    .exercise-card { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0; }
+    .exercise-card h3 { color: #1976d2; margin-bottom: 10px; }
+    .exercise-card code { background: rgba(255,255,255,0.7); padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 13px; }
+    
+    .card { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin: 5px; transition: all 0.2s; }
+    .btn-primary { background: #42b883; color: white; }
+    .btn-danger { background: #ff5252; color: white; }
+    .btn-default { background: #e0e0e0; color: #333; }
+    .btn:hover { opacity: 0.8; }
+    
+    /* 练习1：模态框过渡 */
+    .ex1-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+    .ex1-modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .ex1-modal-enter-active {
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .ex1-modal-leave-active {
+      transition: all 0.3s ease-in;
+    }
+    .ex1-modal-enter-from {
+      opacity: 0;
+      transform: translateY(-40px) scale(0.95);
+    }
+    .ex1-modal-leave-to {
+      opacity: 0;
+      transform: translateY(-30px) scale(0.95);
+    }
+    
+    /* 练习2：图片画廊 */
+    .ex2-gallery {
+      position: relative;
+      height: 350px;
+      background: #1a1a1a;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .ex2-gallery-image {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .ex2-gallery-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: none;
+      padding: 20px 15px;
+      cursor: pointer;
+      font-size: 24px;
+      transition: background 0.3s;
+    }
+    .ex2-gallery-nav:hover { background: rgba(255,255,255,0.4); }
+    .ex2-gallery-nav.prev { left: 0; border-radius: 0 8px 8px 0; }
+    .ex2-gallery-nav.next { right: 0; border-radius: 8px 0 0 8px; }
+    .ex2-gallery-indicators {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+    }
+    .ex2-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .ex2-indicator.active {
+      background: #42b883;
+      transform: scale(1.2);
+    }
+    
+    .ex2-slide-left-enter-active,
+    .ex2-slide-left-leave-active,
+    .ex2-slide-right-enter-active,
+    .ex2-slide-right-leave-active {
+      transition: all 0.5s ease;
+    }
+    .ex2-slide-left-enter-from { opacity: 0; transform: translateX(100%); }
+    .ex2-slide-left-leave-to { opacity: 0; transform: translateX(-100%); }
+    .ex2-slide-right-enter-from { opacity: 0; transform: translateX(-100%); }
+    .ex2-slide-right-leave-to { opacity: 0; transform: translateX(100%); }
+    
+    /* 练习3：手风琴 */
+    .ex3-accordion-item {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      background: white;
+    }
+    .ex3-accordion-header {
+      padding: 18px 20px;
+      background: #f8f8f8;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 500;
+      transition: background 0.3s;
+    }
+    .ex3-accordion-header:hover { background: #e8e8e8; }
+    .ex3-accordion-icon {
+      transition: transform 0.3s ease;
+      font-size: 12px;
+    }
+    .ex3-accordion-icon.open { transform: rotate(180deg); }
+    .ex3-accordion-content-wrapper { overflow: hidden; }
+    .ex3-accordion-content {
+      padding: 0 20px;
+    }
+    .ex3-accordion-body {
+      padding: 20px 0;
+      color: #666;
+      line-height: 1.6;
+    }
+    
+    .ex3-expand-enter-active,
+    .ex3-expand-leave-active {
+      transition: all 0.4s ease;
+    }
+    .ex3-expand-enter-from,
+    .ex3-expand-leave-to {
+      opacity: 0;
+      max-height: 0;
+    }
+    
+    /* 状态标签 */
+    .status-tag { display: inline-block; padding: 4px 12px; background: #e8f5e9; color: #2e7d32; border-radius: 20px; font-size: 12px; margin-left: 10px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>第17章练习题答案</h1>
+      
+      <!-- 练习1：模态框过渡 -->
+      <div class="exercise-card">
+        <h3>练习 1：模态框过渡</h3>
+        <p>淡入 + 从上方滑入 | 点击遮罩层关闭 | 关闭时反向动画 | 使用 cubic-bezier 缓动函数</p>
+      </div>
+      
+      <div class="card">
+        <button class="btn btn-primary" @click="ex1ShowModal = true">
+          打开模态框
+        </button>
+        
+        <Transition name="ex1-modal">
+          <div v-if="ex1ShowModal" class="ex1-modal-overlay" @click.self="ex1ShowModal = false">
+            <div class="ex1-modal-content">
+              <h3 style="margin-bottom: 15px;">动画模态框</h3>
+              <p style="color: #666; line-height: 1.6; margin-bottom: 15px;">
+                这是一个带有精美过渡动画的模态框。它使用了 cubic-bezier 缓动函数，
+                使动画感觉更加自然流畅。点击遮罩层或下方按钮可以关闭。
+              </p>
+              <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" @click="ex1ShowModal = false">
+                  确认
+                </button>
+                <button class="btn btn-default" @click="ex1ShowModal = false">
+                  取消
+                </button>
+              </div>
+            </div>
+          </div>
+        </Transition>
+        
+        <div style="margin-top: 15px; padding: 10px; background: #f8f8f8; border-radius: 4px; font-size: 13px; color: #666;">
+          💡 观察打开和关闭时的动画效果：淡入淡出 + 缩放 + 位移
+        </div>
+      </div>
+      
+      <!-- 练习2：图片画廊过渡 -->
+      <div class="exercise-card">
+        <h3>练习 2：图片画廊过渡</h3>
+        <p>mode="out-in" | 新图片从右滑入，旧图片向左滑出 | 添加缩放效果 | 底部指示器</p>
+      </div>
+      
+      <div class="card">
+        <div class="ex2-gallery">
+          <Transition :name="ex2SlideDirection" mode="out-in">
+            <img 
+              :key="ex2CurrentImage"
+              :src="ex2Images[ex2CurrentImage]" 
+              class="ex2-gallery-image"
+              alt="画廊图片"
+            />
+          </Transition>
+          
+          <button class="ex2-gallery-nav prev" @click="ex2PrevImage">‹</button>
+          <button class="ex2-gallery-nav next" @click="ex2NextImage">›</button>
+          
+          <div class="ex2-gallery-indicators">
+            <div 
+              v-for="(img, index) in ex2Images" 
+              :key="index"
+              :class="['ex2-indicator', { active: ex2CurrentImage === index }]"
+              @click="ex2GoToImage(index)"
+            ></div>
+          </div>
+        </div>
+        
+        <p style="text-align: center; margin-top: 10px; color: #666;">
+          {{ ex2CurrentImage + 1 }} / {{ ex2Images.length }}
+          <span class="status-tag">{{ ex2SlideDirection === 'ex2-slide-right' ? '向左滑动' : '向右滑动' }}</span>
+        </p>
+      </div>
+      
+      <!-- 练习3：可折叠面板 -->
+      <div class="exercise-card">
+        <h3>练习 3：可折叠面板（手风琴）</h3>
+        <p>点击标题展开/收起内容 | 平滑的高度过渡动画 | 支持多个面板同时展开</p>
+      </div>
+      
+      <div class="card">
+        <div style="margin-bottom: 15px;">
+          <label style="margin-right: 15px;">
+            <input type="radio" v-model="ex3Mode" value="single"> 单开模式（手风琴）
+          </label>
+          <label>
+            <input type="radio" v-model="ex3Mode" value="multiple"> 多开模式
+          </label>
+        </div>
+        
+        <div v-for="(item, index) in ex3AccordionItems" :key="index" class="ex3-accordion-item">
+          <div class="ex3-accordion-header" @click="ex3Toggle(index)">
+            <span>{{ item.title }}</span>
+            <span :class="['ex3-accordion-icon', { open: ex3IsOpen(index) }]">▼</span>
+          </div>
+          <Transition name="ex3-expand">
+            <div v-show="ex3IsOpen(index)" class="ex3-accordion-content-wrapper">
+              <div class="ex3-accordion-content">
+                <div class="ex3-accordion-body">
+                  {{ item.content }}
+                </div>
+              </div>
+            </div>
+          </Transition>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed } = Vue;
+
+    createApp({
+      setup() {
+        // ========== 练习1：模态框 ==========
+        const ex1ShowModal = ref(false);
+
+        // ========== 练习2：图片画廊 ==========
+        const ex2CurrentImage = ref(0);
+        const ex2SlideDirection = ref('ex2-slide-right');
+        
+        const ex2Images = [
+          'https://picsum.photos/800/400?random=1',
+          'https://picsum.photos/800/400?random=2',
+          'https://picsum.photos/800/400?random=3',
+          'https://picsum.photos/800/400?random=4',
+          'https://picsum.photos/800/400?random=5'
+        ];
+        
+        const ex2PrevImage = () => {
+          ex2SlideDirection.value = 'ex2-slide-left';
+          ex2CurrentImage.value = (ex2CurrentImage.value - 1 + ex2Images.length) % ex2Images.length;
+        };
+        
+        const ex2NextImage = () => {
+          ex2SlideDirection.value = 'ex2-slide-right';
+          ex2CurrentImage.value = (ex2CurrentImage.value + 1) % ex2Images.length;
+        };
+        
+        const ex2GoToImage = (index) => {
+          ex2SlideDirection.value = index > ex2CurrentImage.value ? 'ex2-slide-right' : 'ex2-slide-left';
+          ex2CurrentImage.value = index;
+        };
+
+        // ========== 练习3：手风琴 ==========
+        const ex3Mode = ref('single');
+        const ex3OpenIndex = ref(null);
+        const ex3OpenIndexes = ref([]);
+        
+        const ex3AccordionItems = [
+          { title: '什么是 Vue 过渡系统？', content: 'Vue 提供了一套强大的过渡系统，让你能够在元素插入、更新或移除时添加动画效果。这套系统基于 CSS 过渡和动画，同时也支持 JavaScript 钩子函数，给你完全的控制权。' },
+          { title: 'Transition 组件的工作原理', content: '当你用 <Transition> 包裹一个元素时，Vue 会在适当的时机自动添加和移除 CSS 类名。这些类名对应于过渡的不同阶段：enter-from、enter-active、enter-to 等。' },
+          { title: 'TransitionGroup 的特殊之处', content: '与 Transition 不同，TransitionGroup 用于列表过渡。它渲染一个真实的 DOM 元素（默认是 span），并提供了 move 类名来处理列表项的重新排序动画。' },
+          { title: '如何优化过渡性能？', content: '为了获得最佳性能，应该优先使用 transform 和 opacity 属性进行动画。这些属性可以由 GPU 加速，不会触发重排。避免使用 width、height、top、left 等会触发重排的属性。' }
+        ];
+        
+        const ex3IsOpen = (index) => {
+          if (ex3Mode.value === 'single') {
+            return ex3OpenIndex.value === index;
+          } else {
+            return ex3OpenIndexes.value.includes(index);
+          }
+        };
+        
+        const ex3Toggle = (index) => {
+          if (ex3Mode.value === 'single') {
+            ex3OpenIndex.value = ex3OpenIndex.value === index ? null : index;
+          } else {
+            const i = ex3OpenIndexes.value.indexOf(index);
+            if (i > -1) {
+              ex3OpenIndexes.value.splice(i, 1);
+            } else {
+              ex3OpenIndexes.value.push(index);
+            }
+          }
+        };
+
+        return {
+          // 练习1
+          ex1ShowModal,
+          
+          // 练习2
+          ex2CurrentImage,
+          ex2SlideDirection,
+          ex2Images,
+          ex2PrevImage,
+          ex2NextImage,
+          ex2GoToImage,
+          
+          // 练习3
+          ex3Mode,
+          ex3AccordionItems,
+          ex3IsOpen,
+          ex3Toggle
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

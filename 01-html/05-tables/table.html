@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表格示例</title>
+    <style>
+        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; line-height: 1.6; max-width: 900px; margin: 0 auto; padding: 20px; }
+        h2 { margin-top: 30px; }
+        table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f5f5f5; font-weight: bold; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        tr:hover { background-color: #f0f0f0; }
+        caption { caption-side: bottom; text-align: center; margin-top: 10px; font-style: italic; color: #666; }
+    </style>
+</head>
+<body>
+    <h1>HTML 表格示例</h1>
+
+    <h2>示例 1：基本表格结构</h2>
+    <table>
+        <caption>学生成绩表</caption>
+        <thead>
+            <tr>
+                <th>学号</th>
+                <th>姓名</th>
+                <th>语文</th>
+                <th>数学</th>
+                <th>英语</th>
+                <th>总分</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1001</td>
+                <td>张三</td>
+                <td>85</td>
+                <td>90</td>
+                <td>88</td>
+                <td>263</td>
+            </tr>
+            <tr>
+                <td>1002</td>
+                <td>李四</td>
+                <td>78</td>
+                <td>85</td>
+                <td>92</td>
+                <td>255</td>
+            </tr>
+            <tr>
+                <td>1003</td>
+                <td>王五</td>
+                <td>92</td>
+                <td>88</td>
+                <td>90</td>
+                <td>270</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>示例 2：带表尾的表格</h2>
+    <table>
+        <caption>2026年第一季度销售报表</caption>
+        <thead>
+            <tr>
+                <th>产品名称</th>
+                <th>一月</th>
+                <th>二月</th>
+                <th>三月</th>
+                <th>季度总计</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>产品 A</td>
+                <td>120</td>
+                <td>135</td>
+                <td>150</td>
+                <td>405</td>
+            </tr>
+            <tr>
+                <td>产品 B</td>
+                <td>95</td>
+                <td>110</td>
+                <td>125</td>
+                <td>330</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td>合计</td>
+                <td>215</td>
+                <td>245</td>
+                <td>275</td>
+                <td>735</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <h2>示例 3：跨列合并（colspan）</h2>
+    <table>
+        <caption>部门年度预算</caption>
+        <thead>
+            <tr>
+                <th>部门</th>
+                <th colspan="4">季度预算（万元）</th>
+                <th>年度总计</th>
+            </tr>
+            <tr>
+                <th></th>
+                <th>一季度</th>
+                <th>二季度</th>
+                <th>三季度</th>
+                <th>四季度</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>技术部</td>
+                <td>50</td>
+                <td>55</td>
+                <td>60</td>
+                <td>65</td>
+                <td>230</td>
+            </tr>
+            <tr>
+                <td>市场部</td>
+                <td>40</td>
+                <td>45</td>
+                <td>50</td>
+                <td>55</td>
+                <td>190</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>示例 4：跨行合并（rowspan）</h2>
+    <table>
+        <caption>学生各科成绩</caption>
+        <thead>
+            <tr>
+                <th>姓名</th>
+                <th>科目</th>
+                <th>成绩</th>
+                <th>排名</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td rowspan="3">张三</td>
+                <td>语文</td>
+                <td>85</td>
+                <td>3</td>
+            </tr>
+            <tr>
+                <td>数学</td>
+                <td>92</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td>英语</td>
+                <td>88</td>
+                <td>2</td>
+            </tr>
+            <tr>
+                <td rowspan="3">李四</td>
+                <td>语文</td>
+                <td>90</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td>数学</td>
+                <td>85</td>
+                <td>2</td>
+            </tr>
+            <tr>
+                <td>英语</td>
+                <td>82</td>
+                <td>3</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>示例 5：综合示例（跨行跨列）</h2>
+    <table>
+        <caption>公司组织结构</caption>
+        <thead>
+            <tr>
+                <th>部门</th>
+                <th>姓名</th>
+                <th>职位</th>
+                <th>入职日期</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td rowspan="3">技术部</td>
+                <td>张三</td>
+                <td>技术总监</td>
+                <td>2020-01-15</td>
+            </tr>
+            <tr>
+                <td>李四</td>
+                <td>高级工程师</td>
+                <td>2021-03-20</td>
+            </tr>
+            <tr>
+                <td>王五</td>
+                <td>工程师</td>
+                <td>2022-06-10</td>
+            </tr>
+            <tr>
+                <td rowspan="2">市场部</td>
+                <td>赵六</td>
+                <td>市场经理</td>
+                <td>2020-05-08</td>
+            </tr>
+            <tr>
+                <td>孙七</td>
+                <td>市场专员</td>
+                <td>2023-02-14</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4">总人数：5 人</td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+</html>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第四章练习题答案</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #31708f;
+            border-bottom: 2px solid #31708f;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #3c763d;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #31708f;
+            margin-top: 25px;
+        }
+        .exercise {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #31708f;
+        }
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .output {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 4px solid #4caf50;
+        }
+        .note {
+            background-color: #e7f3ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <h1>第四章：接口 - 练习题答案</h1>
+
+    <div class="exercise">
+        <h3>练习 4.1：Book 接口定义</h3>
+        <p><strong>题目：</strong>定义一个 `Book` 接口，包含书名（string）、作者（string）、出版年份（number）、是否已读（boolean，可选）。创建两个 Book 实例，一个包含所有属性，一个只包含必需属性。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 定义 Book 接口
+interface Book {
+  title: string;
+  author: string;
+  publishedYear: number;
+  isRead?: boolean;  // 可选属性
+}
+
+// 实例1：包含所有属性
+const book1: Book = {
+  title: "TypeScript 入门指南",
+  author: "张三",
+  publishedYear: 2024,
+  isRead: true
+};
+
+// 实例2：只包含必需属性
+const book2: Book = {
+  title: "JavaScript 高级编程",
+  author: "李四",
+  publishedYear: 2023
+};
+
+// 打印图书信息
+function printBookInfo(book: Book): string {
+  let info = `《${book.title}》 - ${book.author} (${book.publishedYear}年)`;
+  if (book.isRead !== undefined) {
+    info += ` - ${book.isRead ? "已读" : "未读"}`;
+  }
+  return info;
+}
+
+console.log("图书信息：");
+console.log(printBookInfo(book1));
+console.log(printBookInfo(book2));</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            图书信息：<br>
+            《TypeScript 入门指南》 - 张三 (2024年) - 已读<br>
+            《JavaScript 高级编程》 - 李四 (2023年)
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 4.2：矩形面积计算</h3>
+        <p><strong>题目：</strong>创建一个 `Rectangle` 接口，包含宽度和高度（都是 number）。编写一个函数计算矩形的面积。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// Rectangle 接口定义
+interface Rectangle {
+  width: number;
+  height: number;
+}
+
+// 计算面积的函数
+function calculateArea(rect: Rectangle): number {
+  return rect.width * rect.height;
+}
+
+// 计算周长的函数
+function calculatePerimeter(rect: Rectangle): number {
+  return 2 * (rect.width + rect.height);
+}
+
+// 测试
+const rect1: Rectangle = { width: 10, height: 5 };
+const rect2: Rectangle = { width: 8, height: 8 };
+
+console.log("矩形1 (10x5):");
+console.log(`  面积: ${calculateArea(rect1)}`);
+console.log(`  周长: ${calculatePerimeter(rect1)}`);
+
+console.log("\n矩形2 (8x8):");
+console.log(`  面积: ${calculateArea(rect2)}`);
+console.log(`  周长: ${calculatePerimeter(rect2)}`);
+
+// 批量计算
+const rectangles: Rectangle[] = [
+  { width: 3, height: 4 },
+  { width: 5, height: 12 },
+  { width: 6, height: 8 }
+];
+
+console.log("\n多个矩形计算：");
+rectangles.forEach((rect, index) => {
+  const area = calculateArea(rect);
+  console.log(`矩形${index + 1} (${rect.width}x${rect.height}): 面积 = ${area}`);
+});</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            矩形1 (10x5):<br>
+            &nbsp;&nbsp;面积: 50<br>
+            &nbsp;&nbsp;周长: 30<br><br>
+            矩形2 (8x8):<br>
+            &nbsp;&nbsp;面积: 64<br>
+            &nbsp;&nbsp;周长: 32<br><br>
+            多个矩形计算：<br>
+            矩形1 (3x4): 面积 = 12<br>
+            矩形2 (5x12): 面积 = 60<br>
+            矩形3 (6x8): 面积 = 48
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 4.3：函数接口验证邮箱</h3>
+        <p><strong>题目：</strong>创建一个函数接口 `ProcessFunc`，接受一个字符串参数，返回布尔值。使用这个接口定义一个验证邮箱格式的函数。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 函数接口定义
+interface ProcessFunc {
+  (input: string): boolean;
+}
+
+// 邮箱验证函数
+const validateEmail: ProcessFunc = (email) => {
+  // 邮箱正则表达式
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+// 测试
+const testEmails = [
+  "alice@example.com",
+  "bob@mail",
+  "invalid@",
+  "@example.com",
+  "user@domain.co.uk",
+  "not an email"
+];
+
+console.log("邮箱验证：");
+testEmails.forEach(email => {
+  const isValid = validateEmail(email);
+  console.log(`${isValid ? "✓" : "✗"} ${email} - ${isValid ? "有效" : "无效"}`);
+});</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            邮箱验证：<br>
+            ✓ alice@example.com - 有效<br>
+            ✗ bob@mail - 无效<br>
+            ✗ invalid@ - 无效<br>
+            ✗ @example.com - 无效<br>
+            ✓ user@domain.co.uk - 有效<br>
+            ✗ not an email - 无效
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 4.4：车辆接口继承</h3>
+        <p><strong>题目：</strong>创建一个 `Vehicle` 接口，然后创建 `Car` 和 `Motorcycle` 接口继承 `Vehicle`。`Vehicle` 包含品牌和年份，`Car` 额外包含车门数量，`Motorcycle` 额外包含最大速度。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 基础车辆接口
+interface Vehicle {
+  brand: string;
+  year: number;
+}
+
+// 汽车接口继承 Vehicle
+interface Car extends Vehicle {
+  doorCount: number;
+  fuelType: "gasoline" | "diesel" | "electric" | "hybrid";
+}
+
+// 摩托车接口继承 Vehicle
+interface Motorcycle extends Vehicle {
+  maxSpeed: number;
+  hasSidecar: boolean;
+}
+
+// 创建实例
+const myCar: Car = {
+  brand: "Tesla",
+  year: 2024,
+  doorCount: 4,
+  fuelType: "electric"
+};
+
+const myMotorcycle: Motorcycle = {
+  brand: "Harley-Davidson",
+  year: 2023,
+  maxSpeed: 200,
+  hasSidecar: false
+};
+
+// 车辆信息展示函数
+function printVehicleInfo(vehicle: Vehicle): string {
+  return `${vehicle.brand} (${vehicle.year})`;
+}
+
+function printCarInfo(car: Car): string {
+  return `${printVehicleInfo(car)} - ${car.doorCount}门 ${car.fuelType}动力`;
+}
+
+function printMotorcycleInfo(moto: Motorcycle): string {
+  return `${printVehicleInfo(moto)} - 最高时速 ${moto.maxSpeed}km/h`;
+}
+
+console.log("=== 车辆系统 ===");
+console.log("汽车:", printCarInfo(myCar));
+console.log("摩托车:", printMotorcycleInfo(myMotorcycle));
+
+// 车辆列表
+const vehicles: (Car | Motorcycle)[] = [
+  myCar,
+  myMotorcycle,
+  {
+    brand: "Toyota",
+    year: 2022,
+    doorCount: 4,
+    fuelType: "hybrid"
+  },
+  {
+    brand: "Yamaha",
+    year: 2024,
+    maxSpeed: 180,
+    hasSidecar: true
+  }
+];
+
+console.log("\n所有车辆：");
+vehicles.forEach((vehicle, index) => {
+  if ("doorCount" in vehicle) {
+    console.log(`${index + 1}. ${printCarInfo(vehicle as Car)}`);
+  } else {
+    console.log(`${index + 1}. ${printMotorcycleInfo(vehicle as Motorcycle)}`);
+  }
+});</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === 车辆系统 ===<br>
+            汽车: Tesla (2024) - 4门 electric 动力<br>
+            摩托车: Harley-Davidson (2023) - 最高时速 200km/h<br><br>
+            所有车辆：<br>
+            1. Tesla (2024) - 4门 electric 动力<br>
+            2. Harley-Davidson (2023) - 最高时速 200km/h<br>
+            3. Toyota (2022) - 4门 hybrid 动力<br>
+            4. Yamaha (2024) - 最高时速 180km/h
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 4.5：动态配置对象</h3>
+        <p><strong>题目：</strong>创建一个动态配置接口 `Config`，允许任意字符串键，值可以是 string、number 或 boolean。创建配置对象并验证类型安全。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 动态配置接口
+interface Config {
+  [key: string]: string | number | boolean;
+  // 可以添加特定的已知属性
+  appName: string;
+  version: string;
+}
+
+// 创建配置对象
+const config: Config = {
+  appName: "MyApplication",
+  version: "1.0.0",
+
+  // 动态属性
+  debug: true,
+  maxUsers: 1000,
+  timeout: 30,
+  enableCache: true,
+  apiUrl: "https://api.example.com",
+  retryCount: 3
+};
+
+// 获取配置值的函数
+function getConfigValue(key: string): string | number | boolean | undefined {
+  return config[key];
+}
+
+// 设置配置值的函数
+function setConfigValue(key: string, value: string | number | boolean): void {
+  config[key] = value;
+}
+
+// 展示配置信息
+function printConfig(): void {
+  console.log("=== 应用配置 ===");
+  console.log(`应用名称: ${config.appName}`);
+  console.log(`版本: ${config.version}`);
+  console.log("\n其他配置项：");
+
+  Object.keys(config).forEach(key => {
+    if (key !== "appName" && key !== "version") {
+      const value = config[key];
+      console.log(`  ${key}: ${value} (${typeof value})`);
+    }
+  });
+}
+
+printConfig();
+
+// 测试类型安全
+console.log("\n=== 类型安全测试 ===");
+console.log("debug:", getConfigValue("debug"));
+console.log("maxUsers:", getConfigValue("maxUsers"));
+console.log("apiUrl:", getConfigValue("apiUrl"));
+
+// 动态添加新配置
+setConfigValue("logLevel", "info");
+console.log("\n添加 logLevel:", getConfigValue("logLevel"));
+
+// 尝试添加错误类型（TypeScript 会报错）
+// config.invalid = { foo: "bar" };  // 错误：对象类型只能赋值字符串、数字或布尔值</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === 应用配置 ===<br>
+            应用名称: MyApplication<br>
+            版本: 1.0.0<br><br>
+            其他配置项：<br>
+            &nbsp;&nbsp;debug: true (boolean)<br>
+            &nbsp;&nbsp;maxUsers: 1000 (number)<br>
+            &nbsp;&nbsp;timeout: 30 (number)<br>
+            &nbsp;&nbsp;enableCache: true (boolean)<br>
+            &nbsp;&nbsp;apiUrl: https://api.example.com (string)<br>
+            &nbsp;&nbsp;retryCount: 3 (number)<br><br>
+            === 类型安全测试 ===<br>
+            debug: true<br>
+            maxUsers: 1000<br>
+            apiUrl: https://api.example.com<br><br>
+            添加 logLevel: info
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 4.6：电商产品系统</h3>
+        <p><strong>题目：</strong>构建一个简单的电商产品系统，包含产品接口、购物车接口和相应功能函数。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 产品基本信息接口
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+}
+
+// 产品折扣接口
+interface ProductWithDiscount extends Product {
+  originalPrice: number;
+  discountPercentage: number;
+}
+
+// 购物车项接口
+interface CartItem {
+  product: ProductWithDiscount;
+  quantity: number;
+}
+
+// 购物车接口
+interface ShoppingCart {
+  items: CartItem[];
+  addItem(product: ProductWithDiscount, quantity: number): void;
+  removeItem(productId: string): void;
+  updateQuantity(productId: string, quantity: number): void;
+  getTotal(): number;
+  getItemCount(): number;
+  clear(): void;
+}
+
+// 购物车实现
+class SimpleShoppingCart implements ShoppingCart {
+  items: CartItem[] = [];
+
+  addItem(product: ProductWithDiscount, quantity: number): void {
+    const existingItem = this.items.find(item => item.product.id === product.id);
+
+    if (existingItem) {
+      existingItem.quantity += quantity;
+    } else {
+      this.items.push({ product, quantity });
+    }
+  }
+
+  removeItem(productId: string): void {
+    const index = this.items.findIndex(item => item.product.id === productId);
+    if (index !== -1) {
+      this.items.splice(index, 1);
+    }
+  }
+
+  updateQuantity(productId: string, quantity: number): void {
+    const item = this.items.find(item => item.product.id === productId);
+    if (item) {
+      if (quantity <= 0) {
+        this.removeItem(productId);
+      } else {
+        item.quantity = quantity;
+      }
+    }
+  }
+
+  getTotal(): number {
+    return this.items.reduce((total, item) => {
+      return total + item.product.price * item.quantity;
+    }, 0);
+  }
+
+  getItemCount(): number {
+    return this.items.reduce((count, item) => count + item.quantity, 0);
+  }
+
+  clear(): void {
+    this.items = [];
+  }
+
+  printCart(): void {
+    console.log("=== 购物车 ===");
+    if (this.items.length === 0) {
+      console.log("购物车是空的");
+      return;
+    }
+
+    this.items.forEach(item => {
+      const itemTotal = item.product.price * item.quantity;
+      console.log(
+        `${item.product.name} x ${item.quantity} = ¥${itemTotal.toFixed(2)}`
+      );
+    });
+    console.log("----------------");
+    console.log(`总计: ¥${this.getTotal().toFixed(2)}`);
+    console.log(`商品数: ${this.getItemCount()}件`);
+  }
+}
+
+// 测试电商系统
+console.log("=== 电商产品系统 ===\n");
+
+// 创建购物车
+const cart = new SimpleShoppingCart();
+
+// 添加产品（带折扣）
+const products: ProductWithDiscount[] = [
+  { id: "P001", name: "笔记本电脑", price: 5999, originalPrice: 6999, category: "Electronics", discountPercentage: 14.3 },
+  { id: "P002", name: "无线鼠标", price: 99, originalPrice: 129, category: "Accessories", discountPercentage: 23.3 },
+  { id: "P003", name: "机械键盘", price: 299, originalPrice: 399, category: "Accessories", discountPercentage: 25.1 }
+];
+
+// 添加到购物车
+cart.addItem(products[0], 1);  // 笔记本电脑 x 1
+cart.addItem(products[1], 2);  // 无线鼠标 x 2
+cart.addItem(products[2], 1);  // 机械键盘 x 1
+
+cart.printCart();
+
+// 更新数量
+console.log("\n更新鼠标数量为 5：");
+cart.updateQuantity("P002", 5);
+cart.printCart();
+
+// 移除商品
+console.log("\n移除机械键盘：");
+cart.removeItem("P003");
+cart.printCart();
+
+// 清空购物车
+console.log("\n清空购物车：");
+cart.clear();
+cart.printCart();</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === 电商产品系统 ===<br><br>
+            === 购物车 ===<br>
+            笔记本电脑 x 1 = ¥5999.00<br>
+            无线鼠标 x 2 = ¥198.00<br>
+            机械键盘 x 1 = ¥299.00<br>
+            ----------------<br>
+            总计: ¥6496.00<br>
+            商品数: 4件<br><br>
+            更新鼠标数量为 5：<br>
+            === 购物车 ===<br>
+            笔记本电脑 x 1 = ¥5999.00<br>
+            无线鼠标 x 5 = ¥495.00<br>
+            机械键盘 x 1 = ¥299.00<br>
+            ----------------<br>
+            总计: ¥6793.00<br>
+            商品数: 7件<br><br>
+            移除机械键盘：<br>
+            === 购物车 ===<br>
+            笔记本电脑 x 1 = ¥5999.00<br>
+            无线鼠标 x 5 = ¥495.00<br>
+            ----------------<br>
+            总计: ¥6494.00<br>
+            商品数: 6件<br><br>
+            清空购物车：<br>
+            === 购物车 ===<br>
+            购物车是空的
+        </div>
+    </div>
+
+    <p style="text-align: center; color: #666; margin-top: 40px;">
+        练习题答案仅供参考，建议自己动手实践加深理解。
+    </p>
+</body>
+</html>

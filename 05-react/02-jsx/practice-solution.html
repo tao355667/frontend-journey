@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSX 练习题参考答案</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #61dafb;
+            border-bottom: 2px solid #61dafb;
+            padding-bottom: 10px;
+        }
+        h3 {
+            color: #555;
+            margin-top: 20px;
+        }
+        p {
+            color: #666;
+            line-height: 1.6;
+        }
+        .student-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .student-card h2 {
+            color: white;
+            border-bottom-color: rgba(255,255,255,0.3);
+        }
+        .student-card p {
+            color: rgba(255,255,255,0.9);
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .product-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 10px;
+            text-align: center;
+            background: white;
+        }
+        .product-card h3 {
+            color: #333;
+            margin: 0 0 10px 0;
+        }
+        .price {
+            font-size: 24px;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .stock {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .in-stock {
+            background-color: #27ae60;
+            color: white;
+        }
+        .out-of-stock {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .cart-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        .cart-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .total {
+            font-size: 20px;
+            font-weight: bold;
+            color: #e74c3c;
+            text-align: right;
+            margin-top: 10px;
+        }
+        .empty-cart {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // ========== 基础练习 ==========
+        function StudentInfo() {
+            const name = '张三';
+            const age = 20;
+            const major = '计算机科学';
+            
+            return (
+                <div className="student-card">
+                    <h2>学生信息</h2>
+                    <p><strong>姓名：</strong>{name}</p>
+                    <p><strong>年龄：</strong>{age} 岁</p>
+                    <p><strong>专业：</strong>{major}</p>
+                </div>
+            );
+        }
+
+        // ========== 进阶练习 ==========
+        function formatPrice(price) {
+            return `¥${price.toFixed(2)}`;
+        }
+
+        function ProductCard({ name, price, stock }) {
+            const cardStyle = {
+                border: '2px solid #e0e0e0',
+                borderRadius: '12px',
+                padding: '20px',
+                margin: '10px',
+                textAlign: 'center',
+                background: 'white'
+            };
+            
+            const titleStyle = {
+                color: '#333',
+                margin: '0 0 10px 0'
+            };
+            
+            const priceStyle = {
+                fontSize: '24px',
+                color: '#e74c3c',
+                fontWeight: 'bold'
+            };
+            
+            const stockStyle = {
+                display: 'inline-block',
+                padding: '4px 12px',
+                borderRadius: '20px',
+                fontSize: '14px',
+                marginTop: '10px'
+            };
+            
+            const inStockStyle = {
+                ...stockStyle,
+                backgroundColor: '#27ae60',
+                color: 'white'
+            };
+            
+            const outOfStockStyle = {
+                ...stockStyle,
+                backgroundColor: '#e74c3c',
+                color: 'white'
+            };
+            
+            return (
+                <div style={cardStyle}>
+                    <h3 style={titleStyle}>{name}</h3>
+                    <p style={priceStyle}>{formatPrice(price)}</p>
+                    <span style={stock > 0 ? inStockStyle : outOfStockStyle}>
+                        {stock > 0 ? `有货 (${stock}件)` : '缺货'}
+                    </span>
+                </div>
+            );
+        }
+
+        // ========== 挑战练习 ==========
+        function ShoppingCart() {
+            // 购物车商品数据
+            const cartItems = [
+                { id: 1, name: 'React 入门指南', price: 59.00, quantity: 1 },
+                { id: 2, name: 'JavaScript 高级编程', price: 89.00, quantity: 2 },
+                { id: 3, name: 'CSS 权威指南', price: 79.00, quantity: 1 }
+            ];
+            
+            const isEmpty = cartItems.length === 0;
+            
+            // 计算总价
+            const calculateTotal = () => {
+                return cartItems.reduce((total, item) => 
+                    total + item.price * item.quantity, 0
+                );
+            };
+            
+            const subtotal = calculateTotal();
+            const shipping = subtotal > 100 ? 0 : 10; // 满100包邮
+            const total = subtotal + shipping;
+            
+            return (
+                <div className="cart-container">
+                    <h2>购物车</h2>
+                    
+                    {isEmpty ? (
+                        <div className="empty-cart">
+                            <p>购物车是空的</p>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="cart-items">
+                                {cartItems.map(item => (
+                                    <div key={item.id} className="cart-item">
+                                        <span>{item.name} × {item.quantity}</span>
+                                        <span>¥{(item.price * item.quantity).toFixed(2)}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            <div className="cart-summary">
+                                <div className="cart-item">
+                                    <span>小计</span>
+                                    <span>¥{subtotal.toFixed(2)}</span>
+                                </div>
+                                <div className="cart-item">
+                                    <span>运费</span>
+                                    <span>{shipping === 0 ? '免运费' : `¥${shipping.toFixed(2)}`}</span>
+                                </div>
+                                <div className="total">
+                                    总计: ¥{total.toFixed(2)}
+                                </div>
+                            </div>
+                            
+                            {subtotal < 100 && (
+                                <p style={{ color: '#e74c3c', marginTop: '10px' }}>
+                                    再买 ¥{(100 - subtotal).toFixed(2)} 可享免运费！
+                                </p>
+                            )}
+                        </>
+                    )}
+                </div>
+            );
+        }
+
+        // ========== 主应用组件 ==========
+        function App() {
+            return (
+                <div>
+                    <h1>JSX 练习题参考答案</h1>
+                    
+                    {/* 基础练习 */}
+                    <section>
+                        <h2>基础练习：学生信息</h2>
+                        <StudentInfo />
+                    </section>
+                    
+                    {/* 进阶练习 */}
+                    <section>
+                        <h2>进阶练习：产品卡片</h2>
+                        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                            <ProductCard name="笔记本电脑" price={5999.00} stock={5} />
+                            <ProductCard name="无线鼠标" price={99.00} stock={20} />
+                            <ProductCard name="机械键盘" price={299.00} stock={0} />
+                        </div>
+                    </section>
+                    
+                    {/* 挑战练习 */}
+                    <section>
+                        <h2>挑战练习：购物车</h2>
+                        <ShoppingCart />
+                    </section>
+                </div>
+            );
+        }
+
+        // 渲染应用
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

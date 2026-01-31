@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第九章：JavaScript 实践 - 练习题答案</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        h1, h2 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #f8f9fa;
+            border-radius: 3px;
+        }
+        .todo-item.completed {
+            background-color: #d4edda;
+            text-decoration: line-through;
+        }
+        .todo-item input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        .todo-text {
+            flex: 1;
+        }
+        .todo-actions {
+            display: flex;
+            gap: 5px;
+        }
+        .priority-high { border-left: 5px solid #dc3545; }
+        .priority-medium { border-left: 5px solid #ffc107; }
+        .priority-low { border-left: 5px solid #28a745; }
+        .due-date {
+            font-size: 12px;
+            color: #6c757d;
+            margin-left: 10px;
+        }
+        .overdue {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .filter-btn {
+            margin-right: 5px;
+            padding: 8px 16px;
+        }
+        .filter-btn.active {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>第九章：JavaScript 实践 - 练习题答案</h1>
+
+    <!-- 基础练习 -->
+
+    <div class="container">
+        <h2>基础练习：添加功能</h2>
+        <input type="text" id="basicTodoInput" placeholder="输入待办事项">
+        <button onclick="basicAddTodo()">添加</button>
+        <ul id="basicTodoList"></ul>
+    </div>
+
+    <div class="container">
+        <h2>基础练习：删除功能</h2>
+        <ul id="deleteTodoList"></ul>
+    </div>
+
+    <div class="container">
+        <h2>基础练习：完成功能</h2>
+        <ul id="completeTodoList"></ul>
+    </div>
+
+    <!-- 进阶练习 -->
+
+    <div class="container">
+        <h2>进阶练习：编辑功能</h2>
+        <ul id="editTodoList"></ul>
+    </div>
+
+    <div class="container">
+        <h2>进阶练习：过滤功能</h2>
+        <div>
+            <button class="filter-btn active" onclick="filterTodos('all')">全部</button>
+            <button class="filter-btn" onclick="filterTodos('active')">进行中</button>
+            <button class="filter-btn" onclick="filterTodos('completed')">已完成</button>
+        </div>
+        <ul id="filterTodoList"></ul>
+    </div>
+
+    <div class="container">
+        <h2>进阶练习：持久化功能</h2>
+        <input type="text" id="persistTodoInput" placeholder="输入待办事项">
+        <button onclick="persistAddTodo()">添加</button>
+        <button onclick="clearPersistTodos()">清空</button>
+        <ul id="persistTodoList"></ul>
+    </div>
+
+    <!-- 挑战练习 -->
+
+    <div class="container">
+        <h2>挑战练习：拖拽排序</h2>
+        <ul id="dragTodoList"></ul>
+    </div>
+
+    <div class="container">
+        <h2>挑战练习：批量操作</h2>
+        <button onclick="selectAll()">全选</button>
+        <button onclick="deleteSelected()">删除选中</button>
+        <button onclick="completeSelected()">完成选中</button>
+        <ul id="batchTodoList"></ul>
+    </div>
+
+    <div class="container">
+        <h2>挑战练习：搜索功能</h2>
+        <input type="text" id="searchInput" placeholder="搜索待办事项..." oninput="searchTodos()">
+        <ul id="searchTodoList"></ul>
+    </div>
+
+    <div class="container">
+        <h2>扩展功能：优先级和截止日期</h2>
+        <input type="text" id="advancedTodoInput" placeholder="输入待办事项">
+        <select id="priorityInput">
+            <option value="high">高优先级</option>
+            <option value="medium">中优先级</option>
+            <option value="low">低优先级</option>
+        </select>
+        <input type="date" id="dueDateInput">
+        <button onclick="advancedAddTodo()">添加</button>
+        <ul id="advancedTodoList"></ul>
+    </div>
+
+    <script>
+        // 基础练习：添加功能
+        let basicTodos = [];
+
+        function basicAddTodo() {
+            const input = document.getElementById('basicTodoInput');
+            const text = input.value.trim();
+            if (text) {
+                basicTodos.push({
+                    id: Date.now(),
+                    text: text,
+                    completed: false
+                });
+                input.value = '';
+                renderBasicTodos();
+            }
+        }
+
+        function renderBasicTodos() {
+            const list = document.getElementById('basicTodoList');
+            list.innerHTML = basicTodos.map(todo => `
+                <li class="todo-item">
+                    <span class="todo-text">${escapeHtml(todo.text)}</span>
+                </li>
+            `).join('');
+        }
+
+        // 基础练习：删除功能
+        let deleteTodos = [
+            { id: 1, text: '学习 JavaScript', completed: false },
+            { id: 2, text: '完成项目', completed: false },
+            { id: 3, text: '阅读文档', completed: false }
+        ];
+
+        function renderDeleteTodos() {
+            const list = document.getElementById('deleteTodoList');
+            list.innerHTML = deleteTodos.map(todo => `
+                <li class="todo-item">
+                    <span class="todo-text">${escapeHtml(todo.text)}</span>
+                    <button onclick="deleteTodo(${todo.id})">删除</button>
+                </li>
+            `).join('');
+        }
+
+        function deleteTodo(id) {
+            deleteTodos = deleteTodos.filter(t => t.id !== id);
+            renderDeleteTodos();
+        }
+
+        renderDeleteTodos();
+
+        // 基础练习：完成功能
+        let completeTodos = [
+            { id: 1, text: '学习 JavaScript', completed: false },
+            { id: 2, text: '完成项目', completed: false },
+            { id: 3, text: '阅读文档', completed: false }
+        ];
+
+        function renderCompleteTodos() {
+            const list = document.getElementById('completeTodoList');
+            list.innerHTML = completeTodos.map(todo => `
+                <li class="todo-item ${todo.completed ? 'completed' : ''}">
+                    <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleComplete(${todo.id})">
+                    <span class="todo-text">${escapeHtml(todo.text)}</span>
+                </li>
+            `).join('');
+        }
+
+        function toggleComplete(id) {
+            const todo = completeTodos.find(t => t.id === id);
+            if (todo) {
+                todo.completed = !todo.completed;
+                renderCompleteTodos();
+            }
+        }
+
+        renderCompleteTodos();
+
+        // 进阶练习：编辑功能
+        let editTodos = [
+            { id: 1, text: '学习 JavaScript', completed: false },
+            { id: 2, text: '完成项目', completed: false },
+            { id: 3, text: '阅读文档', completed: false }
+        ];
+
+        function renderEditTodos() {
+            const list = document.getElementById('editTodoList');
+            list.innerHTML = editTodos.map(todo => `
+                <li class="todo-item ${todo.completed ? 'completed' : ''}">
+                    <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleEditComplete(${todo.id})">
+                    <span class="todo-text" id="text-${todo.id}">${escapeHtml(todo.text)}</span>
+                    <button onclick="startEdit(${todo.id})">编辑</button>
+                    <button onclick="deleteEditTodo(${todo.id})">删除</button>
+                </li>
+            `).join('');
+        }
+
+        function startEdit(id) {
+            const todo = editTodos.find(t => t.id === id);
+            const textElement = document.getElementById(`text-${id}`);
+            const currentText = todo.text;
+
+            textElement.innerHTML = `<input type="text" id="edit-input-${id}" value="${escapeHtml(currentText)}" style="width: 200px;">`;
+            const inputElement = document.getElementById(`edit-input-${id}`);
+            inputElement.focus();
+
+            const saveEdit = () => {
+                const newText = inputElement.value.trim();
+                if (newText) {
+                    todo.text = newText;
+                    renderEditTodos();
+                }
+            };
+
+            const cancelEdit = () => {
+                renderEditTodos();
+            };
+
+            inputElement.onblur = saveEdit;
+            inputElement.onkeypress = (e) => {
+                if (e.key === 'Enter') saveEdit();
+                if (e.key === 'Escape') cancelEdit();
+            };
+        }
+
+        function toggleEditComplete(id) {
+            const todo = editTodos.find(t => t.id === id);
+            if (todo) {
+                todo.completed = !todo.completed;
+                renderEditTodos();
+            }
+        }
+
+        function deleteEditTodo(id) {
+            editTodos = editTodos.filter(t => t.id !== id);
+            renderEditTodos();
+        }
+
+        renderEditTodos();
+
+        // 进阶练习：过滤功能
+        let filterTodos = [
+            { id: 1, text: '学习 JavaScript', completed: false },
+            { id: 2, text: '完成项目', completed: true },
+            { id: 3, text: '阅读文档', completed: false }
+        ];
+
+        let currentFilter = 'all';
+
+        function filterTodos(filter) {
+            currentFilter = filter;
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent === 
+                    (filter === 'all' ? '全部' : filter === 'active' ? '进行中' : '已完成'));
+            });
+            
+            renderFilterTodos();
+        }
+
+        function getFilteredTodos() {
+            switch (currentFilter) {
+                case 'active':
+                    return filterTodos.filter(t => !t.completed);
+                case 'completed':
+                    return filterTodos.filter(t => t.completed);
+                default:
+                    return filterTodos;
+            }
+        }
+
+        function renderFilterTodos() {
+            const list = document.getElementById('filterTodoList');
+            const filtered = getFilteredTodos();
+            list.innerHTML = filtered.map(todo => `
+                <li class="todo-item ${todo.completed ? 'completed' : ''}">
+                    <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleFilterComplete(${todo.id})">
+                    <span class="todo-text">${escapeHtml(todo.text)}</span>
+                </li>
+            `).join('');
+        }
+
+        function toggleFilterComplete(id) {
+            const todo = filterTodos.find(t => t.id === id);
+            if (todo) {
+                todo.completed = !todo.completed;
+                renderFilterTodos();
+            }
+        }
+
+        renderFilterTodos();
+
+        // 进阶练习：持久化功能
+        let persistTodos = JSON.parse(localStorage.getItem('persistTodos') || '[]');
+
+        function persistAddTodo() {
+            const input = document.getElementById('persistTodoInput');
+            const text = input.value.trim();
+            if (text) {
+                persistTodos.push({
+                    id: Date.now(),
+                    text: text,
+                    completed: false
+                });
+                savePersistTodos();
+                input.value = '';
+                renderPersistTodos();
+            }
+        }
+
+        function savePersistTodos() {
+            localStorage.setItem('persistTodos', JSON.stringify(persistTodos));
+        }
+
+        function renderPersistTodos() {
+            const list = document.getElementById('persistTodoList');
+            list.innerHTML = persistTodos.map(todo => `
+                <li class="todo-item ${todo.completed ? 'completed' : ''}">
+                    <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="togglePersistComplete(${todo.id})">
+                    <span class="todo-text">${escapeHtml(todo.text)}</span>
+                    <button onclick="deletePersistTodo(${todo.id})">删除</button>
+                </li>
+            `).join('');
+        }
+
+        function togglePersistComplete(id) {
+            const todo = persistTodos.find(t => t.id === id);
+            if (todo) {
+                todo.completed = !todo.completed;
+                savePersistTodos();
+                renderPersistTodos();
+            }
+        }
+
+        function deletePersistTodo(id) {
+            persistTodos = persistTodos.filter(t => t.id !== id);
+            savePersistTodos();
+            renderPersistTodos();
+        }
+
+        function clearPersistTodos() {
+            persistTodos = [];
+            savePersistTodos();
+            renderPersistTodos();
+        }
+
+        renderPersistTodos();
+
+        // 挑战练习：拖拽排序（简化版）
+        let dragTodos = [
+            { id: 1, text: '学习 JavaScript', completed: false },
+            { id: 2, text: '完成项目', completed: false },
+            { id: 3, text: '阅读文档', completed: false }
+        ];
+
+        function renderDragTodos() {
+            const list = document.getElementById('dragTodoList');
+            list.innerHTML = dragTodos.map((todo, index) => `
+                <li class="todo-item" draggable="true" data-id="${todo.id}" data-index="${index}"
+                    ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                    <span class="todo-text">${escapeHtml(todo.text)}</span>
+                    <span style="margin-left: 10px; color: #999;">☰</span>
+                </li>
+            `).join('');
+        }
+
+        let draggedItem = null;
+
+        function handleDragStart(event) {
+            draggedItem = event.target;
+            event.target.style.opacity = '0.5';
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            if (draggedItem !== event.target) {
+                const fromIndex = parseInt(draggedItem.dataset.index);
+                const toIndex = parseInt(event.target.dataset.index);
+                
+                const item = dragTodos.splice(fromIndex, 1)[0];
+                dragTodos.splice(toIndex, 0, item);
+                
+                renderDragTodos();
+            }
+            draggedItem.style.opacity = '1';
+        }
+
+        renderDragTodos();
+
+        // 挑战练习：批量操作
+        let batchTodos = [
+            { id: 1, text: '学习 JavaScript', completed: false, selected: false },
+            { id: 2, text: '完成项目', completed: false, selected: false },
+            { id: 3, text: '阅读文档', completed: false, selected: false }
+        ];
+
+        function renderBatchTodos() {
+            const list = document.getElementById('batchTodoList');
+            list.innerHTML = batchTodos.map(todo => `
+                <li class="todo-item ${todo.completed ? 'completed' : ''}">
+                    <input type="checkbox" class="batch-checkbox" data-id="${todo.id}" ${todo.selected ? 'checked' : ''}>
+                    <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleBatchComplete(${todo.id})">
+                    <span class="todo-text">${escapeHtml(todo.text)}</span>
+                </li>
+            `).join('');
+        }
+
+        function toggleBatchComplete(id) {
+            const todo = batchTodos.find(t => t.id === id);
+            if (todo) {
+                todo.completed = !todo.completed;
+                renderBatchTodos();
+            }
+        }
+
+        function selectAll() {
+            const allSelected = batchTodos.every(t => t.selected);
+            batchTodos.forEach(todo => todo.selected = !allSelected);
+            renderBatchTodos();
+        }
+
+        function deleteSelected() {
+            const selectedTodos = document.querySelectorAll('.batch-checkbox:checked');
+            const selectedIds = Array.from(selectedTodos).map(cb => parseInt(cb.dataset.id));
+            batchTodos = batchTodos.filter(t => !selectedIds.includes(t.id));
+            renderBatchTodos();
+        }
+
+        function completeSelected() {
+            const selectedTodos = document.querySelectorAll('.batch-checkbox:checked');
+            const selectedIds = Array.from(selectedTodos).map(cb => parseInt(cb.dataset.id));
+            batchTodos.forEach(todo => {
+                if (selectedIds.includes(todo.id)) {
+                    todo.completed = true;
+                }
+            });
+            renderBatchTodos();
+        }
+
+        renderBatchTodos();
+
+        // 挑战练习：搜索功能
+        let searchTodos = [
+            { id: 1, text: '学习 JavaScript', completed: false },
+            { id: 2, text: '完成项目', completed: false },
+            { id: 3, text: '阅读文档', completed: false },
+            { id: 4, text: '编写代码', completed: false }
+        ];
+
+        function searchTodos() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = searchTodos.filter(t => t.text.toLowerCase().includes(query));
+            
+            const list = document.getElementById('searchTodoList');
+            list.innerHTML = filtered.map(todo => `
+                <li class="todo-item ${todo.completed ? 'completed' : ''}">
+                    <span class="todo-text">${escapeHtml(todo.text)}</span>
+                </li>
+            `).join('');
+        }
+
+        searchTodos();
+
+        // 扩展功能：优先级和截止日期
+        let advancedTodos = [];
+
+        function advancedAddTodo() {
+            const input = document.getElementById('advancedTodoInput');
+            const priority = document.getElementById('priorityInput').value;
+            const dueDate = document.getElementById('dueDateInput').value;
+            const text = input.value.trim();
+            
+            if (text) {
+                advancedTodos.push({
+                    id: Date.now(),
+                    text: text,
+                    completed: false,
+                    priority: priority,
+                    dueDate: dueDate
+                });
+                input.value = '';
+                renderAdvancedTodos();
+            }
+        }
+
+        function renderAdvancedTodos() {
+            const list = document.getElementById('advancedTodoList');
+            list.innerHTML = advancedTodos.map(todo => {
+                const isOverdue = todo.dueDate && new Date(todo.dueDate) < new Date() && !todo.completed;
+                return `
+                    <li class="todo-item priority-${todo.priority} ${todo.completed ? 'completed' : ''}">
+                        <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleAdvancedComplete(${todo.id})">
+                        <span class="todo-text">${escapeHtml(todo.text)}</span>
+                        ${todo.dueDate ? `<span class="due-date ${isOverdue ? 'overdue' : ''}">${todo.dueDate}</span>` : ''}
+                        <button onclick="deleteAdvancedTodo(${todo.id})">删除</button>
+                    </li>
+                `;
+            }).join('');
+        }
+
+        function toggleAdvancedComplete(id) {
+            const todo = advancedTodos.find(t => t.id === id);
+            if (todo) {
+                todo.completed = !todo.completed;
+                renderAdvancedTodos();
+            }
+        }
+
+        function deleteAdvancedTodo(id) {
+            advancedTodos = advancedTodos.filter(t => t.id !== id);
+            renderAdvancedTodos();
+        }
+
+        renderAdvancedTodos();
+
+        // 工具函数：转义 HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第二十一章：computed 与 watch - TypeScript 示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; }
+    .demo-section { border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 8px; }
+    .demo-title { color: #42b983; }
+    button { padding: 8px 16px; margin: 5px; background: #42b983; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .code-block { background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 4px; font-family: monospace; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>第二十一章：computed 与 watch（TypeScript）</h1>
+  <div id="app">
+    <div class="demo-section">
+      <h2 class="demo-title">TypeScript 示例</h2>
+      <ts-demo></ts-demo>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed, watch, watchEffect } = Vue;
+
+    const TsDemo = {
+      setup() {
+        /**
+         * @typedef {Object} Item
+         * @property {number} id
+         * @property {string} name
+         * @property {number} price
+         * @property {number} quantity
+         */
+        
+        /** @type {import('vue').Ref<Item[]>} */
+        const items = ref([
+          { id: 1, name: '苹果', price: 5, quantity: 3 },
+          { id: 2, name: '香蕉', price: 3, quantity: 5 }
+        ]);
+        
+        /** @type {import('vue').Ref<number>} */
+        const discount = ref(0);
+        
+        // 带类型的计算属性
+        const subtotal = computed(() => {
+          return items.value.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        });
+        
+        const total = computed(() => {
+          return subtotal.value * (1 - discount.value / 100);
+        });
+        
+        // 带类型的 watch
+        watch(discount, (newVal, oldVal) => {
+          console.log(`折扣变化: ${oldVal}% -> ${newVal}%`);
+        });
+        
+        /**
+         * @param {number} itemId
+         */
+        const removeItem = (itemId) => {
+          items.value = items.value.filter(item => item.id !== itemId);
+        };
+        
+        return {
+          items,
+          discount,
+          subtotal,
+          total,
+          removeItem
+        };
+      },
+      template: `
+        <div>
+          <h4>购物车</h4>
+          <div v-for="item in items" :key="item.id">
+            {{ item.name }} - ¥{{ item.price }} x {{ item.quantity }}
+            <button @click="removeItem(item.id)">删除</button>
+          </div>
+          <p>小计：¥{{ subtotal }}</p>
+          <p>折扣：<input v-model.number="discount" type="number" min="0" max="100">%</p>
+          <p>总计：¥{{ total.toFixed(2) }}</p>
+          
+          <div class="code-block">
+// TypeScript 类型定义
+interface Item {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+const items = ref&lt;Item[]&gt;([
+  { id: 1, name: '苹果', price: 5, quantity: 3 }
+]);
+
+const subtotal = computed&lt;number&gt;(() => {
+  return items.value.reduce((sum, item) => sum + item.price * item.quantity, 0);
+});
+          </div>
+        </div>
+      `
+    };
+
+    createApp({ components: { TsDemo } }).mount('#app');
+  </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS 入门 - 基础练习答案</title>
+    <!-- 外部样式表：用于整体布局与外部样式示例 -->
+    <link rel="stylesheet" href="practice-solution.css">
+    <style>
+        /* 内部样式表：用于内部样式示例 */
+        .internal-demo {
+            background-color: #fff7e6;
+            border-left: 4px solid #faad14;
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        .internal-demo__title {
+            color: #d46b08;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header class="page-header">
+        <h1>CSS 入门基础练习答案</h1>
+        <p class="page-subtitle">包含内联、内部、外部三种样式方式的示例</p>
+    </header>
+
+    <main class="page-content" aria-label="CSS 入门练习内容">
+        <!-- 题目 1：个人简介页面（使用外部样式表） -->
+        <section class="card" aria-label="个人简介页面">
+            <h2 class="card__title">个人简介</h2>
+            <p class="card__text">你好！我是前端学习者，正在系统学习 CSS 基础。</p>
+            <p class="card__text">我喜欢简洁的排版和清晰的视觉层级。</p>
+            <div class="avatar" aria-label="头像占位"></div>
+        </section>
+
+        <!-- 题目 2：三种样式引入方式对比 -->
+        <section class="card" aria-label="三种样式引入方式">
+            <h2 class="card__title">三种样式引入方式</h2>
+
+            <div class="demo-group">
+                <h3 class="demo-title">内联样式（Inline）</h3>
+                <p style="color: #1677ff; font-size: 18px; line-height: 1.6;">
+                    这段文字使用内联样式直接设置颜色和字号。
+                </p>
+            </div>
+
+            <div class="demo-group internal-demo" aria-label="内部样式示例">
+                <h3 class="internal-demo__title">内部样式（Internal）</h3>
+                <p>这段内容的样式来自当前文件的 &lt;style&gt;。</p>
+            </div>
+
+            <div class="demo-group external-demo" aria-label="外部样式示例">
+                <h3 class="demo-title">外部样式（External）</h3>
+                <p>这段内容的样式来自 practice-solution.css。</p>
+            </div>
+        </section>
+
+        <!-- 题目 3：按钮样式 -->
+        <section class="card" aria-label="按钮样式">
+            <h2 class="card__title">按钮样式</h2>
+            <button class="btn" type="button" aria-label="示例按钮">示例按钮</button>
+        </section>
+    </main>
+</body>
+</html>

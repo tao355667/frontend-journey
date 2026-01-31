@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第五章：DOM 操作 - 练习题答案</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        .hidden {
+            display: none;
+        }
+        .todo-item {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #f0f0f0;
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+        }
+        .tab.active {
+            border-color: #ccc;
+            border-bottom-color: white;
+            background-color: white;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .carousel {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
+        }
+        .carousel-slides {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+        .carousel-slide {
+            min-width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 48px;
+            color: white;
+        }
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 10px 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .carousel-btn.prev {
+            left: 10px;
+        }
+        .carousel-btn.next {
+            right: 10px;
+        }
+        .carousel-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+        }
+        .carousel-dot.active {
+            background-color: white;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .valid {
+            color: green;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>第五章：DOM 操作 - 练习题答案</h1>
+
+    <!-- 基础练习 -->
+
+    <div class="section">
+        <h2>基础练习 1：修改文本</h2>
+        <p id="demo-paragraph">这是一个示例段落。</p>
+        <button id="changeTextBtn">修改文本</button>
+    </div>
+
+    <div class="section">
+        <h2>基础练习 2：切换样式</h2>
+        <div id="demo-box" style="width: 200px; height: 100px; background-color: lightblue; padding: 20px; border: 1px solid #ccc;">
+            这是一个演示盒子
+        </div>
+        <button id="toggleStyleBtn">切换显示/隐藏</button>
+    </div>
+
+    <div class="section">
+        <h2>基础练习 3：计数器</h2>
+        <p>计数: <span id="counter">0</span></p>
+        <button id="incrementBtn">增加</button>
+        <button id="decrementBtn">减少</button>
+        <button id="resetBtn">重置</button>
+    </div>
+
+    <!-- 进阶练习 -->
+
+    <div class="section">
+        <h2>进阶练习 1：待办事项列表</h2>
+        <div>
+            <input type="text" id="todoInput" placeholder="输入待办事项">
+            <button id="addTodoBtn">添加</button>
+        </div>
+        <div id="todoList"></div>
+    </div>
+
+    <div class="section">
+        <h2>进阶练习 2：模态框</h2>
+        <button id="openModalBtn">打开模态框</button>
+        
+        <div id="modal" class="modal-overlay hidden">
+            <div class="modal">
+                <h3>模态框标题</h3>
+                <p>这是一个模态框内容。</p>
+                <button id="closeModalBtn">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>进阶练习 3：表单验证</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="username">用户名：</label>
+                <input type="text" id="username" placeholder="至少 3 个字符">
+                <div id="usernameError" class="error"></div>
+                <div id="usernameValid" class="valid"></div>
+            </div>
+            <div class="form-group">
+                <label for="email">邮箱：</label>
+                <input type="email" id="email" placeholder="example@email.com">
+                <div id="emailError" class="error"></div>
+                <div id="emailValid" class="valid"></div>
+            </div>
+            <div class="form-group">
+                <label for="password">密码：</label>
+                <input type="password" id="password" placeholder="至少 6 个字符">
+                <div id="passwordError" class="error"></div>
+                <div id="passwordValid" class="valid"></div>
+            </div>
+            <button type="submit" id="submitBtn" disabled>提交</button>
+        </form>
+    </div>
+
+    <!-- 挑战练习 -->
+
+    <div class="section">
+        <h2>挑战练习 1：选项卡切换</h2>
+        <div class="tabs">
+            <div class="tab active" data-tab="tab1">选项卡 1</div>
+            <div class="tab" data-tab="tab2">选项卡 2</div>
+            <div class="tab" data-tab="tab3">选项卡 3</div>
+        </div>
+        <div class="tab-content active" id="tab1">
+            <h3>选项卡 1 内容</h3>
+            <p>这是第一个选项卡的内容。</p>
+        </div>
+        <div class="tab-content" id="tab2">
+            <h3>选项卡 2 内容</h3>
+            <p>这是第二个选项卡的内容。</p>
+        </div>
+        <div class="tab-content" id="tab3">
+            <h3>选项卡 3 内容</h3>
+            <p>这是第三个选项卡的内容。</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>挑战练习 2：图片轮播</h2>
+        <div class="carousel">
+            <div class="carousel-slides" id="carouselSlides">
+                <div class="carousel-slide" style="background-color: #ff6b6b;">1</div>
+                <div class="carousel-slide" style="background-color: #4ecdc4;">2</div>
+                <div class="carousel-slide" style="background-color: #45b7d1;">3</div>
+                <div class="carousel-slide" style="background-color: #96ceb4;">4</div>
+                <div class="carousel-slide" style="background-color: #ffeaa7;">5</div>
+            </div>
+            <button class="carousel-btn prev" id="prevSlideBtn">上一个</button>
+            <button class="carousel-btn next" id="nextSlideBtn">下一个</button>
+            <div class="carousel-dots" id="carouselDots"></div>
+        </div>
+    </div>
+
+    <script>
+        // 基础练习 1：修改文本
+        document.getElementById('changeTextBtn').addEventListener('click', function() {
+            const paragraph = document.getElementById('demo-paragraph');
+            paragraph.textContent = '文本已被修改！';
+            paragraph.style.color = '#007bff';
+            paragraph.style.fontWeight = 'bold';
+        });
+
+        // 基础练习 2：切换样式
+        document.getElementById('toggleStyleBtn').addEventListener('click', function() {
+            const box = document.getElementById('demo-box');
+            box.classList.toggle('hidden');
+        });
+
+        // 基础练习 3：计数器
+        let count = 0;
+        const counterDisplay = document.getElementById('counter');
+
+        document.getElementById('incrementBtn').addEventListener('click', function() {
+            count++;
+            counterDisplay.textContent = count;
+        });
+
+        document.getElementById('decrementBtn').addEventListener('click', function() {
+            count--;
+            counterDisplay.textContent = count;
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            count = 0;
+            counterDisplay.textContent = count;
+        });
+
+        // 进阶练习 1：待办事项列表
+        const todoInput = document.getElementById('todoInput');
+        const todoList = document.getElementById('todoList');
+
+        document.getElementById('addTodoBtn').addEventListener('click', function() {
+            const text = todoInput.value.trim();
+            if (text) {
+                const todoItem = document.createElement('div');
+                todoItem.className = 'todo-item';
+                todoItem.innerHTML = `
+                    <span>${text}</span>
+                    <button class="delete-todo">删除</button>
+                `;
+                todoList.appendChild(todoItem);
+                todoInput.value = '';
+            }
+        });
+
+        todoList.addEventListener('click', function(event) {
+            if (event.target.classList.contains('delete-todo')) {
+                event.target.parentElement.remove();
+            }
+        });
+
+        // 进阶练习 2：模态框
+        const modal = document.getElementById('modal');
+        const openModalBtn = document.getElementById('openModalBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        openModalBtn.addEventListener('click', function() {
+            modal.classList.remove('hidden');
+        });
+
+        closeModalBtn.addEventListener('click', function() {
+            modal.classList.add('hidden');
+        });
+
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+
+        // 进阶练习 3：表单验证
+        const usernameInput = document.getElementById('username');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const submitBtn = document.getElementById('submitBtn');
+
+        function validateUsername() {
+            const username = usernameInput.value.trim();
+            const error = document.getElementById('usernameError');
+            const valid = document.getElementById('usernameValid');
+
+            if (username.length < 3) {
+                error.textContent = '用户名至少需要 3 个字符';
+                valid.textContent = '';
+                return false;
+            } else {
+                error.textContent = '';
+                valid.textContent = '✓ 有效';
+                return true;
+            }
+        }
+
+        function validateEmail() {
+            const email = emailInput.value.trim();
+            const error = document.getElementById('emailError');
+            const valid = document.getElementById('emailValid');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!emailRegex.test(email)) {
+                error.textContent = '请输入有效的邮箱地址';
+                valid.textContent = '';
+                return false;
+            } else {
+                error.textContent = '';
+                valid.textContent = '✓ 有效';
+                return true;
+            }
+        }
+
+        function validatePassword() {
+            const password = passwordInput.value;
+            const error = document.getElementById('passwordError');
+            const valid = document.getElementById('passwordValid');
+
+            if (password.length < 6) {
+                error.textContent = '密码至少需要 6 个字符';
+                valid.textContent = '';
+                return false;
+            } else {
+                error.textContent = '';
+                valid.textContent = '✓ 有效';
+                return true;
+            }
+        }
+
+        usernameInput.addEventListener('input', function() {
+            validateUsername();
+            checkFormValidity();
+        });
+
+        emailInput.addEventListener('input', function() {
+            validateEmail();
+            checkFormValidity();
+        });
+
+        passwordInput.addEventListener('input', function() {
+            validatePassword();
+            checkFormValidity();
+        });
+
+        function checkFormValidity() {
+            const isUsernameValid = validateUsername();
+            const isEmailValid = validateEmail();
+            const isPasswordValid = validatePassword();
+            submitBtn.disabled = !(isUsernameValid && isEmailValid && isPasswordValid);
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            alert('表单验证通过！\n用户名: ' + usernameInput.value + '\n邮箱: ' + emailInput.value);
+        });
+
+        // 挑战练习 1：选项卡切换
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const targetTab = this.getAttribute('data-tab');
+
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+
+                this.classList.add('active');
+                document.getElementById(targetTab).classList.add('active');
+            });
+        });
+
+        // 挑战练习 2：图片轮播
+        const slides = document.getElementById('carouselSlides');
+        const totalSlides = 5;
+        let currentSlide = 0;
+
+        // 创建指示器
+        const dotsContainer = document.getElementById('carouselDots');
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+            dot.addEventListener('click', function() {
+                goToSlide(i);
+            });
+            dotsContainer.appendChild(dot);
+        }
+
+        const dots = document.querySelectorAll('.carousel-dot');
+
+        function goToSlide(index) {
+            currentSlide = index;
+            slides.style.transform = `translateX(-${currentSlide * 100}%)`;
+            updateDots();
+        }
+
+        function updateDots() {
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+        }
+
+        document.getElementById('prevSlideBtn').addEventListener('click', function() {
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            goToSlide(currentSlide);
+        });
+
+        document.getElementById('nextSlideBtn').addEventListener('click', function() {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            goToSlide(currentSlide);
+        });
+
+        // 自动播放
+        setInterval(() => {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            goToSlide(currentSlide);
+        }, 3000);
+    </script>
+</body>
+</html>

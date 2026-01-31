@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>列表渲染练习题参考答案</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        h1 { text-align: center; }
+        h2 { color: #61dafb; border-bottom: 2px solid #61dafb; padding-bottom: 10px; }
+        /* 水果列表样式 */
+        .fruit-list { list-style: none; padding: 0; }
+        .fruit-list li {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #61dafb;
+        }
+        /* 联系人列表样式 */
+        .contact-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .contact-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #61dafb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        .contact-info { flex: 1; }
+        .contact-info h4 { margin: 0 0 5px 0; }
+        .contact-info p { margin: 0; color: #666; font-size: 14px; }
+        .contact-actions button {
+            padding: 5px 10px;
+            margin-left: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .edit-btn { background: #007bff; color: white; }
+        .delete-btn { background: #dc3545; color: white; }
+        /* 数据表格样式 */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #f5f5f5; }
+        th button { margin-left: 5px; cursor: pointer; }
+        .sort-indicator { font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // ========== 基础练习：水果列表 ==========
+        function FruitList() {
+            const fruits = ['苹果', '香蕉', '橙子', '葡萄', '西瓜', '芒果'];
+            
+            return (
+                <div>
+                    <h3>水果列表</h3>
+                    <ul className="fruit-list">
+                        {fruits.map((fruit, index) => (
+                            <li key={index}>{fruit}</li>
+                        ))}
+                    </ul>
+                </div>
+            );
+        }
+
+        // ========== 进阶练习：可编辑联系人列表 ==========
+        function ContactList() {
+            const [contacts, setContacts] = React.useState([
+                { id: 1, name: '张三', phone: '13800138001', email: 'zhang@example.com' },
+                { id: 2, name: '李四', phone: '13800138002', email: 'li@example.com' },
+                { id: 3, name: '王五', phone: '13800138003', email: 'wang@example.com' }
+            ]);
+            const [editingId, setEditingId] = React.useState(null);
+            const [editForm, setEditForm] = React.useState({});
+            
+            const startEdit = (contact) => {
+                setEditingId(contact.id);
+                setEditForm({ ...contact });
+            };
+            
+            const saveEdit = () => {
+                setContacts(contacts.map(c =>
+                    c.id === editingId ? editForm : c
+                ));
+                setEditingId(null);
+            };
+            
+            const cancelEdit = () => {
+                setEditingId(null);
+                setEditForm({});
+            };
+            
+            const deleteContact = (id) => {
+                if (confirm('确定删除该联系人？')) {
+                    setContacts(contacts.filter(c => c.id !== id));
+                }
+            };
+            
+            return (
+                <div>
+                    <h3>联系人列表</h3>
+                    {contacts.map(contact => (
+                        <div key={contact.id} className="contact-item">
+                            <div className="contact-avatar">{contact.name[0]}</div>
+                            <div className="contact-info">
+                                {editingId === contact.id ? (
+                                    <div>
+                                        <input
+                                            value={editForm.name}
+                                            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                                            placeholder="姓名"
+                                        />
+                                        <input
+                                            value={editForm.phone}
+                                            onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                                            placeholder="电话"
+                                        />
+                                        <button onClick={saveEdit}>保存</button>
+                                        <button onClick={cancelEdit}>取消</button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <h4>{contact.name}</h4>
+                                        <p>电话: {contact.phone}</p>
+                                        <p>邮箱: {contact.email}</p>
+                                    </>
+                                )}
+                            </div>
+                            <div className="contact-actions">
+                                {editingId !== contact.id && (
+                                    <>
+                                        <button className="edit-btn" onClick={() => startEdit(contact)}>编辑</button>
+                                        <button className="delete-btn" onClick={() => deleteContact(contact.id)}>删除</button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        // ========== 挑战练习：可排序数据表格 ==========
+        function SortableTable() {
+            const [data, setData] = React.useState([
+                { id: 1, name: '产品A', price: 99, stock: 10 },
+                { id: 2, name: '产品B', price: 199, stock: 5 },
+                { id: 3, name: '产品C', price: 49, stock: 20 },
+                { id: 4, name: '产品D', price: 299, stock: 0 },
+                { id: 5, name: '产品E', price: 149, stock: 15 }
+            ]);
+            const [sortConfig, setSortConfig] = React.useState({ key: null, direction: 'asc' });
+            
+            const sort = (key) => {
+                let direction = 'asc';
+                if (sortConfig.key === key && sortConfig.direction === 'asc') {
+                    direction = 'desc';
+                }
+                setSortConfig({ key, direction });
+                
+                const sorted = [...data].sort((a, b) => {
+                    if (a[key] < b[key]) return direction === 'asc' ? -1 : 1;
+                    if (a[key] > b[key]) return direction === 'asc' ? 1 : -1;
+                    return 0;
+                });
+                setData(sorted);
+            };
+            
+            return (
+                <div>
+                    <h3>产品数据表</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>
+                                    ID <button onClick={() => sort('id')}>
+                                        {sortConfig.key === 'id' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
+                                    </button>
+                                </th>
+                                <th>
+                                    名称 <button onClick={() => sort('name')}>
+                                        {sortConfig.key === 'name' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
+                                    </button>
+                                </th>
+                                <th>
+                                    价格 <button onClick={() => sort('price')}>
+                                        {sortConfig.key === 'price' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
+                                    </button>
+                                </th>
+                                <th>
+                                    库存 <button onClick={() => sort('stock')}>
+                                        {sortConfig.key === 'stock' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
+                                    </button>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data.map(item => (
+                                <tr key={item.id}>
+                                    <td>{item.id}</td>
+                                    <td>{item.name}</td>
+                                    <td>¥{item.price}</td>
+                                    <td style={{ color: item.stock === 0 ? 'red' : item.stock < 10 ? 'orange' : 'green' }}>
+                                        {item.stock === 0 ? '缺货' : `${item.stock}件`}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }
+
+        // ========== 主应用 ==========
+        function App() {
+            return (
+                <div>
+                    <h1>列表渲染练习题参考答案</h1>
+                    
+                    <section className="section">
+                        <h2>基础练习：水果列表</h2>
+                        <FruitList />
+                    </section>
+                    
+                    <section className="section">
+                        <h2>进阶练习：可编辑联系人列表</h2>
+                        <ContactList />
+                    </section>
+                    
+                    <section className="section">
+                        <h2>挑战练习：可排序数据表格</h2>
+                        <SortableTable />
+                    </section>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

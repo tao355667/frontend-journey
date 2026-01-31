@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第17章：过渡动画 - TypeScript示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #f5f5f5; }
+    h1 { text-align: center; color: #333; margin-bottom: 30px; }
+    h2 { color: #42b883; margin: 30px 0 15px; border-bottom: 2px solid #42b883; padding-bottom: 10px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    .type-hint { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 12px; margin: 10px 0; border-radius: 0 4px 4px 0; font-size: 13px; }
+    .type-hint code { background: rgba(255,255,255,0.7); padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }
+    
+    .card { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin: 5px; transition: all 0.2s; }
+    .btn-primary { background: #42b883; color: white; }
+    .btn-default { background: #e0e0e0; color: #333; }
+    .btn:hover { opacity: 0.8; }
+    
+    /* 类型化过渡类名 */
+    .typed-fade-enter-active,
+    .typed-fade-leave-active {
+      transition: opacity 0.5s ease;
+    }
+    .typed-fade-enter-from,
+    .typed-fade-leave-to {
+      opacity: 0;
+    }
+    
+    .typed-slide-enter-active,
+    .typed-slide-leave-active {
+      transition: all 0.3s ease-out;
+    }
+    .typed-slide-enter-from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    .typed-slide-leave-to {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    
+    .demo-box {
+      background: linear-gradient(135deg, #42b883, #347474);
+      color: white;
+      padding: 30px;
+      border-radius: 8px;
+      text-align: center;
+      margin-top: 15px;
+    }
+    
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      min-width: 300px;
+    }
+    
+    .list-enter-active,
+    .list-leave-active {
+      transition: all 0.4s ease;
+    }
+    .list-enter-from {
+      opacity: 0;
+      transform: translateX(-50px);
+    }
+    .list-leave-to {
+      opacity: 0;
+      transform: translateX(50px);
+    }
+    .list-move {
+      transition: transform 0.4s;
+    }
+    
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px;
+      background: #f8f8f8;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+    
+    .chart-container {
+      height: 200px;
+      background: #f8f8f8;
+      border-radius: 8px;
+      display: flex;
+      align-items: flex-end;
+      padding: 20px;
+      gap: 10px;
+    }
+    .chart-bar {
+      flex: 1;
+      background: #42b883;
+      border-radius: 4px 4px 0 0;
+      transition: height 0.5s ease;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 5px;
+      color: white;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>Vue 3 + TypeScript 过渡动画</h1>
+      
+      <div class="type-hint">
+        <strong>TypeScript 类型提示：</strong><br>
+        Transition 组件可以配合类型化的数据进行类型安全的动画控制<br>
+        <code>&lt;Transition name="typed-fade"&gt;&lt;Component v-if="typedShow" /&gt;&lt;/Transition&gt;</code>
+      </div>
+      
+      <h2>1. 类型化的淡入淡出</h2>
+      
+      <div class="card">
+        <button class="btn btn-primary" @click="typedShow = !typedShow">
+          {{ typedShow ? '隐藏' : '显示' }} (类型安全)
+        </button>
+        <Transition name="typed-fade">
+          <div v-if="typedShow" class="demo-box">
+            <h3>类型化过渡</h3>
+            <p>show 属性是 Ref&lt;boolean&gt; 类型</p>
+          </div>
+        </Transition>
+      </div>
+      
+      <h2>2. 类型化的列表动画</h2>
+      
+      <div class="card">
+        <div style="margin-bottom: 15px;">
+          <button class="btn btn-primary" @click="addTypedItem">添加项目</button>
+          <button class="btn btn-default" @click="shuffleTypedItems">随机排序</button>
+          <button class="btn btn-danger" @click="clearTypedItems">清空</button>
+        </div>
+        
+        <TransitionGroup name="list" tag="div">
+          <div v-for="item in typedItems" :key="item.id" class="list-item">
+            <span>{{ item.name }} (ID: {{ item.id }})</span>
+            <button class="btn btn-default" style="padding: 5px 10px; font-size: 12px;" @click="removeTypedItem(item.id)">
+              删除
+            </button>
+          </div>
+        </TransitionGroup>
+        
+        <p v-if="typedItems.length === 0" style="text-align: center; color: #999; padding: 20px;">
+          列表为空
+        </p>
+      </div>
+      
+      <h2>3. 类型化的数据可视化过渡</h2>
+      
+      <div class="card">
+        <div style="margin-bottom: 15px;">
+          <button class="btn btn-primary" @click="randomizeChart">随机数据</button>
+          <span style="color: #666; margin-left: 10px;">使用 number[] 类型数据驱动动画</span>
+        </div>
+        
+        <div class="chart-container">
+          <TransitionGroup name="list" tag="div" style="display: contents;">
+            <div 
+              v-for="(value, index) in chartData" 
+              :key="index"
+              class="chart-bar"
+              :style="{ height: value + '%' }"
+            >
+              {{ value }}%
+            </div>
+          </TransitionGroup>
+        </div>
+      </div>
+      
+      <h2>4. 类型化的模态框组件</h2>
+      
+      <div class="card">
+        <button class="btn btn-primary" @click="modalVisible = true">
+          打开类型化模态框
+        </button>
+        
+        <typed-modal v-model="modalVisible" title="类型化模态框">
+          <p>这是一个使用 TypeScript 类型定义的模态框组件。</p>
+          <p>visible 属性类型为 boolean，支持 v-model。</p>
+        </typed-modal>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // TypeScript 类型定义（运行时模拟）
+    /**
+     * @typedef {Object} ListItem
+     * @property {number} id
+     * @property {string} name
+     */
+
+    const { createApp, ref, computed, defineComponent } = Vue;
+
+    // 类型化的模态框组件
+    const TypedModal = defineComponent({
+      props: {
+        modelValue: {
+          type: Boolean,
+          required: true
+        },
+        title: {
+          type: String,
+          default: '模态框'
+        }
+      },
+      emits: ['update:modelValue'],
+      template: `
+        <Transition name="typed-fade">
+          <div v-if="modelValue" class="modal-overlay" @click.self="close">
+            <Transition name="typed-slide">
+              <div v-if="modelValue" class="modal-content">
+                <h3 style="margin-bottom: 15px;">{{ title }}</h3>
+                <slot></slot>
+                <button class="btn btn-default" style="margin-top: 15px;" @click="close">关闭</button>
+              </div>
+            </Transition>
+          </div>
+        </Transition>
+      `,
+      setup(props, { emit }) {
+        const close = () => {
+          emit('update:modelValue', false);
+        };
+        return { close };
+      }
+    });
+
+    createApp({
+      components: {
+        TypedModal
+      },
+      setup() {
+        // 类型化的状态
+        /** @type {import('vue').Ref<boolean>} */
+        const typedShow = ref(true);
+        
+        /** @type {import('vue').Ref<ListItem[]>} */
+        const typedItems = ref([
+          { id: 1, name: '项目 A' },
+          { id: 2, name: '项目 B' },
+          { id: 3, name: '项目 C' }
+        ]);
+        
+        /** @type {import('vue').Ref<number>} */
+        let nextId = 4;
+        
+        /**
+         * @param {number} id
+         */
+        const removeTypedItem = (id) => {
+          const index = typedItems.value.findIndex(item => item.id === id);
+          if (index > -1) {
+            typedItems.value.splice(index, 1);
+          }
+        };
+        
+        const addTypedItem = () => {
+          const names = ['项目 D', '项目 E', '项目 F', '项目 G', '项目 H'];
+          const randomName = names[Math.floor(Math.random() * names.length)];
+          typedItems.value.push({
+            id: nextId++,
+            name: randomName + ' #' + nextId
+          });
+        };
+        
+        const shuffleTypedItems = () => {
+          typedItems.value = typedItems.value.sort(() => Math.random() - 0.5);
+        };
+        
+        const clearTypedItems = () => {
+          typedItems.value = [];
+        };
+        
+        // 类型化的图表数据
+        /** @type {import('vue').Ref<number[]>} */
+        const chartData = ref([30, 50, 70, 45, 60, 80, 40]);
+        
+        const randomizeChart = () => {
+          chartData.value = chartData.value.map(() => Math.floor(Math.random() * 80) + 20);
+        };
+        
+        // 模态框状态
+        /** @type {import('vue').Ref<boolean>} */
+        const modalVisible = ref(false);
+        
+        return {
+          typedShow,
+          typedItems,
+          removeTypedItem,
+          addTypedItem,
+          shuffleTypedItems,
+          clearTypedItems,
+          chartData,
+          randomizeChart,
+          modalVisible
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

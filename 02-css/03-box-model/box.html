@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>盒模型演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        /* 基础盒模型演示 */
+        .box-demo {
+            background-color: #3498db;
+            color: white;
+            padding: 20px;
+            margin: 20px 0;
+            border: 5px solid #2c3e50;
+            width: 300px;
+            text-align: center;
+        }
+        
+        /* 不同box-sizing对比 */
+        .comparison {
+            display: flex;
+            gap: 30px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .content-box {
+            box-sizing: content-box;
+            width: 200px;
+            padding: 20px;
+            border: 5px solid #e74c3c;
+            background-color: #ffe6e6;
+        }
+        
+        .border-box {
+            box-sizing: border-box;
+            width: 200px;
+            padding: 20px;
+            border: 5px solid #27ae60;
+            background-color: #e6ffe6;
+        }
+        
+        /* 盒模型各部分演示 */
+        .box-parts {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            margin: 30px auto;
+            background-color: #ecf0f1;
+            border: 20px solid #3498db;
+            padding: 30px;
+        }
+        
+        .box-parts::before {
+            content: "Margin (外边距)";
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #95a5a6;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        .box-parts::after {
+            content: "Border (边框)";
+            position: absolute;
+            top: 50%;
+            left: -60px;
+            transform: translateY(-50%);
+            background-color: #3498db;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            writing-mode: vertical-rl;
+        }
+        
+        .content {
+            background-color: #e74c3c;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .content::before {
+            content: "Padding (内边距)";
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: #f39c12;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+        
+        .content::after {
+            content: "Content (内容)";
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: #e74c3c;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+        
+        /* 外边距演示 */
+        .margin-demo {
+            background-color: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .margin-box {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            margin: 20px;
+            text-align: center;
+        }
+        
+        .margin-collapse {
+            background-color: #9b59b6;
+            color: white;
+            padding: 15px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        /* 内边距演示 */
+        .padding-demo {
+            background-color: #ecf0f1;
+            padding: 10px;
+            margin: 20px 0;
+        }
+        
+        .padding-box {
+            background-color: #e74c3c;
+            color: white;
+            padding: 40px;
+            margin: 10px;
+            text-align: center;
+        }
+        
+        /* 边框演示 */
+        .border-demo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .border-style-solid {
+            border: 3px solid #3498db;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .border-style-dashed {
+            border: 3px dashed #e74c3c;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .border-style-dotted {
+            border: 3px dotted #27ae60;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .border-style-double {
+            border: 5px double #9b59b6;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .border-radius {
+            border: 3px solid #f39c12;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        /* 圆角演示 */
+        .radius-demo {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .radius-box {
+            width: 100px;
+            height: 100px;
+            background-color: #3498db;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .radius-0 { border-radius: 0; }
+        .radius-5 { border-radius: 5px; }
+        .radius-10 { border-radius: 10px; }
+        .radius-15 { border-radius: 15px; }
+        .radius-50 { border-radius: 50%; }
+        .radius-custom { border-radius: 20px 5px; }
+        
+        /* 说明样式 */
+        .explanation {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .code-example {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <main class="container" aria-label="盒模型演示内容">
+        <header>
+            <h1>CSS盒模型演示</h1>
+        </header>
+        
+        <div class="explanation">
+            <h3>什么是盒模型？</h3>
+            <p>CSS盒模型是网页布局的基础。每个HTML元素都可以看作一个矩形的盒子，由内容(content)、内边距(padding)、边框(border)和外边距(margin)组成。</p>
+        </div>
+        
+        <h2>基础盒模型</h2>
+        <div class="box-demo">
+            这是一个基础盒模型演示
+            <br>Width: 300px
+            <br>Padding: 20px
+            <br>Border: 5px
+            <br>Margin: 20px
+        </div>
+        
+        <h2>box-sizing 属性对比</h2>
+        <div class="comparison">
+            <div class="content-box">
+                <h4>content-box (默认)</h4>
+                <p>width: 200px</p>
+                <p>padding: 20px</p>
+                <p>border: 5px</p>
+                <p><strong>总宽度: 250px</strong></p>
+            </div>
+            
+            <div class="border-box">
+                <h4>border-box</h4>
+                <p>width: 200px</p>
+                <p>padding: 20px</p>
+                <p>border: 5px</p>
+                <p><strong>总宽度: 200px</strong></p>
+            </div>
+        </div>
+        
+        <div class="explanation">
+            <h3>box-sizing: border-box 的优势</h3>
+            <p>使用 border-box 可以让元素的宽度和高度包含内边距和边框，这样在设置元素大小时更加直观和可预测。</p>
+        </div>
+        
+        <h2>盒模型各部分详解</h2>
+        <div class="box-parts">
+            <div class="content">
+                内容区域
+            </div>
+        </div>
+        
+        <h2>外边距 (Margin) 演示</h2>
+        <div class="margin-demo">
+            <div class="margin-box">
+                这个盒子有 20px 的外边距
+            </div>
+            <div class="margin-box">
+                这个盒子也有 20px 的外边距
+            </div>
+        </div>
+        
+        <h3>外边距折叠</h3>
+        <div class="margin-collapse">
+            第一个盒子 (margin: 30px 0)
+        </div>
+        <div class="margin-collapse">
+            第二个盒子 (margin: 30px 0)
+            <br><small>两个盒子之间的距离是 30px，而不是 60px（外边距折叠）</small>
+        </div>
+        
+        <h2>内边距 (Padding) 演示</h2>
+        <div class="padding-demo">
+            <div class="padding-box">
+                这个盒子有 40px 的内边距
+                <br>内容与边框之间有较大间距
+            </div>
+        </div>
+        
+        <h2>边框 (Border) 演示</h2>
+        <div class="border-demo">
+            <div class="border-style-solid">
+                <h4>实线边框</h4>
+                <p>border: 3px solid</p>
+            </div>
+            
+            <div class="border-style-dashed">
+                <h4>虚线边框</h4>
+                <p>border: 3px dashed</p>
+            </div>
+            
+            <div class="border-style-dotted">
+                <h4>点线边框</h4>
+                <p>border: 3px dotted</p>
+            </div>
+            
+            <div class="border-style-double">
+                <h4>双线边框</h4>
+                <p>border: 5px double</p>
+            </div>
+            
+            <div class="border-radius">
+                <h4>圆角边框</h4>
+                <p>border-radius: 15px</p>
+            </div>
+        </div>
+        
+        <h2>圆角 (border-radius) 演示</h2>
+        <div class="radius-demo">
+            <div class="radius-box radius-0">0px</div>
+            <div class="radius-box radius-5">5px</div>
+            <div class="radius-box radius-10">10px</div>
+            <div class="radius-box radius-15">15px</div>
+            <div class="radius-box radius-50">50%</div>
+            <div class="radius-box radius-custom">20px 5px</div>
+        </div>
+        
+        <div class="explanation">
+            <h3>最佳实践</h3>
+            <ul>
+                <li>使用 <code>box-sizing: border-box</code> 简化布局计算</li>
+                <li>合理使用外边距创建元素间距</li>
+                <li>使用内边距为内容创建呼吸空间</li>
+                <li>边框不仅可以装饰，还可以用于视觉分组</li>
+                <li>圆角可以让设计更加现代和友好</li>
+            </ul>
+        </div>
+    </main>
+</body>
+</html>

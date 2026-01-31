@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>内部样式表演示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .highlight {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <main class="container" aria-label="内部样式表演示内容">
+        <header>
+            <h1>内部样式表演示</h1>
+            <p>这是使用内部样式表的示例。CSS规则写在&lt;style&gt;标签中，位于&lt;head&gt;部分。</p>
+        </header>
+        
+        <section class="highlight" aria-label="内部样式的优势">
+            <h2>内部样式的优势</h2>
+            <ul>
+                <li>样式与HTML结构在同一文件中，便于管理</li>
+                <li>可以重用样式规则</li>
+                <li>适合单页面应用</li>
+            </ul>
+        </section>
+        
+        <a href="#" class="btn" aria-label="示例按钮">示例按钮</a>
+    </main>
+</body>
+</html>

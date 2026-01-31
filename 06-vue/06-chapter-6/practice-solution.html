@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 6: Class 与 Style 绑定 - 练习题答案</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    /* CSS 变量定义 */
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #333333;
+      --primary-color: #42b883;
+      --secondary-color: #f5f5f5;
+      --border-color: #ddd;
+      --shadow-color: rgba(0,0,0,0.1);
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .level-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 10px;
+    }
+    .basic { background: #42b883; }
+    .advanced { background: #f39c12; }
+    .challenge { background: #e74c3c; }
+    
+    .solution-card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .demo-area {
+      background: #f8f9fa;
+      border: 2px dashed #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 15px 0;
+    }
+    
+    /* 基础练习：交互式卡片样式 */
+    .interactive-card {
+      padding: 30px;
+      border: 3px solid #ddd;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: white;
+      margin: 20px 0;
+    }
+    .interactive-card.hovered {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+    .interactive-card.selected {
+      border-color: #42b883;
+      border-width: 4px;
+      background: #e8f5e9;
+    }
+    
+    /* 进阶练习：导航栏样式 */
+    .navbar-demo {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 15px 30px;
+      transition: all 0.3s ease;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .navbar-demo.transparent {
+      background: transparent;
+      color: white;
+    }
+    .navbar-demo.scrolled {
+      background: white;
+      color: #333;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .nav-items {
+      display: flex;
+      gap: 30px;
+      align-items: center;
+    }
+    .nav-item {
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 4px;
+      transition: all 0.3s;
+    }
+    .nav-item.active {
+      background: rgba(66, 184, 131, 0.2);
+      color: #42b883;
+      font-weight: bold;
+    }
+    .hamburger {
+      display: none;
+      cursor: pointer;
+      font-size: 24px;
+    }
+    @media (max-width: 600px) {
+      .nav-items { display: none; }
+      .nav-items.mobile-open { 
+        display: flex; 
+        flex-direction: column;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: white;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      }
+      .hamburger { display: block; }
+    }
+    
+    /* 挑战练习：主题系统样式 */
+    .theme-container {
+      min-height: 500px;
+      padding: 30px;
+      border-radius: 12px;
+      transition: all 0.5s ease;
+    }
+    .theme-light {
+      background: #ffffff;
+      color: #333333;
+    }
+    .theme-dark {
+      background: #1a1a2e;
+      color: #eee;
+    }
+    .theme-dark .card {
+      background: #16213e;
+      border-color: #0f3460;
+    }
+    .theme-high-contrast {
+      background: #000000;
+      color: #ffffff;
+    }
+    .theme-high-contrast .card {
+      background: #000000;
+      border: 3px solid #ffff00;
+      color: #ffff00;
+    }
+    .theme-high-contrast button {
+      background: #ffff00;
+      color: #000000;
+      border: 3px solid #ffff00;
+      font-weight: bold;
+    }
+    
+    .card {
+      padding: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin: 15px 0;
+      background: var(--bg-color);
+      transition: all 0.3s;
+    }
+    
+    .control-panel {
+      background: rgba(255,255,255,0.1);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+    }
+    
+    input[type="range"] {
+      width: 200px;
+      margin: 0 10px;
+    }
+    
+    input[type="color"] {
+      width: 60px;
+      height: 30px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      background: #42b883;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .code-explanation {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 15px 0;
+      font-size: 14px;
+    }
+    
+    .scroll-content {
+      height: 300px;
+      overflow-y: scroll;
+      padding: 20px;
+      background: linear-gradient(to bottom, #667eea, #764ba2);
+      border-radius: 8px;
+      color: white;
+    }
+    
+    .scroll-content p {
+      margin: 100px 0;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1 style="text-align: center; color: white; margin-bottom: 30px;">
+      📚 Class 与 Style 绑定练习题答案
+    </h1>
+
+    <!-- 基础练习答案：交互式卡片 -->
+    <div class="solution-card">
+      <span class="level-badge basic">基础练习</span>
+      <h2>交互式卡片组件</h2>
+      <p>使用 Class 和 Style 绑定创建完全可定制的交互卡片。</p>
+      
+      <div class="demo-area">
+        <div 
+          class="interactive-card"
+          :class="{
+            hovered: isHovered,
+            selected: isSelected,
+            active: cardActive
+          }"
+          :style="cardStyles"
+          @mouseenter="isHovered = true"
+          @mouseleave="isHovered = false"
+          @click="isSelected = !isSelected"
+        >
+          <h3>🎨 交互式卡片</h3>
+          <p>点击选中，悬停查看效果</p>
+          <p>状态: {{ cardStatus }}</p>
+        </div>
+        
+        <div class="control-panel">
+          <h4>样式控制面板</h4>
+          <label>
+            <input type="checkbox" v-model="cardActive"> active 状态
+          </label>
+          <br><br>
+          <label>
+            背景颜色: <input type="color" v-model="cardStyles.backgroundColor">
+          </label>
+          <br><br>
+          <label>
+            内边距: {{ cardStyles.padding }}px
+            <input type="range" v-model.number="cardPadding" min="10" max="60" @input="cardStyles.padding = cardPadding + 'px'">
+          </label>
+          <br><br>
+          <label>
+            圆角: {{ cardStyles.borderRadius }}px
+            <input type="range" v-model.number="cardBorderRadius" min="0" max="30" @input="cardStyles.borderRadius = cardBorderRadius + 'px'">
+          </label>
+        </div>
+      </div>
+      
+      <div class="code-explanation">
+        <strong>核心代码：</strong><br><br>
+// Class 绑定 - 对象语法
+&lt;div 
+  class="interactive-card"
+  :class="{
+    hovered: isHovered,
+    selected: isSelected,
+    active: cardActive
+  }"
+  :style="cardStyles"
+  @mouseenter="isHovered = true"
+  @mouseleave="isHovered = false"
+  @click="isSelected = !isSelected"
+&gt;
+  ...
+&lt;/div&gt;
+
+// Style 绑定
+data() {
+  return {
+    cardStyles: {
+      backgroundColor: '#ffffff',
+      padding: '30px',
+      borderRadius: '12px'
+    }
+  }
+}
+      </div>
+    </div>
+
+    <!-- 进阶练习答案：响应式导航栏 -->
+    <div class="solution-card">
+      <span class="level-badge advanced">进阶练习</span>
+      <h2>响应式导航栏</h2>
+      <p>根据滚动位置动态改变样式，支持移动端适配。</p>
+      
+      <div class="demo-area">
+        <!-- 导航栏 -->
+        <nav 
+          class="navbar-demo"
+          :class="{ 
+            transparent: !isScrolled, 
+            scrolled: isScrolled 
+          }"
+        >
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0;">🚀 Logo</h3>
+            <div class="hamburger" @click="mobileMenuOpen = !mobileMenuOpen">☰</div>
+            <div class="nav-items" :class="{ 'mobile-open': mobileMenuOpen }">
+              <div 
+                v-for="item in navItems" 
+                :key="item.id"
+                class="nav-item"
+                :class="{ active: currentNav === item.id }"
+                @click="currentNav = item.id"
+              >
+                {{ item.name }}
+              </div>
+            </div>
+          </div>
+        </nav>
+        
+        <!-- 可滚动内容区 -->
+        <div class="scroll-content" @scroll="handleScroll">
+          <p>👆 向下滚动查看导航栏变化</p>
+          <p>继续滚动...</p>
+          <p>看到导航栏变成白色了吗？</p>
+          <p>这是根据滚动位置动态绑定的 class 效果</p>
+          <p>已经滚动到: {{ scrollY }}px</p>
+        </div>
+        
+        <p style="margin-top: 10px;">
+          当前导航: {{ currentNavItem?.name }}
+        </p>
+      </div>
+      
+      <div class="code-explanation">
+        <strong>核心代码：</strong><br><br>
+// 导航栏 Class 绑定
+&lt;nav :class="{ transparent: !isScrolled, scrolled: isScrolled }"&gt;
+
+// 监听滚动
+data() {
+  return {
+    isScrolled: false,
+    scrollY: 0
+  }
+},
+
+methods: {
+  handleScroll(e) {
+    this.scrollY = e.target.scrollTop
+    this.isScrolled = this.scrollY > 50
+  }
+}
+
+// CSS
+.navbar-demo {
+  transition: all 0.3s ease;
+}
+.navbar-demo.transparent {
+  background: transparent;
+  color: white;
+}
+.navbar-demo.scrolled {
+  background: white;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+      </div>
+    </div>
+
+    <!-- 挑战练习答案：主题切换系统 -->
+    <div class="solution-card">
+      <span class="level-badge challenge">挑战练习</span>
+      <h2>完整主题切换系统</h2>
+      <p>支持亮色/暗色/高对比度三种主题，自动保存偏好，可跟随系统。</p>
+      
+      <div class="demo-area">
+        <div class="theme-container" :class="themeClass">
+          <h3>🎨 主题切换演示</h3>
+          
+          <!-- 主题选择器 -->
+          <div class="control-panel">
+            <button @click="setTheme('light')" :class="{ active: currentTheme === 'light' }">☀️ 亮色</button>
+            <button @click="setTheme('dark')" :class="{ active: currentTheme === 'dark' }">🌙 暗色</button>
+            <button @click="setTheme('high-contrast')" :class="{ active: currentTheme === 'high-contrast' }">⚡ 高对比度</button>
+            <button @click="followSystem" :class="{ active: followSystemTheme }">🖥️ 跟随系统</button>
+          </div>
+          
+          <!-- 示例组件 -->
+          <div class="card">
+            <h4>示例卡片</h4>
+            <p>这是一个根据主题动态调整样式的卡片组件</p>
+            <button>示例按钮</button>
+          </div>
+          
+          <div class="card">
+            <h4>当前主题信息</h4>
+            <ul>
+              <li>当前主题: <strong>{{ currentTheme }}</strong></li>
+              <li>跟随系统: {{ followSystemTheme ? '是' : '否' }}</li>
+              <li>已保存到 localStorage: {{ savedToStorage ? '是' : '否' }}</li>
+              <li>系统偏好: {{ systemTheme }}</li>
+            </ul>
+          </div>
+          
+          <p style="margin-top: 20px; font-size: 14px; opacity: 0.7;">
+            提示：刷新页面后主题偏好会被保留
+          </p>
+        </div>
+      </div>
+      
+      <div class="code-explanation">
+        <strong>核心代码：</strong><br><br>
+// 主题 Class 绑定
+&lt;div class="theme-container" :class="themeClass"&gt;
+
+// 计算属性
+data() {
+  return {
+    currentTheme: 'light',
+    followSystemTheme: false
+  }
+},
+
+computed: {
+  themeClass() {
+    return `theme-${this.currentTheme}`
+  }
+},
+
+methods: {
+  setTheme(theme) {
+    this.currentTheme = theme
+    this.followSystemTheme = false
+    localStorage.setItem('theme', theme)
+  },
+  
+  followSystem() {
+    this.followSystemTheme = true
+    this.currentTheme = this.getSystemTheme()
+    
+    // 监听系统主题变化
+    window.matchMedia('(prefers-color-scheme: dark)')
+      .addEventListener('change', e => {
+        if (this.followSystemTheme) {
+          this.currentTheme = e.matches ? 'dark' : 'light'
+        }
+      })
+  }
+}
+
+// CSS 变量使用
+.theme-light {
+  --bg-color: #ffffff;
+  --text-color: #333333;
+}
+.theme-dark {
+  --bg-color: #1a1a2e;
+  --text-color: #eeeeee;
+}
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          // ===== 基础练习数据 =====
+          isHovered: false,
+          isSelected: false,
+          cardActive: false,
+          cardPadding: 30,
+          cardBorderRadius: 12,
+          cardStyles: {
+            backgroundColor: '#ffffff',
+            padding: '30px',
+            borderRadius: '12px'
+          },
+
+          // ===== 进阶练习数据 =====
+          isScrolled: false,
+          scrollY: 0,
+          mobileMenuOpen: false,
+          currentNav: 'home',
+          navItems: [
+            { id: 'home', name: '首页' },
+            { id: 'products', name: '产品' },
+            { id: 'about', name: '关于' },
+            { id: 'contact', name: '联系' }
+          ],
+
+          // ===== 挑战练习数据 =====
+          currentTheme: 'light',
+          followSystemTheme: false,
+          savedToStorage: false,
+          systemTheme: 'light'
+        };
+      },
+
+      computed: {
+        // 基础练习
+        cardStatus() {
+          const states = [];
+          if (this.isHovered) states.push('悬停');
+          if (this.isSelected) states.push('选中');
+          if (this.cardActive) states.push('激活');
+          return states.length > 0 ? states.join(' + ') : '普通状态';
+        },
+
+        // 进阶练习
+        currentNavItem() {
+          return this.navItems.find(item => item.id === this.currentNav);
+        },
+
+        // 挑战练习
+        themeClass() {
+          return `theme-${this.currentTheme}`;
+        }
+      },
+
+      mounted() {
+        // 加载保存的主题
+        this.loadTheme();
+        
+        // 检测系统主题
+        this.detectSystemTheme();
+      },
+
+      watch: {
+        currentTheme(newVal) {
+          this.savedToStorage = true;
+        }
+      },
+
+      methods: {
+        // ===== 基础练习方法 =====
+        updateCardStyles() {
+          this.cardStyles.padding = this.cardPadding + 'px';
+          this.cardStyles.borderRadius = this.cardBorderRadius + 'px';
+        },
+
+        // ===== 进阶练习方法 =====
+        handleScroll(e) {
+          this.scrollY = e.target.scrollTop;
+          this.isScrolled = this.scrollY > 50;
+        },
+
+        // ===== 挑战练习方法 =====
+        setTheme(theme) {
+          this.currentTheme = theme;
+          this.followSystemTheme = false;
+          localStorage.setItem('theme', theme);
+          this.savedToStorage = true;
+        },
+
+        followSystem() {
+          this.followSystemTheme = true;
+          this.currentTheme = this.getSystemTheme();
+          
+          // 监听系统主题变化
+          const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+          mediaQuery.addEventListener('change', (e) => {
+            if (this.followSystemTheme) {
+              this.currentTheme = e.matches ? 'dark' : 'light';
+            }
+          });
+        },
+
+        getSystemTheme() {
+          return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        },
+
+        detectSystemTheme() {
+          this.systemTheme = this.getSystemTheme();
+        },
+
+        loadTheme() {
+          const savedTheme = localStorage.getItem('theme');
+          if (savedTheme) {
+            this.currentTheme = savedTheme;
+            this.savedToStorage = true;
+          }
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

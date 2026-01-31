@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>响应式设计 - 基础练习答案</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f7fb;
+            color: #2c3e50;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .nav {
+            background-color: #2c3e50;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+        }
+
+        .nav__list {
+            list-style: none;
+            display: flex;
+            gap: 16px;
+        }
+
+        .nav__toggle {
+            display: none;
+            margin-left: auto;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .responsive-text {
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        /* 768px：两列布局 */
+        @media (min-width: 768px) {
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .responsive-text {
+                font-size: 18px;
+            }
+        }
+
+        /* 1024px：三列布局 */
+        @media (min-width: 1024px) {
+            .cards {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .responsive-text {
+                font-size: 20px;
+            }
+        }
+
+        /* 移动端导航 */
+        @media (max-width: 767px) {
+            .nav__list {
+                flex-direction: column;
+            }
+
+            .nav__toggle {
+                display: inline-block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="container" aria-label="响应式基础练习">
+        <header>
+            <h1>响应式基础练习答案</h1>
+        </header>
+
+        <nav class="nav" aria-label="示例导航">
+            <strong>MySite</strong>
+            <button class="nav__toggle" type="button" aria-label="打开菜单">☰</button>
+            <ul class="nav__list">
+                <li>首页</li>
+                <li>案例</li>
+                <li>联系</li>
+            </ul>
+        </nav>
+
+        <section class="cards" aria-label="响应式卡片">
+            <article class="card">卡片 1</article>
+            <article class="card">卡片 2</article>
+            <article class="card">卡片 3</article>
+            <article class="card">卡片 4</article>
+            <article class="card">卡片 5</article>
+            <article class="card">卡片 6</article>
+        </section>
+
+        <section class="responsive-text" aria-label="响应式文字">
+            <p>文字大小会在不同屏幕尺寸下自动调整。</p>
+        </section>
+    </main>
+</body>
+</html>

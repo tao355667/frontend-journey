@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第 8 章练习题答案</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    
+    .container { max-width: 1000px; margin: 0 auto; }
+    
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 36px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .exercise-card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    
+    .exercise-title {
+      color: #667eea;
+      font-size: 24px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 3px solid #667eea;
+    }
+    
+    /* 基础练习：商品列表 */
+    .product-list {
+      display: grid;
+      gap: 15px;
+    }
+    
+    .product-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+    
+    .product-item:hover { transform: translateX(5px); }
+    .product-item.out-of-stock { opacity: 0.6; background: #f8d7da; }
+    
+    .product-number {
+      width: 40px;
+      height: 40px;
+      background: #667eea;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    
+    .product-icon { font-size: 36px; }
+    
+    .product-info { flex: 1; }
+    .product-name { font-weight: bold; font-size: 18px; margin-bottom: 5px; }
+    .product-price { color: #667eea; font-size: 16px; }
+    
+    .stock-badge {
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .stock-badge.in-stock { background: #d4edda; color: #155724; }
+    .stock-badge.out { background: #f8d7da; color: #721c24; }
+    
+    /* 进阶练习：任务管理器 */
+    .task-input {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .task-input input {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    
+    .task-input select {
+      padding: 12px;
+      border: 2px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-bar button {
+      padding: 8px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: #e9ecef;
+      color: #6c757d;
+    }
+    
+    .filter-bar button.active {
+      background: #667eea;
+      color: white;
+    }
+    
+    .sort-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      background: #42b883;
+      color: white;
+    }
+    
+    button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(66, 184, 131, 0.4); }
+    button.secondary { background: #6c757d; }
+    button.danger { background: #dc3545; }
+    
+    .task-list { list-style: none; }
+    
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      transition: all 0.3s ease;
+    }
+    
+    .task-item:hover { background: #e9ecef; }
+    .task-item.completed { opacity: 0.6; }
+    .task-item.completed .task-text { text-decoration: line-through; color: #6c757d; }
+    
+    .priority-badge {
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .priority-high { background: #f8d7da; color: #721c24; }
+    .priority-medium { background: #fff3cd; color: #856404; }
+    .priority-low { background: #d4edda; color: #155724; }
+    
+    .task-text { flex: 1; }
+    
+    .task-time {
+      font-size: 12px;
+      color: #6c757d;
+    }
+    
+    .task-stats {
+      display: flex;
+      gap: 20px;
+      padding: 15px;
+      background: #e9ecef;
+      border-radius: 8px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+    
+    .stat-item { text-align: center; }
+    .stat-value { font-size: 24px; font-weight: bold; color: #667eea; }
+    .stat-label { font-size: 14px; color: #6c757d; }
+    
+    /* 挑战练习：嵌套分类浏览器 */
+    .category-browser {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 20px;
+    }
+    
+    .category-sidebar {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    
+    .category-item {
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .category-item:hover { background: #e9ecef; }
+    .category-item.active { background: #667eea; color: white; }
+    
+    .category-toggle {
+      font-size: 12px;
+      transition: transform 0.3s ease;
+    }
+    
+    .category-toggle.expanded { transform: rotate(90deg); }
+    
+    .subcategory-list {
+      padding-left: 20px;
+    }
+    
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: #e9ecef;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .breadcrumb-item {
+      cursor: pointer;
+      color: #667eea;
+    }
+    
+    .breadcrumb-item:hover { text-decoration: underline; }
+    .breadcrumb-separator { color: #6c757d; }
+    
+    .search-box {
+      margin-bottom: 20px;
+    }
+    
+    .search-box input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    
+    .product-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 15px;
+    }
+    
+    .gallery-item {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      cursor: move;
+      transition: all 0.3s ease;
+    }
+    
+    .gallery-item:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+    
+    .gallery-item.dragging { opacity: 0.5; }
+    
+    .gallery-icon { font-size: 48px; margin-bottom: 10px; }
+    .gallery-name { font-weight: bold; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>🎯 第 8 章练习题答案</h1>
+      
+      <!-- 基础练习：商品列表 -->
+      <div class="exercise-card">
+        <h2 class="exercise-title">基础练习：商品列表</h2>
+        
+        <div class="product-list">
+          <div 
+            v-for="(product, index) in products" 
+            :key="product.id"
+            class="product-item"
+            :class="{ 'out-of-stock': product.stock === 0 }"
+          >
+            <div class="product-number">{{ index + 1 }}</div>
+            <div class="product-icon">{{ product.icon }}</div>
+            <div class="product-info">
+              <div class="product-name">{{ product.name }}</div>
+              <div class="product-price">¥{{ product.price }}</div>
+            </div>
+            <div 
+              class="stock-badge"
+              :class="product.stock === 0 ? 'out' : 'in-stock'"
+            >
+              {{ product.stock === 0 ? '缺货' : `库存: ${product.stock}` }}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 进阶练习：任务管理器 -->
+      <div class="exercise-card">
+        <h2 class="exercise-title">进阶练习：任务管理器</h2>
+        
+        <div class="task-input">
+          <input 
+            v-model="newTaskText" 
+            @keyup.enter="addTask"
+            placeholder="输入新任务..."
+          >
+          <select v-model="newTaskPriority">
+            <option value="high">高优先级</option>
+            <option value="medium">中优先级</option>
+            <option value="low">低优先级</option>
+          </select>
+          <button @click="addTask">添加</button>
+        </div>
+        
+        <div class="filter-bar">
+          <button 
+            v-for="filter in taskFilters" 
+            :key="filter.value"
+            :class="{ active: currentTaskFilter === filter.value }"
+            @click="currentTaskFilter = filter.value"
+          >
+            {{ filter.label }}
+          </button>
+        </div>
+        
+        <div class="sort-controls">
+          <button @click="sortTasks('time')">
+            {{ sortBy === 'time' ? '取消排序' : '按时间排序' }}
+          </button>
+          <button @click="sortTasks('priority')" class="secondary">
+            {{ sortBy === 'priority' ? '取消排序' : '按优先级排序' }}
+          </button>
+        </div>
+        
+        <ul class="task-list">
+          <li 
+            v-for="task in filteredAndSortedTasks" 
+            :key="task.id"
+            class="task-item"
+            :class="{ completed: task.completed }"
+          >
+            <input 
+              type="checkbox" 
+              v-model="task.completed"
+              style="width: 20px; height: 20px; cursor: pointer;"
+            >
+            <span 
+              class="priority-badge"
+              :class="`priority-${task.priority}`"
+            >
+              {{ task.priority === 'high' ? '高' : task.priority === 'medium' ? '中' : '低' }}
+            </span>
+            <span class="task-text">{{ task.text }}</span>
+            <span class="task-time">{{ formatTime(task.createdAt) }}</span>
+            <button class="danger" @click="removeTask(task.id)">删除</button>
+          </li>
+        </ul>
+        
+        <p v-if="filteredAndSortedTasks.length === 0" style="text-align: center; color: #6c757d; padding: 40px;">
+          暂无任务
+        </p>
+        
+        <div class="task-stats">
+          <div class="stat-item">
+            <div class="stat-value">{{ taskStats.total }}</div>
+            <div class="stat-label">总计</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ taskStats.active }}</div>
+            <div class="stat-label">进行中</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ taskStats.completed }}</div>
+            <div class="stat-label">已完成</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 挑战练习：嵌套商品分类 -->
+      <div class="exercise-card">
+        <h2 class="exercise-title">挑战练习：嵌套商品分类浏览器</h2>
+        
+        <div class="category-browser">
+          <div class="category-sidebar">
+            <div 
+              v-for="category in categories" 
+              :key="category.id"
+            >
+              <div 
+                class="category-item"
+                :class="{ active: selectedCategory === category.id }"
+                @click="selectCategory(category.id)"
+              >
+                <span>{{ category.name }}</span>
+                <span 
+                  v-if="category.children"
+                  class="category-toggle"
+                  :class="{ expanded: expandedCategories.includes(category.id) }"
+                  @click.stop="toggleCategory(category.id)"
+                >
+                  ▶
+                </span>
+              </div>
+              
+              <div 
+                v-if="category.children && expandedCategories.includes(category.id)"
+                class="subcategory-list"
+              >
+                <div 
+                  v-for="sub in category.children" 
+                  :key="sub.id"
+                  class="category-item"
+                  :class="{ active: selectedCategory === sub.id }"
+                  @click="selectCategory(sub.id)"
+                >
+                  {{ sub.name }}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <!-- 面包屑 -->
+            <div class="breadcrumb">
+              <span class="breadcrumb-item" @click="selectedCategory = null">首页</span>
+              <span v-if="breadcrumb.length > 0" class="breadcrumb-separator">/</span>
+              <template v-for="(item, index) in breadcrumb" :key="item.id">
+                <span class="breadcrumb-item" @click="selectCategory(item.id)">{{ item.name }}</span>
+                <span v-if="index < breadcrumb.length - 1" class="breadcrumb-separator">/</span>
+              </template>
+            </div>
+            
+            <!-- 搜索 -->
+            <div class="search-box">
+              <input v-model="searchQuery" placeholder="搜索商品...">
+            </div>
+            
+            <!-- 商品列表 -->
+            <div class="product-gallery">
+              <div 
+                v-for="product in filteredCategoryProducts" 
+                :key="product.id"
+                class="gallery-item"
+                draggable="true"
+                @dragstart="handleDragStart($event, product)"
+                @dragover.prevent
+                @drop="handleDrop($event, product)"
+              >
+                <div class="gallery-icon">{{ product.icon }}</div>
+                <div class="gallery-name">{{ product.name }}</div>
+              </div>
+            </div>
+            
+            <p v-if="filteredCategoryProducts.length === 0" style="text-align: center; color: #6c757d; padding: 40px;">
+              该分类下暂无商品
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed } = Vue
+
+    createApp({
+      setup() {
+        // 基础练习：商品列表
+        const products = ref([
+          { id: 1, name: '苹果手机', price: 5999, stock: 10, icon: '📱' },
+          { id: 2, name: '蓝牙耳机', price: 299, stock: 50, icon: '🎧' },
+          { id: 3, name: '笔记本电脑', price: 8999, stock: 0, icon: '💻' },
+          { id: 4, name: '智能手表', price: 1299, stock: 20, icon: '⌚' },
+          { id: 5, name: '平板电脑', price: 3299, stock: 15, icon: '📲' }
+        ])
+        
+        // 进阶练习：任务管理器
+        const newTaskText = ref('')
+        const newTaskPriority = ref('medium')
+        const nextTaskId = ref(4)
+        
+        const tasks = ref([
+          { id: 1, text: '完成 Vue 练习', priority: 'high', completed: false, createdAt: Date.now() - 3600000 },
+          { id: 2, text: '阅读文档', priority: 'medium', completed: true, createdAt: Date.now() - 7200000 },
+          { id: 3, text: '整理笔记', priority: 'low', completed: false, createdAt: Date.now() }
+        ])
+        
+        const taskFilters = [
+          { value: 'all', label: '全部' },
+          { value: 'active', label: '进行中' },
+          { value: 'completed', label: '已完成' }
+        ]
+        
+        const currentTaskFilter = ref('all')
+        const sortBy = ref('')
+        
+        const addTask = () => {
+          if (!newTaskText.value.trim()) return
+          tasks.value.push({
+            id: nextTaskId.value++,
+            text: newTaskText.value.trim(),
+            priority: newTaskPriority.value,
+            completed: false,
+            createdAt: Date.now()
+          })
+          newTaskText.value = ''
+        }
+        
+        const removeTask = (id) => {
+          const index = tasks.value.findIndex(t => t.id === id)
+          if (index > -1) tasks.value.splice(index, 1)
+        }
+        
+        const filteredAndSortedTasks = computed(() => {
+          let result = tasks.value
+          
+          if (currentTaskFilter.value === 'active') {
+            result = result.filter(t => !t.completed)
+          } else if (currentTaskFilter.value === 'completed') {
+            result = result.filter(t => t.completed)
+          }
+          
+          if (sortBy.value === 'time') {
+            result = [...result].sort((a, b) => b.createdAt - a.createdAt)
+          } else if (sortBy.value === 'priority') {
+            const priorityOrder = { high: 3, medium: 2, low: 1 }
+            result = [...result].sort((a, b) => priorityOrder[b.priority] - priorityOrder[a.priority])
+          }
+          
+          return result
+        })
+        
+        const sortTasks = (type) => {
+          sortBy.value = sortBy.value === type ? '' : type
+        }
+        
+        const formatTime = (timestamp) => {
+          return new Date(timestamp).toLocaleString('zh-CN', { 
+            month: 'short', 
+            day: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          })
+        }
+        
+        const taskStats = computed(() => ({
+          total: tasks.value.length,
+          active: tasks.value.filter(t => !t.completed).length,
+          completed: tasks.value.filter(t => t.completed).length
+        }))
+        
+        // 挑战练习：嵌套分类
+        const categories = ref([
+          {
+            id: 'electronics',
+            name: '数码电子',
+            children: [
+              { id: 'phones', name: '手机' },
+              { id: 'computers', name: '电脑' },
+              { id: 'audio', name: '音频' }
+            ]
+          },
+          {
+            id: 'clothing',
+            name: '服装服饰',
+            children: [
+              { id: 'men', name: '男装' },
+              { id: 'women', name: '女装' }
+            ]
+          },
+          { id: 'food', name: '食品生鲜' }
+        ])
+        
+        const expandedCategories = ref(['electronics'])
+        const selectedCategory = ref('phones')
+        const searchQuery = ref('')
+        
+        const toggleCategory = (id) => {
+          const index = expandedCategories.value.indexOf(id)
+          if (index > -1) {
+            expandedCategories.value.splice(index, 1)
+          } else {
+            expandedCategories.value.push(id)
+          }
+        }
+        
+        const selectCategory = (id) => {
+          selectedCategory.value = id
+        }
+        
+        const breadcrumb = computed(() => {
+          const result = []
+          const findCategory = (cats, targetId) => {
+            for (const cat of cats) {
+              if (cat.id === targetId) {
+                result.push(cat)
+                return true
+              }
+              if (cat.children) {
+                for (const child of cat.children) {
+                  if (child.id === targetId) {
+                    result.push(cat, child)
+                    return true
+                  }
+                }
+              }
+            }
+            return false
+          }
+          findCategory(categories.value, selectedCategory.value)
+          return result
+        })
+        
+        // 商品数据
+        const allProducts = ref([
+          { id: 1, name: 'iPhone 15', icon: '📱', category: 'phones' },
+          { id: 2, name: 'MacBook Pro', icon: '💻', category: 'computers' },
+          { id: 3, name: 'AirPods', icon: '🎧', category: 'audio' },
+          { id: 4, name: '男士T恤', icon: '👕', category: 'men' },
+          { id: 5, name: '连衣裙', icon: '👗', category: 'women' },
+          { id: 6, name: 'iPad', icon: '📲', category: 'computers' }
+        ])
+        
+        const filteredCategoryProducts = computed(() => {
+          let result = allProducts.value
+          
+          if (selectedCategory.value) {
+            result = result.filter(p => p.category === selectedCategory.value)
+          }
+          
+          if (searchQuery.value.trim()) {
+            const query = searchQuery.value.toLowerCase()
+            result = result.filter(p => p.name.toLowerCase().includes(query))
+          }
+          
+          return result
+        })
+        
+        // 拖拽排序
+        let draggedProduct = null
+        
+        const handleDragStart = (e, product) => {
+          draggedProduct = product
+          e.target.classList.add('dragging')
+        }
+        
+        const handleDrop = (e, targetProduct) => {
+          e.target.classList.remove('dragging')
+          if (!draggedProduct || draggedProduct.id === targetProduct.id) return
+          
+          const items = allProducts.value
+          const fromIndex = items.findIndex(p => p.id === draggedProduct.id)
+          const toIndex = items.findIndex(p => p.id === targetProduct.id)
+          
+          if (fromIndex > -1 && toIndex > -1) {
+            items.splice(fromIndex, 1)
+            items.splice(toIndex, 0, draggedProduct)
+          }
+          
+          draggedProduct = null
+        }
+        
+        return {
+          products,
+          newTaskText, newTaskPriority, tasks, taskFilters,
+          currentTaskFilter, sortBy, addTask, removeTask,
+          filteredAndSortedTasks, sortTasks, formatTime, taskStats,
+          categories, expandedCategories, selectedCategory,
+          searchQuery, toggleCategory, selectCategory, breadcrumb,
+          filteredCategoryProducts, handleDragStart, handleDrop
+        }
+      }
+    }).mount('#app')
+  </script>
+</body>
+</html>

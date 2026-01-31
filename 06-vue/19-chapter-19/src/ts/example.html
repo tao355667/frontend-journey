@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第十九章：组合式 API 概述与 setup - TypeScript 示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .demo-section {
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    .demo-title {
+      color: #42b983;
+      margin-top: 0;
+    }
+    button {
+      padding: 8px 16px;
+      margin: 5px;
+      background: #42b983;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #369870;
+    }
+    .info-box {
+      background: #f0f8ff;
+      padding: 15px;
+      border-left: 4px solid #42b983;
+      margin: 10px 0;
+    }
+    .comparison {
+      display: flex;
+      gap: 20px;
+    }
+    .comparison > div {
+      flex: 1;
+      padding: 15px;
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>第十九章：组合式 API 概述与 setup（TypeScript）</h1>
+  <p>本章演示组合式 API 的 TypeScript 用法和类型定义。</p>
+
+  <div id="app">
+    <!-- 示例 1：带类型的 setup -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 1：带类型的 setup 函数</h2>
+      <typed-setup-demo></typed-setup-demo>
+    </div>
+
+    <!-- 示例 2：接口定义 -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 2：接口（Interface）的使用</h2>
+      <interface-demo></interface-demo>
+    </div>
+
+    <!-- 示例 3：完整示例 -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 3：完整的 TypeScript 组件</h2>
+      <full-ts-demo></full-ts-demo>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed } = Vue;
+
+    // 示例 1：带类型的 setup
+    const TypedSetupDemo = {
+      setup() {
+        // 使用泛型指定类型
+        /** @type {import('vue').Ref<number>} */
+        const count = ref(0);
+        
+        /** @type {import('vue').Ref<string>} */
+        const userName = ref('张三');
+        
+        /** @type {import('vue').Ref<boolean>} */
+        const isActive = ref(true);
+        
+        // 带类型的计算属性
+        const userInfo = computed(() => {
+          return `${userName.value} - ${isActive.value ? '活跃' : '离线'}`;
+        });
+        
+        // 带类型的方法
+        /**
+         * @param {number} amount
+         */
+        const increment = (amount) => {
+          count.value += amount;
+        };
+        
+        const toggleStatus = () => {
+          isActive.value = !isActive.value;
+        };
+        
+        return {
+          count,
+          userName,
+          isActive,
+          userInfo,
+          increment,
+          toggleStatus
+        };
+      },
+      template: `
+        <div>
+          <p><strong>计数：</strong>{{ count }}</p>
+          <p><strong>用户信息：</strong>{{ userInfo }}</p>
+          <button @click="increment(1)">+1</button>
+          <button @click="increment(5)">+5</button>
+          <button @click="toggleStatus">切换状态</button>
+          <div class="info-box">
+            <strong>TypeScript 优势：</strong><br>
+            1. 类型安全：编译时检查数据类型<br>
+            2. 更好的 IDE 支持：代码提示和自动补全<br>
+            3. 更容易重构：类型约束确保修改不会破坏代码
+          </div>
+        </div>
+      `
+    };
+
+    // 示例 2：接口定义
+    const InterfaceDemo = {
+      setup() {
+        // 定义用户接口
+        /**
+         * @typedef {Object} User
+         * @property {number} id
+         * @property {string} name
+         * @property {string} email
+         * @property {number} [age]
+         */
+        
+        // 使用接口
+        /** @type {import('vue').Ref<User>} */
+        const user = ref({
+          id: 1,
+          name: '张三',
+          email: 'zhangsan@example.com',
+          age: 25
+        });
+        
+        // 用户列表
+        /** @type {import('vue').Ref<User[]>} */
+        const users = ref([
+          { id: 1, name: '张三', email: 'zhangsan@example.com', age: 25 },
+          { id: 2, name: '李四', email: 'lisi@example.com', age: 30 },
+          { id: 3, name: '王五', email: 'wangwu@example.com' }
+        ]);
+        
+        /**
+         * @param {User} newUser
+         */
+        const addUser = (newUser) => {
+          users.value.push(newUser);
+        };
+        
+        /**
+         * @param {number} userId
+         */
+        const removeUser = (userId) => {
+          users.value = users.value.filter(u => u.id !== userId);
+        };
+        
+        return {
+          user,
+          users,
+          addUser,
+          removeUser
+        };
+      },
+      template: `
+        <div>
+          <h4>当前用户</h4>
+          <p>ID: {{ user.id }}, 姓名: {{ user.name }}, 邮箱: {{ user.email }}</p>
+          <p v-if="user.age">年龄: {{ user.age }}</p>
+          
+          <h4>用户列表</h4>
+          <ul>
+            <li v-for="u in users" :key="u.id">
+              {{ u.name }} ({{ u.email }})
+              <button @click="removeUser(u.id)">删除</button>
+            </li>
+          </ul>
+          
+          <button @click="addUser({ id: Date.now(), name: '新用户', email: 'new@example.com' })">
+            添加用户
+          </button>
+          
+          <div class="info-box">
+            <strong>接口定义的好处：</strong><br>
+            明确的结构定义让代码更易理解和维护，IDE 能提供更好的代码提示。
+          </div>
+        </div>
+      `
+    };
+
+    // 示例 3：完整的 TypeScript 组件
+    const FullTsDemo = {
+      props: {
+        /** @type {import('vue').PropType<string>} */
+        title: {
+          type: String,
+          required: true
+        },
+        /** @type {import('vue').PropType<number>} */
+        maxCount: {
+          type: Number,
+          default: 100
+        }
+      },
+      emits: {
+        /** @param {number} value */
+        'update': (value) => typeof value === 'number',
+        /** @param {string} message */
+        'message': null
+      },
+      setup(props, { emit }) {
+        // 状态
+        /** @type {import('vue').Ref<number>} */
+        const count = ref(0);
+        
+        /** @type {import('vue').Ref<string[]>} */
+        const logs = ref([]);
+        
+        // 计算属性
+        const progress = computed(() => {
+          return Math.round((count.value / props.maxCount) * 100);
+        });
+        
+        const isMaxReached = computed(() => {
+          return count.value >= props.maxCount;
+        });
+        
+        // 方法
+        const increment = () => {
+          if (!isMaxReached.value) {
+            count.value++;
+            addLog(`增加: ${count.value}`);
+            emit('update', count.value);
+          } else {
+            emit('message', '已达到最大值！');
+          }
+        };
+        
+        const reset = () => {
+          count.value = 0;
+          logs.value = [];
+          addLog('重置计数器');
+          emit('update', 0);
+        };
+        
+        /**
+         * @param {string} message
+         */
+        const addLog = (message) => {
+          const timestamp = new Date().toLocaleTimeString();
+          logs.value.unshift(`[${timestamp}] ${message}`);
+          if (logs.value.length > 5) {
+            logs.value.pop();
+          }
+        };
+        
+        return {
+          count,
+          progress,
+          isMaxReached,
+          logs,
+          increment,
+          reset,
+          title: props.title
+        };
+      },
+      template: `
+        <div>
+          <h3>{{ title }}</h3>
+          <p>计数：{{ count }} / {{ maxCount }}</p>
+          <p>进度：{{ progress }}%</p>
+          <div style="background: #eee; height: 20px; border-radius: 10px; overflow: hidden;">
+            <div :style="{ width: progress + '%', background: isMaxReached ? '#ff6b6b' : '#42b983', height: '100%', transition: 'width 0.3s' }"></div>
+          </div>
+          <p v-if="isMaxReached" style="color: #ff6b6b;">已达到最大值！</p>
+          
+          <button @click="increment" :disabled="isMaxReached">增加</button>
+          <button @click="reset">重置</button>
+          
+          <div style="margin-top: 20px; background: #f5f5f5; padding: 10px; border-radius: 4px;">
+            <h4>操作日志</h4>
+            <div v-for="(log, index) in logs" :key="index" style="font-family: monospace; font-size: 12px;">
+              {{ log }}
+            </div>
+          </div>
+          
+          <div class="code-block">
+// TypeScript 类型定义示例
+interface Props {
+  title: string;
+  maxCount: number;
+}
+
+interface Emits {
+  (e: 'update', value: number): void;
+  (e: 'message', msg: string): void;
+}
+          </div>
+        </div>
+      `
+    };
+
+    // 父组件
+    const App = {
+      components: {
+        TypedSetupDemo,
+        InterfaceDemo,
+        FullTsDemo
+      },
+      setup() {
+        const message = ref('');
+        const lastCount = ref(0);
+        
+        const handleUpdate = (value) => {
+          lastCount.value = value;
+        };
+        
+        const handleMessage = (msg) => {
+          message.value = msg;
+          setTimeout(() => message.value = '', 3000);
+        };
+        
+        return {
+          message,
+          lastCount,
+          handleUpdate,
+          handleMessage
+        };
+      },
+      template: `
+        <typed-setup-demo></typed-setup-demo>
+        <interface-demo></interface-demo>
+        <full-ts-demo 
+          title="TypeScript 计数器" 
+          :max-count="10"
+          @update="handleUpdate"
+          @message="handleMessage"
+        ></full-ts-demo>
+        <p v-if="message" style="color: #ff6b6b; padding: 10px; background: #ffe0e0; border-radius: 4px;">
+          消息：{{ message }}
+        </p>
+        <p v-if="lastCount > 0">最后更新的值：{{ lastCount }}</p>
+      `
+    };
+
+    createApp(App).mount('#app');
+  </script>
+</body>
+</html>

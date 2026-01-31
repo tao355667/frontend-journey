@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEM - 基础练习答案</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f7fb;
+            color: #2c3e50;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            display: grid;
+            gap: 20px;
+        }
+
+        /* 卡片组件 */
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .card__header {
+            padding: 16px;
+            background-color: #1677ff;
+            color: #fff;
+        }
+
+        .card__title {
+            font-size: 18px;
+        }
+
+        .card__body {
+            padding: 16px;
+        }
+
+        .card--featured {
+            border: 2px solid #1677ff;
+        }
+
+        .card--dark {
+            background-color: #2c3e50;
+            color: #fff;
+        }
+
+        /* 按钮组件 */
+        .button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #fff;
+            background-color: #1677ff;
+        }
+
+        .button__icon { font-size: 16px; }
+        .button__text { font-weight: bold; }
+
+        .button--large { padding: 14px 22px; }
+        .button--primary { background-color: #1677ff; }
+
+        /* 导航组件 */
+        .nav {
+            background-color: #ffffff;
+            padding: 12px 16px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .nav__item { list-style: none; }
+        .nav__link { text-decoration: none; color: #2c3e50; }
+
+        .nav--horizontal .nav__list {
+            display: flex;
+            gap: 16px;
+        }
+
+        .nav--vertical .nav__list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <main class="container" aria-label="BEM 基础练习">
+        <header>
+            <h1>BEM 基础练习答案</h1>
+        </header>
+
+        <section aria-label="BEM 卡片组件">
+            <h2>卡片组件</h2>
+            <article class="card card--featured">
+                <div class="card__header">
+                    <h3 class="card__title">精选卡片</h3>
+                </div>
+                <div class="card__body">使用 card--featured 修饰符。</div>
+            </article>
+        </section>
+
+        <section aria-label="BEM 按钮组件">
+            <h2>按钮组件</h2>
+            <a href="#" class="button button--primary button--large">
+                <span class="button__icon">🚀</span>
+                <span class="button__text">立即开始</span>
+            </a>
+        </section>
+
+        <section aria-label="BEM 导航组件">
+            <h2>导航组件</h2>
+            <nav class="nav nav--horizontal" aria-label="水平导航">
+                <ul class="nav__list">
+                    <li class="nav__item"><a href="#" class="nav__link">首页</a></li>
+                    <li class="nav__item"><a href="#" class="nav__link">文章</a></li>
+                    <li class="nav__item"><a href="#" class="nav__link">联系</a></li>
+                </ul>
+            </nav>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第十九章：组合式 API 概述与 setup - JavaScript 示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .demo-section {
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    .demo-title {
+      color: #42b983;
+      margin-top: 0;
+    }
+    button {
+      padding: 8px 16px;
+      margin: 5px;
+      background: #42b983;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #369870;
+    }
+    .info-box {
+      background: #f0f8ff;
+      padding: 15px;
+      border-left: 4px solid #42b983;
+      margin: 10px 0;
+    }
+    .comparison {
+      display: flex;
+      gap: 20px;
+    }
+    .comparison > div {
+      flex: 1;
+      padding: 15px;
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>第十九章：组合式 API 概述与 setup</h1>
+  <p>本章演示组合式 API 的基础用法和 setup 函数的使用。</p>
+
+  <div id="app">
+    <!-- 示例 1：基础 setup -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 1：基础 setup 函数</h2>
+      <basic-setup-demo></basic-setup-demo>
+    </div>
+
+    <!-- 示例 2：setup 参数 -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 2：setup 参数（props 和 context）</h2>
+      <parent-component></parent-component>
+    </div>
+
+    <!-- 示例 3：对比演示 -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 3：选项式 API vs 组合式 API</h2>
+      <comparison-demo></comparison-demo>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed } = Vue;
+
+    // 示例 1：基础 setup 函数
+    const BasicSetupDemo = {
+      setup() {
+        // 定义响应式数据
+        const count = ref(0);
+        const message = ref('Hello Vue 3!');
+        
+        // 定义计算属性
+        const doubleCount = computed(() => count.value * 2);
+        
+        // 定义方法
+        const increment = () => {
+          count.value++;
+        };
+        
+        const updateMessage = () => {
+          message.value = '组合式 API 真棒！';
+        };
+        
+        // 返回给模板使用
+        return {
+          count,
+          message,
+          doubleCount,
+          increment,
+          updateMessage
+        };
+      },
+      template: `
+        <div>
+          <p><strong>计数器：</strong>{{ count }}</p>
+          <p><strong>双倍：</strong>{{ doubleCount }}</p>
+          <p><strong>消息：</strong>{{ message }}</p>
+          <button @click="increment">计数 +1</button>
+          <button @click="updateMessage">更新消息</button>
+          <div class="info-box">
+            <strong>代码说明：</strong><br>
+            在 setup() 函数中定义数据和逻辑，通过 return 暴露给模板使用。
+          </div>
+        </div>
+      `
+    };
+
+    // 示例 2：setup 参数
+    const ChildComponent = {
+      props: {
+        title: {
+          type: String,
+          required: true
+        },
+        initialCount: {
+          type: Number,
+          default: 0
+        }
+      },
+      emits: ['update'],
+      setup(props, context) {
+        // props 是响应式的
+        const localCount = ref(props.initialCount);
+        
+        // context 包含 attrs, slots, emit
+        const { emit } = context;
+        
+        const handleClick = () => {
+          localCount.value++;
+          // 触发事件
+          emit('update', localCount.value);
+        };
+        
+        return {
+          localCount,
+          handleClick,
+          title: props.title
+        };
+      },
+      template: `
+        <div style="border: 2px dashed #42b983; padding: 10px; margin: 10px 0;">
+          <h4>子组件</h4>
+          <p>接收的标题：{{ title }}</p>
+          <p>本地计数：{{ localCount }}</p>
+          <button @click="handleClick">增加并通知父组件</button>
+        </div>
+      `
+    };
+
+    const ParentComponent = {
+      components: { ChildComponent },
+      setup() {
+        const message = ref('等待子组件触发事件...');
+        
+        const handleUpdate = (value) => {
+          message.value = `子组件通知：当前值为 ${value}`;
+        };
+        
+        return {
+          message,
+          handleUpdate
+        };
+      },
+      template: `
+        <div>
+          <p class="info-box">{{ message }}</p>
+          <child-component 
+            title="我是子组件" 
+            :initial-count="10"
+            @update="handleUpdate"
+          ></child-component>
+          <div class="info-box">
+            <strong>代码说明：</strong><br>
+            setup(props, context) 接收两个参数：<br>
+            1. props：组件接收的属性（响应式）<br>
+            2. context：包含 attrs, slots, emit 等
+          </div>
+        </div>
+      `
+    };
+
+    // 示例 3：对比演示
+    const OptionsApiDemo = {
+      data() {
+        return {
+          firstName: '张',
+          lastName: '三',
+          age: 25
+        };
+      },
+      computed: {
+        fullName() {
+          return this.firstName + this.lastName;
+        }
+      },
+      methods: {
+        updateName() {
+          this.firstName = '李';
+          this.age++;
+        }
+      },
+      template: `
+        <div>
+          <h4>选项式 API</h4>
+          <p>姓名：{{ fullName }}</p>
+          <p>年龄：{{ age }}</p>
+          <button @click="updateName">更新信息</button>
+        </div>
+      `
+    };
+
+    const CompositionApiDemo = {
+      setup() {
+        const firstName = ref('张');
+        const lastName = ref('三');
+        const age = ref(25);
+        
+        const fullName = computed(() => {
+          return firstName.value + lastName.value;
+        });
+        
+        const updateName = () => {
+          firstName.value = '李';
+          age.value++;
+        };
+        
+        return {
+          fullName,
+          age,
+          updateName
+        };
+      },
+      template: `
+        <div>
+          <h4>组合式 API</h4>
+          <p>姓名：{{ fullName }}</p>
+          <p>年龄：{{ age }}</p>
+          <button @click="updateName">更新信息</button>
+        </div>
+      `
+    };
+
+    const ComparisonDemo = {
+      components: {
+        OptionsApiDemo,
+        CompositionApiDemo
+      },
+      template: `
+        <div class="comparison">
+          <options-api-demo></options-api-demo>
+          <composition-api-demo></composition-api-demo>
+        </div>
+        <div class="info-box">
+          <strong>对比说明：</strong><br>
+          选项式 API 将相关逻辑分散在 data、computed、methods 中；<br>
+          组合式 API 将相关逻辑组织在一起，更容易理解和维护。
+        </div>
+      `
+    };
+
+    // 创建应用
+    createApp({
+      components: {
+        BasicSetupDemo,
+        ParentComponent,
+        ComparisonDemo
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

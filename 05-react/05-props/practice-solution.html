@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Props 练习题参考答案</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        h2 {
+            color: #61dafb;
+            border-bottom: 2px solid #61dafb;
+            padding-bottom: 10px;
+        }
+        /* Profile 组件样式 */
+        .profile-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 300px;
+            text-align: center;
+            background: white;
+        }
+        .profile-card .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 16px;
+        }
+        .profile-card h3 {
+            margin: 0 0 8px 0;
+            color: #333;
+        }
+        .profile-card p {
+            margin: 0;
+            color: #666;
+            line-height: 1.6;
+        }
+        /* Rating 组件样式 */
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .star {
+            font-size: 32px;
+            color: #ddd;
+            cursor: pointer;
+        }
+        .star.filled {
+            color: #ffc107;
+        }
+        .rating-text {
+            margin-left: 12px;
+            color: #666;
+        }
+        /* Pagination 组件样式 */
+        .pagination {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .pagination button {
+            padding: 8px 14px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .pagination button:hover:not(:disabled) {
+            background: #f0f0f0;
+        }
+        .pagination button.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .pagination .page-info {
+            margin-left: 16px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // ========== 基础练习 ==========
+        function Profile({ avatar, name, bio }) {
+            return (
+                <div className="profile-card">
+                    <img 
+                        src={avatar || 'https://via.placeholder.com/100'} 
+                        alt={`${name}的头像`}
+                        className="avatar"
+                    />
+                    <h3>{name}</h3>
+                    <p>{bio}</p>
+                </div>
+            );
+        }
+
+        // ========== 进阶练习 ==========
+        function Rating({ maxRating = 5, currentRating, onRatingChange }) {
+            const stars = [];
+            
+            for (let i = 1; i <= maxRating; i++) {
+                const isFilled = i <= currentRating;
+                stars.push(
+                    <span 
+                        key={i}
+                        className={`star ${isFilled ? 'filled' : ''}`}
+                        onClick={() => onRatingChange && onRatingChange(i)}
+                    >
+                        ★
+                    </span>
+                );
+            }
+            
+            return (
+                <div className="rating">
+                    {stars}
+                    <span className="rating-text">
+                        {currentRating} / {maxRating}
+                    </span>
+                </div>
+            );
+        }
+
+        // ========== 挑战练习 ==========
+        function Pagination({ totalPages, currentPage, onPageChange }) {
+            const pages = [];
+            
+            // 生成页码按钮
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(
+                    <button
+                        key={i}
+                        className={i === currentPage ? 'active' : ''}
+                        onClick={() => onPageChange(i)}
+                    >
+                        {i}
+                    </button>
+                );
+            }
+            
+            return (
+                <div className="pagination">
+                    <button 
+                        disabled={currentPage === 1}
+                        onClick={() => onPageChange(currentPage - 1)}
+                    >
+                        上一页
+                    </button>
+                    
+                    {pages}
+                    
+                    <button 
+                        disabled={currentPage === totalPages}
+                        onClick={() => onPageChange(currentPage + 1)}
+                    >
+                        下一页
+                    </button>
+                    
+                    <span className="page-info">
+                        第 {currentPage} / {totalPages} 页
+                    </span>
+                </div>
+            );
+        }
+
+        // ========== 综合示例组件 ==========
+        function ProductCard({ 
+            name, 
+            price, 
+            rating, 
+            image,
+            onAddToCart 
+        }) {
+            return (
+                <div style={{
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '8px',
+                    padding: '16px',
+                    maxWidth: '250px'
+                }}>
+                    <img 
+                        src={image || 'https://via.placeholder.com/200x150'} 
+                        alt={name}
+                        style={{ width: '100%', borderRadius: '4px' }}
+                    />
+                    <h3 style={{ margin: '12px 0 8px' }}>{name}</h3>
+                    <p style={{ 
+                        color: '#e74c3c', 
+                        fontSize: '20px',
+                        fontWeight: 'bold',
+                        margin: '8px 0'
+                    }}>
+                        ¥{price.toFixed(2)}
+                    </p>
+                    <Rating 
+                        maxRating={5} 
+                        currentRating={rating}
+                    />
+                    <button 
+                        onClick={onAddToCart}
+                        style={{
+                            width: '100%',
+                            padding: '10px',
+                            marginTop: '12px',
+                            background: '#007bff',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        加入购物车
+                    </button>
+                </div>
+            );
+        }
+
+        function ReviewList({ reviews }) {
+            return (
+                <div style={{ marginTop: '20px' }}>
+                    <h4>用户评价</h4>
+                    {reviews.map((review, index) => (
+                        <div 
+                            key={index}
+                            style={{
+                                padding: '12px',
+                                borderBottom: '1px solid #eee'
+                            }}
+                        >
+                            <Rating 
+                                maxRating={5} 
+                                currentRating={review.rating}
+                            />
+                            <p style={{ margin: '8px 0 0' }}>{review.content}</p>
+                            <small style={{ color: '#999' }}>
+                                - {review.user} · {review.date}
+                            </small>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        // ========== 主应用组件 ==========
+        function App() {
+            const [rating, setRating] = React.useState(3);
+            const [currentPage, setCurrentPage] = React.useState(1);
+            
+            const reviews = [
+                { user: '张三', rating: 5, content: '产品质量很好！', date: '2024-01-28' },
+                { user: '李四', rating: 4, content: '还不错，值得购买', date: '2024-01-25' },
+                { user: '王五', rating: 5, content: '强烈推荐！', date: '2024-01-20' }
+            ];
+            
+            return (
+                <div>
+                    <h1>Props 练习题参考答案</h1>
+                    
+                    {/* 基础练习 */}
+                    <section className="section">
+                        <h2>基础练习：Profile 组件</h2>
+                        <Profile 
+                            avatar="https://via.placeholder.com/100"
+                            name="张明"
+                            bio="前端开发者，喜欢 React 和 TypeScript"
+                        />
+                    </section>
+                    
+                    {/* 进阶练习 */}
+                    <section className="section">
+                        <h2>进阶练习：Rating 组件</h2>
+                        <div>
+                            <p>点击星星改变评分：</p>
+                            <Rating 
+                                maxRating={5} 
+                                currentRating={rating}
+                                onRatingChange={setRating}
+                            />
+                        </div>
+                    </section>
+                    
+                    {/* 挑战练习 */}
+                    <section className="section">
+                        <h2>挑战练习：Pagination 组件</h2>
+                        <Pagination 
+                            totalPages={10}
+                            currentPage={currentPage}
+                            onPageChange={setCurrentPage}
+                        />
+                    </section>
+                    
+                    {/* 综合示例 */}
+                    <section className="section">
+                        <h2>综合示例</h2>
+                        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+                            <ProductCard 
+                                name="React 入门指南"
+                                price={59.00}
+                                rating={4}
+                                onAddToCart={() => alert('已加入购物车')}
+                            />
+                            <ProductCard 
+                                name="JavaScript 高级编程"
+                                price={89.00}
+                                rating={5}
+                                onAddToCart={() => alert('已加入购物车')}
+                            />
+                        </div>
+                        <ReviewList reviews={reviews} />
+                    </section>
+                </div>
+            );
+        }
+
+        // 渲染应用
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

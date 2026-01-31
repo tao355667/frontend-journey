@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第一个 Vue 应用 - JS 版本</title>
+  <!-- 引入 Vue 3 -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    #app {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+      width: 100%;
+    }
+    
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 28px;
+    }
+    
+    .counter-section {
+      background: #f8f9fa;
+      padding: 30px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .count-display {
+      font-size: 48px;
+      font-weight: bold;
+      color: #667eea;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-weight: 600;
+    }
+    
+    .btn-increment {
+      background: #42b883;
+      color: white;
+    }
+    
+    .btn-increment:hover {
+      background: #369870;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(66, 184, 131, 0.4);
+    }
+    
+    .btn-decrement {
+      background: #ff6b6b;
+      color: white;
+    }
+    
+    .btn-decrement:hover {
+      background: #ee5a5a;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+    }
+    
+    .btn-reset {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-reset:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+    }
+    
+    .status-message {
+      text-align: center;
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: 600;
+      margin-top: 20px;
+    }
+    
+    .status-high {
+      background: #fff3cd;
+      color: #856404;
+      border: 2px solid #ffeaa7;
+    }
+    
+    .status-low {
+      background: #f8d7da;
+      color: #721c24;
+      border: 2px solid #f5c6cb;
+    }
+    
+    .status-normal {
+      background: #d4edda;
+      color: #155724;
+      border: 2px solid #c3e6cb;
+    }
+    
+    .info-section {
+      margin-top: 30px;
+      padding: 20px;
+      background: #e9ecef;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .info-section h3 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+    
+    .info-section p {
+      color: #666;
+      line-height: 1.6;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      color: #d63384;
+    }
+  </style>
+</head>
+<body>
+  <!-- Vue 应用的挂载点 -->
+  <div id="app">
+    <!-- 使用双大括号进行文本插值 -->
+    <h1>{{ title }}</h1>
+    
+    <div class="counter-section">
+      <!-- 显示计数器的值 -->
+      <div class="count-display">{{ count }}</div>
+      
+      <!-- 按钮组 -->
+      <div class="buttons">
+        <!-- 事件绑定：@click 是 v-on:click 的简写 -->
+        <button class="btn-increment" @click="increment">
+          ➕ 增加
+        </button>
+        <button class="btn-decrement" @click="decrement">
+          ➖ 减少
+        </button>
+        <button class="btn-reset" @click="reset">
+          🔄 重置
+        </button>
+      </div>
+      
+      <!-- 条件渲染：根据 count 的值显示不同的状态 -->
+      <div 
+        class="status-message"
+        :class="statusClass"
+      >
+        {{ statusMessage }}
+      </div>
+    </div>
+    
+    <!-- 信息说明区域 -->
+    <div class="info-section">
+      <h3>💡 知识点</h3>
+      <p>
+        这个示例展示了 Vue 的基础概念：<br>
+        • <code>{{ }}</code> - 文本插值，显示数据<br>
+        • <code>ref()</code> - 创建响应式数据<br>
+        • <code>@click</code> - 事件绑定<br>
+        • <code>v-if/v-else-if/v-else</code> - 条件渲染
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // 从 Vue 全局对象中提取需要的 API
+    const { createApp, ref, computed } = Vue
+
+    // 创建 Vue 应用实例
+    createApp({
+      // setup 函数是组合式 API 的入口
+      setup() {
+        // 使用 ref 创建响应式数据
+        // ref 返回一个对象，需要通过 .value 访问和修改值
+        const title = ref('欢迎使用 Vue 3！')
+        const count = ref(0)
+
+        // 定义增加计数的方法
+        const increment = () => {
+          // 修改 ref 的值需要使用 .value
+          count.value++
+          console.log('计数增加到:', count.value)
+        }
+
+        // 定义减少计数的方法
+        const decrement = () => {
+          count.value--
+          console.log('计数减少到:', count.value)
+        }
+
+        // 定义重置计数的方法
+        const reset = () => {
+          count.value = 0
+          console.log('计数已重置')
+        }
+
+        // 使用 computed 创建计算属性
+        // 根据 count 的值返回不同的状态消息
+        const statusMessage = computed(() => {
+          if (count.value > 5) {
+            return '🔥 计数超过 5 了！'
+          } else if (count.value < 0) {
+            return '❄️ 计数小于 0 了！'
+          } else {
+            return '✅ 计数在正常范围内'
+          }
+        })
+
+        // 根据状态返回不同的 CSS 类名
+        const statusClass = computed(() => {
+          if (count.value > 5) return 'status-high'
+          if (count.value < 0) return 'status-low'
+          return 'status-normal'
+        })
+
+        // 返回的数据和方法可以在模板中使用
+        return {
+          title,
+          count,
+          increment,
+          decrement,
+          reset,
+          statusMessage,
+          statusClass
+        }
+      }
+    }).mount('#app')  // 将应用挂载到 DOM 元素上
+  </script>
+</body>
+</html>

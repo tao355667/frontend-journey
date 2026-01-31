@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第15章：动态组件与异步组件 - TypeScript示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #f5f5f5; }
+    h1 { text-align: center; color: #333; margin-bottom: 30px; }
+    h2 { color: #42b883; margin: 30px 0 15px; border-bottom: 2px solid #42b883; padding-bottom: 10px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    .type-hint { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 12px; margin: 10px 0; border-radius: 0 4px 4px 0; font-size: 13px; }
+    .type-hint code { background: rgba(255,255,255,0.7); padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }
+    
+    .card { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin: 5px; transition: opacity 0.2s; }
+    .btn-primary { background: #42b883; color: white; }
+    .btn-default { background: #e0e0e0; color: #333; }
+    .btn:hover { opacity: 0.8; }
+    .btn.active { box-shadow: 0 0 0 2px #42b883; }
+    
+    .tab-nav { display: flex; background: #f8f8f8; border-radius: 8px 8px 0 0; border-bottom: 2px solid #e0e0e0; }
+    .tab-btn { flex: 1; padding: 15px; border: none; background: none; cursor: pointer; transition: all 0.3s; font-size: 14px; }
+    .tab-btn.active { background: white; color: #42b883; border-bottom: 2px solid #42b883; margin-bottom: -2px; }
+    
+    .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 4px; }
+    @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    
+    .user-profile { display: flex; gap: 20px; padding: 20px; }
+    .avatar { width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #42b883, #347474); display: flex; align-items: center; justify-content: center; color: white; font-size: 48px; }
+    .profile-info h3 { font-size: 24px; margin-bottom: 10px; }
+    .profile-info p { color: #666; margin-bottom: 5px; }
+    .tags { display: flex; gap: 8px; margin-top: 10px; }
+    .tag { padding: 4px 12px; background: #e8f5e9; color: #2e7d32; border-radius: 20px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>Vue 3 + TypeScript 动态组件与异步组件</h1>
+      
+      <div class="type-hint">
+        <strong>TypeScript 类型提示：</strong><br>
+        <code>defineAsyncComponent&lt;ComponentType&gt;(() =&gt; import('./Component.vue'))</code><br>
+        使用类型参数可以获得完整的类型推断和 IDE 支持
+      </div>
+      
+      <h2>1. 类型化的动态组件</h2>
+      
+      <div class="card">
+        <div style="margin-bottom: 15px;">
+          <button 
+            v-for="tab in typedTabs" 
+            :key="tab.id"
+            :class="['btn', { active: currentTypedTab === tab.id }]"
+            @click="currentTypedTab = tab.id"
+          >
+            {{ tab.label }}
+          </button>
+        </div>
+        
+        <keep-alive>
+          <component :is="typedTabComponents[currentTypedTab]" />
+        </keep-alive>
+      </div>
+      
+      <h2>2. 类型化的异步组件加载</h2>
+      
+      <div class="card">
+        <div style="margin-bottom: 15px;">
+          <button class="btn btn-primary" @click="loadUser(1)">加载用户 1</button>
+          <button class="btn btn-primary" @click="loadUser(2)">加载用户 2</button>
+          <button class="btn btn-primary" @click="loadUser(3)">加载用户 3</button>
+          <button class="btn btn-default" @click="selectedUser = null">清除</button>
+        </div>
+        
+        <typed-user-profile v-if="selectedUser" :user-id="selectedUser" />
+        <div v-else style="text-align: center; padding: 40px; color: #999;">
+          选择一个用户加载详情
+        </div>
+      </div>
+      
+      <h2>3. Suspense 异步加载演示</h2>
+      
+      <div class="card">
+        <button class="btn btn-primary" @click="showSuspenseDemo = !showSuspenseDemo" style="margin-bottom: 15px;">
+          {{ showSuspenseDemo ? '隐藏' : '显示' }} Suspense 演示
+        </button>
+        
+        <suspense-demo v-if="showSuspenseDemo" />
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // TypeScript 类型定义（运行时模拟）
+    /**
+     * @typedef {Object} Tab
+     * @property {string} id
+     * @property {string} label
+     */
+
+    /**
+     * @typedef {Object} User
+     * @property {number} id
+     * @property {string} name
+     * @property {string} role
+     * @property {string} bio
+     * @property {string[]} skills
+     */
+
+    const { createApp, ref, computed, markRaw, onActivated, onDeactivated, defineAsyncComponent, defineComponent } = Vue;
+
+    // 1. 类型化的标签组件
+    const TypedHomeTab = defineComponent({
+      name: 'HomeTab',
+      template: `
+        <div>
+          <h3>首页</h3>
+          <p>访问次数: {{ visitCount }}</p>
+          <div class="type-hint" style="margin-top: 15px;">
+            使用 onActivated/onDeactivated 追踪组件激活状态
+          </div>
+        </div>
+      `,
+      setup() {
+        /** @type {import('vue').Ref<number>} */
+        const visitCount = ref(0);
+
+        onActivated(() => {
+          visitCount.value++;
+        });
+
+        return { visitCount };
+      }
+    });
+
+    const TypedDataTab = defineComponent({
+      name: 'DataTab',
+      template: `
+        <div>
+          <h3>数据面板</h3>
+          <ul style="list-style: none; padding: 0;">
+            <li v-for="item in data" :key="item.id" style="padding: 8px; border-bottom: 1px solid #eee;">
+              {{ item.name }}: {{ item.value }}
+            </li>
+          </ul>
+        </div>
+      `,
+      setup() {
+        /** @type {import('vue').Ref<Array<{id: number, name: string, value: number}>>} */
+        const data = ref([
+          { id: 1, name: '用户量', value: 1234 },
+          { id: 2, name: '访问量', value: 5678 },
+          { id: 3, name: '转化率', value: 12.5 }
+        ]);
+
+        return { data };
+      }
+    });
+
+    const TypedSettingsTab = defineComponent({
+      name: 'SettingsTab',
+      template: `
+        <div>
+          <h3>系统设置</h3>
+          <div style="margin: 10px 0;">
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" v-model="settings.darkMode"> 深色模式
+            </label>
+          </div>
+          <div style="margin: 10px 0;">
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" v-model="settings.notifications"> 开启通知
+            </label>
+          </div>
+          <p style="color: #666; font-size: 13px;">设置会被 KeepAlive 保留</p>
+        </div>
+      `,
+      setup() {
+        /** @type {import('vue').Ref<{darkMode: boolean, notifications: boolean}>} */
+        const settings = ref({
+          darkMode: false,
+          notifications: true
+        });
+
+        return { settings };
+      }
+    });
+
+    // 2. 异步加载的用户详情组件
+    const TypedUserProfileContent = defineComponent({
+      props: {
+        userId: {
+          type: Number,
+          required: true
+        }
+      },
+      template: `
+        <div class="user-profile">
+          <div class="avatar">{{ user.name[0] }}</div>
+          <div class="profile-info">
+            <h3>{{ user.name }}</h3>
+            <p><strong>职位:</strong> {{ user.role }}</p>
+            <p><strong>简介:</strong> {{ user.bio }}</p>
+            <div class="tags">
+              <span v-for="skill in user.skills" :key="skill" class="tag">{{ skill }}</span>
+            </div>
+          </div>
+        </div>
+      `,
+      setup(props) {
+        /** @type {import('vue').Ref<User>} */
+        const user = ref({});
+
+        // 模拟用户数据
+        /** @type {Record<number, User>} */
+        const users = {
+          1: { id: 1, name: '张三', role: '高级工程师', bio: '10年前端开发经验，Vue 核心贡献者。', skills: ['Vue', 'TypeScript', 'Node.js'] },
+          2: { id: 2, name: '李四', role: '产品经理', bio: '专注于用户体验和产品设计。', skills: ['产品设计', '数据分析', '用户研究'] },
+          3: { id: 3, name: '王五', role: 'UI设计师', bio: '追求极致的视觉体验。', skills: ['Figma', 'Sketch', '动效设计'] }
+        };
+
+        user.value = users[props.userId] || users[1];
+
+        return { user };
+      }
+    });
+
+    // 骨架屏组件
+    const SkeletonLoader = defineComponent({
+      template: `
+        <div style="padding: 20px;">
+          <div style="display: flex; gap: 20px;">
+            <div class="skeleton" style="width: 100px; height: 100px; border-radius: 50%;"></div>
+            <div style="flex: 1;">
+              <div class="skeleton" style="width: 200px; height: 24px; margin-bottom: 10px;"></div>
+              <div class="skeleton" style="width: 150px; height: 16px; margin-bottom: 10px;"></div>
+              <div class="skeleton" style="width: 100%; height: 16px;"></div>
+            </div>
+          </div>
+        </div>
+      `
+    });
+
+    // 创建类型化的异步组件
+    const TypedUserProfile = defineAsyncComponent({
+      loader: () => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve({ default: TypedUserProfileContent });
+          }, 1200);
+        });
+      },
+      loadingComponent: SkeletonLoader,
+      delay: 200,
+      timeout: 5000
+    });
+
+    // 3. Suspense 演示组件
+    const SuspenseChild1 = defineComponent({
+      template: `
+        <div style="padding: 15px; background: #e8f5e9; border-radius: 4px; margin: 10px 0;">
+          <strong>子组件 1</strong> - 加载完成！
+        </div>
+      `
+    });
+
+    const SuspenseChild2 = defineComponent({
+      template: `
+        <div style="padding: 15px; background: #fff3e0; border-radius: 4px; margin: 10px 0;">
+          <strong>子组件 2</strong> - 加载完成！
+        </div>
+      `,
+      async setup() {
+        // 模拟异步数据获取
+        await new Promise(resolve => setTimeout(resolve, 800));
+        return {};
+      }
+    });
+
+    const SuspenseChild3 = defineComponent({
+      template: `
+        <div style="padding: 15px; background: #e3f2fd; border-radius: 4px; margin: 10px 0;">
+          <strong>子组件 3</strong> - 加载完成！
+        </div>
+      `,
+      async setup() {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        return {};
+      }
+    });
+
+    const SuspenseDemo = defineComponent({
+      template: `
+        <div class="card" style="background: #f8f8f8;">
+          <h4>Suspense 演示（所有异步组件完成后才显示）</h4>
+          <div style="background: white; padding: 15px; border-radius: 4px; margin-top: 10px;">
+            <suspense>
+              <template #default>
+                <div>
+                  <suspense-child1 />
+                  <suspense-child2 />
+                  <suspense-child3 />
+                  <div style="text-align: center; color: #42b883; margin-top: 15px;">
+                    ✅ 所有组件加载完成！
+                  </div>
+                </div>
+              </template>
+              <template #fallback>
+                <div style="text-align: center; padding: 40px;">
+                  <div class="skeleton" style="width: 50px; height: 50px; border-radius: 50%; margin: 0 auto 20px;"></div>
+                  <div style="color: #666;">等待所有组件加载...</div>
+                </div>
+              </template>
+            </suspense>
+          </div>
+        </div>
+      `,
+      components: {
+        SuspenseChild1,
+        SuspenseChild2,
+        SuspenseChild3
+      }
+    });
+
+    // 创建应用
+    createApp({
+      components: {
+        TypedUserProfile,
+        SuspenseDemo
+      },
+      setup() {
+        // 类型化的标签系统
+        /** @type {import('vue').Ref<string>} */
+        const currentTypedTab = ref('home');
+        
+        /** @type {Tab[]} */
+        const typedTabs = [
+          { id: 'home', label: '首页' },
+          { id: 'data', label: '数据' },
+          { id: 'settings', label: '设置' }
+        ];
+
+        const typedTabComponents = {
+          home: TypedHomeTab,
+          data: TypedDataTab,
+          settings: TypedSettingsTab
+        };
+
+        // 用户选择
+        /** @type {import('vue').Ref<number | null>} */
+        const selectedUser = ref(null);
+        
+        /**
+         * @param {number} id
+         */
+        const loadUser = (id) => {
+          selectedUser.value = null;
+          // 强制重新加载
+          setTimeout(() => {
+            selectedUser.value = id;
+          }, 100);
+        };
+
+        // Suspense 演示
+        /** @type {import('vue').Ref<boolean>} */
+        const showSuspenseDemo = ref(false);
+
+        return {
+          currentTypedTab,
+          typedTabs,
+          typedTabComponents,
+          selectedUser,
+          loadUser,
+          showSuspenseDemo
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

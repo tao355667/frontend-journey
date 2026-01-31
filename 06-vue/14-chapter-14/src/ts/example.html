@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第14章：生命周期钩子 - TypeScript示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #f5f5f5; }
+    h1 { text-align: center; color: #333; margin-bottom: 30px; }
+    h2 { color: #42b883; margin: 30px 0 15px; border-bottom: 2px solid #42b883; padding-bottom: 10px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    .card { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin: 5px; transition: opacity 0.2s; }
+    .btn-primary { background: #42b883; color: white; }
+    .btn-danger { background: #ff5252; color: white; }
+    .btn-default { background: #e0e0e0; color: #333; }
+    .btn:hover { opacity: 0.8; }
+    
+    .logs { background: #1e1e1e; color: #4ec9b0; padding: 15px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; max-height: 200px; overflow-y: auto; margin-top: 15px; }
+    
+    .type-hint { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 12px; margin: 10px 0; border-radius: 0 4px 4px 0; font-size: 13px; }
+    .type-hint code { background: rgba(255,255,255,0.7); padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }
+    
+    .timer-display { font-size: 36px; font-weight: bold; color: #42b883; text-align: center; padding: 20px; font-family: monospace; }
+    .status-online { color: #42b883; }
+    .status-offline { color: #ff5252; }
+    
+    .resize-box { background: #f8f8f8; padding: 20px; border-radius: 4px; text-align: center; }
+    .resize-value { font-size: 28px; font-weight: bold; color: #42b883; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>Vue 3 + TypeScript 生命周期示例</h1>
+      
+      <div class="type-hint">
+        <strong>TypeScript 类型提示：</strong><br>
+        使用 <code>onMounted(() =&gt; {...})</code> 等钩子时，回调函数会自动获得正确的类型推断
+      </div>
+      
+      <h2>1. 类型化的生命周期日志</h2>
+      
+      <div class="card">
+        <typed-lifecycle-demo v-if="showDemo" />
+        <div v-else style="text-align: center; color: #999; padding: 40px;">
+          组件已销毁 (onUnmounted 已执行)
+        </div>
+        <button class="btn btn-danger" style="margin-top: 15px;" @click="showDemo = !showDemo">
+          {{ showDemo ? '销毁组件' : '重新创建' }}
+        </button>
+      </div>
+      
+      <h2>2. 类型化的定时器组件</h2>
+      
+      <div class="card">
+        <typed-timer v-if="showTimer" />
+        <div v-else class="timer-display">--:--:--</div>
+        <div class="type-hint">
+          <code>let timer: ReturnType&lt;typeof setInterval&gt; | null = null</code>
+        </div>
+        <button class="btn btn-primary" @click="showTimer = !showTimer">
+          {{ showTimer ? '停止' : '启动' }} 定时器
+        </button>
+      </div>
+      
+      <h2>3. 类型化的网络状态监听</h2>
+      
+      <div class="card">
+        <network-status />
+      </div>
+      
+      <h2>4. 类型化的鼠标位置追踪</h2>
+      
+      <div class="card">
+        <mouse-tracker />
+      </div>
+      
+      <h2>5. 类型化的防抖请求</h2>
+      
+      <div class="card">
+        <search-component />
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // TypeScript 类型定义注释
+    /**
+     * @typedef {Object} LifecycleLog
+     * @property {string} time
+     * @property {string} type
+     * @property {string} message
+     */
+
+    /**
+     * @typedef {Object} User
+     * @property {number} id
+     * @property {string} name
+     * @property {string} email
+     */
+
+    const { createApp, ref, computed, onBeforeMount, onMounted, onBeforeUpdate, onUpdated, onBeforeUnmount, onUnmounted, defineComponent } = Vue;
+
+    // 1. 类型化的生命周期演示组件
+    const TypedLifecycleDemo = defineComponent({
+      template: `
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h4>状态: {{ status }}</h4>
+            <button class="btn btn-primary" @click="count++">更新 ({{ count }})</button>
+          </div>
+          <div class="logs">
+            <div v-for="(log, index) in logs" :key="index" style="margin: 3px 0;">
+              <span style="color: #ce9178;">[{{ log.time }}]</span>
+              <span style="color: #4ec9b0;"> {{ log.message }}</span>
+            </div>
+          </div>
+        </div>
+      `,
+      setup() {
+        // 带类型的响应式数据
+        /** @type {import('vue').Ref<LifecycleLog[]>} */
+        const logs = ref([]);
+        /** @type {import('vue').Ref<number>} */
+        const count = ref(0);
+        /** @type {import('vue').Ref<string>} */
+        const status = ref('已挂载');
+
+        /**
+         * @param {string} message
+         */
+        function addLog(message) {
+          const time = new Date().toLocaleTimeString();
+          logs.value.unshift({ time, type: 'info', message });
+          if (logs.value.length > 15) logs.value.pop();
+        }
+
+        addLog('setup() 执行 - 初始化响应式数据');
+
+        onBeforeMount(() => {
+          addLog('onBeforeMount: 组件即将挂载');
+        });
+
+        onMounted(() => {
+          addLog('onMounted: 组件已挂载，DOM可操作');
+        });
+
+        onBeforeUpdate(() => {
+          addLog('onBeforeUpdate: 数据变化，准备更新DOM');
+          status.value = '更新中';
+        });
+
+        onUpdated(() => {
+          addLog('onUpdated: DOM更新完成');
+          status.value = '已挂载';
+        });
+
+        onBeforeUnmount(() => {
+          addLog('onBeforeUnmount: 组件即将卸载');
+          status.value = '卸载中';
+        });
+
+        onUnmounted(() => {
+          console.log('TypedLifecycleDemo: 已完全卸载');
+        });
+
+        return { logs, count, status };
+      }
+    });
+
+    // 2. 类型化的定时器组件
+    const TypedTimer = defineComponent({
+      template: `
+        <div class="timer-display">
+          {{ formattedTime }}
+          <div style="font-size: 14px; color: #666; margin-top: 10px;">
+            运行时间
+          </div>
+        </div>
+      `,
+      setup() {
+        /** @type {import('vue').Ref<number>} */
+        const seconds = ref(0);
+        
+        // 类型化的定时器变量
+        /** @type {ReturnType<typeof setInterval> | null} */
+        let timer = null;
+
+        const formattedTime = computed(() => {
+          const h = Math.floor(seconds.value / 3600);
+          const m = Math.floor((seconds.value % 3600) / 60);
+          const s = seconds.value % 60;
+          return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        });
+
+        onMounted(() => {
+          timer = setInterval(() => {
+            seconds.value++;
+          }, 1000);
+        });
+
+        onUnmounted(() => {
+          if (timer) {
+            clearInterval(timer);
+            timer = null;
+          }
+        });
+
+        return { formattedTime };
+      }
+    });
+
+    // 计算属性辅助函数
+    const computed = (getter) => {
+      return {
+        get value() { return getter(); }
+      };
+    };
+
+    // 3. 网络状态监听组件
+    const NetworkStatus = defineComponent({
+      template: `
+        <div style="text-align: center; padding: 20px;">
+          <div style="font-size: 48px; margin-bottom: 10px;">
+            {{ isOnline ? '🟢' : '🔴' }}
+          </div>
+          <div :class="isOnline ? 'status-online' : 'status-offline'" style="font-size: 24px; font-weight: bold;">
+            {{ isOnline ? '在线' : '离线' }}
+          </div>
+          <div style="color: #999; margin-top: 10px; font-size: 13px;">
+            {{ isOnline ? '网络连接正常' : '请检查网络连接' }}
+          </div>
+        </div>
+      `,
+      setup() {
+        /** @type {import('vue').Ref<boolean>} */
+        const isOnline = ref(navigator.onLine);
+
+        function handleOnline() {
+          isOnline.value = true;
+        }
+
+        function handleOffline() {
+          isOnline.value = false;
+        }
+
+        onMounted(() => {
+          window.addEventListener('online', handleOnline);
+          window.addEventListener('offline', handleOffline);
+        });
+
+        onUnmounted(() => {
+          window.removeEventListener('online', handleOnline);
+          window.removeEventListener('offline', handleOffline);
+        });
+
+        return { isOnline };
+      }
+    });
+
+    // 4. 鼠标位置追踪组件
+    const MouseTracker = defineComponent({
+      template: `
+        <div class="resize-box" style="height: 150px; position: relative; overflow: hidden;">
+          <div class="resize-value">X: {{ x }}, Y: {{ y }}</div>
+          <div style="color: #666; margin-top: 10px; font-size: 13px;">
+            在此区域内移动鼠标
+          </div>
+          <div 
+            v-if="showDot"
+            style="position: absolute; width: 10px; height: 10px; background: #42b883; border-radius: 50%; pointer-events: none; transition: all 0.1s;"
+            :style="{ left: x + 'px', top: y + 'px', transform: 'translate(-50%, -50%)' }"
+          ></div>
+        </div>
+      `,
+      setup() {
+        /** @type {import('vue').Ref<number>} */
+        const x = ref(0);
+        /** @type {import('vue').Ref<number>} */
+        const y = ref(0);
+        /** @type {import('vue').Ref<boolean>} */
+        const showDot = ref(false);
+
+        /** @type {HTMLElement | null} */
+        let container = null;
+
+        /**
+         * @param {MouseEvent} e
+         */
+        function handleMouseMove(e) {
+          if (container) {
+            const rect = container.getBoundingClientRect();
+            x.value = Math.round(e.clientX - rect.left);
+            y.value = Math.round(e.clientY - rect.top);
+          }
+        }
+
+        function handleMouseEnter() {
+          showDot.value = true;
+        }
+
+        function handleMouseLeave() {
+          showDot.value = false;
+        }
+
+        onMounted(() => {
+          container = document.querySelector('.resize-box');
+          if (container) {
+            container.addEventListener('mousemove', handleMouseMove);
+            container.addEventListener('mouseenter', handleMouseEnter);
+            container.addEventListener('mouseleave', handleMouseLeave);
+          }
+        });
+
+        onUnmounted(() => {
+          if (container) {
+            container.removeEventListener('mousemove', handleMouseMove);
+            container.removeEventListener('mouseenter', handleMouseEnter);
+            container.removeEventListener('mouseleave', handleMouseLeave);
+          }
+        });
+
+        return { x, y, showDot };
+      }
+    });
+
+    // 5. 防抖搜索组件
+    const SearchComponent = defineComponent({
+      template: `
+        <div>
+          <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <input 
+              v-model="searchQuery"
+              placeholder="输入搜索关键词..."
+              style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;"
+            >
+            <button class="btn btn-default" @click="searchQuery = ''">清空</button>
+          </div>
+          
+          <div v-if="loading" style="text-align: center; padding: 20px; color: #666;">
+            搜索中...
+          </div>
+          <div v-else-if="results.length > 0">
+            <div style="color: #666; margin-bottom: 10px; font-size: 13px;">
+              找到 {{ results.length }} 个结果 (防抖: 300ms)
+            </div>
+            <ul style="list-style: none;">
+              <li v-for="result in results" :key="result.id" style="padding: 10px; border-bottom: 1px solid #eee;">
+                <strong>{{ result.title }}</strong>
+                <div style="font-size: 13px; color: #666;">{{ result.description }}</div>
+              </li>
+            </ul>
+          </div>
+          <div v-else-if="searchQuery" style="text-align: center; padding: 20px; color: #999;">
+            没有找到结果
+          </div>
+          <div v-else style="text-align: center; padding: 20px; color: #999;">
+            输入关键词开始搜索
+          </div>
+        </div>
+      `,
+      setup() {
+        /** @type {import('vue').Ref<string>} */
+        const searchQuery = ref('');
+        /** @type {import('vue').Ref<Array<{id: number, title: string, description: string}>>} */
+        const results = ref([]);
+        /** @type {import('vue').Ref<boolean>} */
+        const loading = ref(false);
+
+        /** @type {ReturnType<typeof setTimeout> | null} */
+        let debounceTimer = null;
+
+        // 模拟搜索
+        async function performSearch(query) {
+          loading.value = true;
+          
+          // 模拟 API 延迟
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          // 模拟搜索结果
+          if (query) {
+            results.value = [
+              { id: 1, title: `结果 1: ${query}`, description: '这是搜索结果的描述文本...' },
+              { id: 2, title: `结果 2: ${query}`, description: '另一个搜索结果的描述...' },
+              { id: 3, title: `结果 3: ${query}`, description: '更多搜索结果在这里...' }
+            ];
+          } else {
+            results.value = [];
+          }
+          
+          loading.value = false;
+        }
+
+        // 监听搜索词变化，带防抖
+        const stopWatch = Vue.watch(searchQuery, (newQuery) => {
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => {
+            performSearch(newQuery);
+          }, 300);
+        });
+
+        onUnmounted(() => {
+          clearTimeout(debounceTimer);
+          stopWatch();
+        });
+
+        return { searchQuery, results, loading };
+      }
+    });
+
+    // 创建应用
+    createApp({
+      components: {
+        TypedLifecycleDemo,
+        TypedTimer,
+        NetworkStatus,
+        MouseTracker,
+        SearchComponent
+      },
+      setup() {
+        const showDemo = ref(true);
+        const showTimer = ref(true);
+
+        return { showDemo, showTimer };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

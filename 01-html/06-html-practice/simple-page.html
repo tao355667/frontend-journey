@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>李明的个人主页</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; line-height: 1.6; color: #333; background-color: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        
+        /* Header */
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px 0; }
+        header .container { display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-size: 24px; margin-bottom: 10px; }
+        header p { font-size: 14px; opacity: 0.9; }
+        nav ul { list-style: none; display: flex; gap: 20px; }
+        nav a { color: white; text-decoration: none; font-weight: 500; transition: opacity 0.3s; }
+        nav a:hover { opacity: 0.8; }
+        
+        /* Main */
+        main { padding: 40px 0; }
+        main .container { display: grid; grid-template-columns: 1fr 300px; gap: 30px; }
+        
+        /* Article */
+        article { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        article h2 { color: #667eea; margin-bottom: 20px; font-size: 28px; }
+        article p { margin-bottom: 15px; }
+        
+        /* Section */
+        section { margin: 40px 0; }
+        section h3 { color: #764ba2; margin-bottom: 15px; font-size: 22px; }
+        
+        /* Skills List */
+        ul.skills { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; }
+        ul.skills li { background: #f0f0f0; padding: 8px 16px; border-radius: 20px; font-size: 14px; }
+        
+        /* Works Table */
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; font-weight: 600; color: #667eea; }
+        tr:hover { background: #f8f9fa; }
+        
+        /* Form */
+        form { margin: 20px 0; }
+        form label { display: block; margin-bottom: 5px; font-weight: 500; }
+        form input, form textarea { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+        form textarea { min-height: 100px; resize: vertical; }
+        button { background: #667eea; color: white; padding: 10px 30px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background 0.3s; }
+        button:hover { background: #764ba2; }
+        
+        /* Aside */
+        aside { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); height: fit-content; }
+        aside h3 { color: #667eea; margin-bottom: 20px; font-size: 20px; }
+        aside p { margin-bottom: 10px; }
+        aside a { color: #667eea; text-decoration: none; }
+        aside a:hover { text-decoration: underline; }
+        
+        /* Figure */
+        figure { margin: 20px 0; }
+        figure img { width: 100%; border-radius: 8px; }
+        figcaption { text-align: center; color: #666; font-size: 14px; margin-top: 10px; }
+        
+        /* Details */
+        details { background: #f8f9fa; padding: 15px; border-radius: 4px; margin: 20px 0; }
+        summary { cursor: pointer; font-weight: 500; color: #667eea; }
+        summary:hover { color: #764ba2; }
+        
+        /* Footer */
+        footer { background: #333; color: white; padding: 30px 0; text-align: center; }
+        footer p { opacity: 0.8; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            header .container { flex-direction: column; text-align: center; }
+            nav ul { margin-top: 20px; }
+            main .container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div>
+                <h1>李明的个人主页</h1>
+                <p>前端开发工程师 | 热爱技术，追求卓越</p>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#about">关于我</a></li>
+                    <li><a href="#skills">技能</a></li>
+                    <li><a href="#works">作品</a></li>
+                    <li><a href="#contact">联系</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <article>
+                <section id="about">
+                    <h2>关于我</h2>
+                    <p>你好，我是李明，一名充满热情的前端开发工程师。我热爱编程，喜欢探索新技术，致力于创建优雅、高效的用户界面。</p>
+                    <p>我有 <strong>3 年</strong> 的前端开发经验，熟悉现代前端技术栈，包括 HTML、CSS、JavaScript 以及主流的前端框架。</p>
+                    <p>我相信<strong>技术可以改变世界</strong>，希望通过我的代码为用户带来更好的体验。</p>
+                    
+                    <figure>
+                        <img src="https://via.placeholder.com/800x400/667eea/ffffff?text=前端开发" alt="前端开发示意图">
+                        <figcaption>前端开发需要不断学习和实践</figcaption>
+                    </figure>
+                </section>
+
+                <section id="skills">
+                    <h2>技能</h2>
+                    <h3>前端技能</h3>
+                    <ul class="skills">
+                        <li>HTML5</li>
+                        <li>CSS3</li>
+                        <li>JavaScript (ES6+)</li>
+                        <li>React</li>
+                        <li>Vue.js</li>
+                        <li>TypeScript</li>
+                    </ul>
+
+                    <h3>工具和框架</h3>
+                    <ul class="skills">
+                        <li>Git</li>
+                        <li>Webpack</li>
+                        <li>Vite</li>
+                        <li>Node.js</li>
+                        <li>NPM</li>
+                    </ul>
+                </section>
+
+                <section id="works">
+                    <h2>我的作品</h2>
+                    <table>
+                        <caption>部分项目展示</caption>
+                        <thead>
+                            <tr>
+                                <th>作品名称</th>
+                                <th>类型</th>
+                                <th>技术栈</th>
+                                <th>完成时间</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>个人博客系统</td>
+                                <td>网站</td>
+                                <td>React + Node.js</td>
+                                <td><time datetime="2025-01">2025 年 1 月</time></td>
+                            </tr>
+                            <tr>
+                                <td>待办事项应用</td>
+                                <td>移动应用</td>
+                                <td>React Native</td>
+                                <td><time datetime="2025-06">2025 年 6 月</time></td>
+                            </tr>
+                            <tr>
+                                <td>数据可视化平台</td>
+                                <td>Web 应用</td>
+                                <td>Vue + ECharts</td>
+                                <td><time datetime="2025-10">2025 年 10 月</time></td>
+                            </tr>
+                            <tr>
+                                <td>企业级后台管理系统</td>
+                                <td>管理系统</td>
+                                <td>TypeScript + Ant Design</td>
+                                <td><time datetime="2026-01">2026 年 1 月</time></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section id="contact">
+                    <h2>联系我</h2>
+                    <p>如果你对我的工作感兴趣，或者有任何问题，欢迎随时联系我！</p>
+
+                    <form action="#" method="post">
+                        <label for="name">姓名：</label>
+                        <input type="text" id="name" name="name" placeholder="请输入您的姓名" required>
+                        
+                        <label for="email">邮箱：</label>
+                        <input type="email" id="email" name="email" placeholder="请输入您的邮箱" required>
+                        
+                        <label for="subject">主题：</label>
+                        <input type="text" id="subject" name="subject" placeholder="请输入消息主题">
+                        
+                        <label for="message">留言：</label>
+                        <textarea id="message" name="message" placeholder="写下您的留言..." required></textarea>
+                        
+                        <button type="submit">发送消息</button>
+                    </form>
+
+                    <details>
+                        <summary>其他联系方式</summary>
+                        <p>微信：liming_frontend</p>
+                        <p>GitHub：github.com/liming-frontend</p>
+                        <p>LinkedIn：linkedin.com/in/liming-frontend</p>
+                    </details>
+                </section>
+            </article>
+
+            <aside>
+                <h3>快速导航</h3>
+                <p><a href="#about">关于我</a></p>
+                <p><a href="#skills">技能</a></p>
+                <p><a href="#works">作品</a></p>
+                <p><a href="#contact">联系</a></p>
+
+                <h3>联系方式</h3>
+                <address>
+                    <p><strong>邮箱：</strong> liming@example.com</p>
+                    <p><strong>电话：</strong> +86 138-0000-0000</p>
+                    <p><strong>地址：</strong> 北京市朝阳区</p>
+                </address>
+
+                <h3>关注我</h3>
+                <ul>
+                    <li><a href="https://github.com/liming-frontend" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+                    <li><a href="#" target="_blank" rel="noopener noreferrer">知乎</a></li>
+                    <li><a href="#" target="_blank" rel="noopener noreferrer">掘金</a></li>
+                </ul>
+            </aside>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 李明的个人主页. All Rights Reserved.</p>
+            <p>使用 HTML5、CSS3 构建 | <a href="#" style="color: #667eea;">网站地图</a></p>
+        </div>
+    </footer>
+</body>
+</html>

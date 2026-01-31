@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第三章练习题答案</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #31708f;
+            border-bottom: 2px solid #31708f;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #3c763d;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #31708f;
+            margin-top: 25px;
+        }
+        .exercise {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #31708f;
+        }
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .output {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 4px solid #4caf50;
+        }
+        .note {
+            background-color: #e7f3ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+        }
+        .warning {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <h1>第三章：基础类型 - 练习题答案</h1>
+
+    <div class="exercise">
+        <h3>练习 3.1：基础变量声明</h3>
+        <p><strong>题目：</strong>声明以下变量并标注正确类型：姓名（字符串）、年龄（数字）、是否在职（布尔值）、身高（数字，使用厘米单位）。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 声明变量并标注类型
+const name: string = "张三";
+const age: number = 28;
+const isEmployed: boolean = true;
+const height: number = 175;
+
+console.log(`姓名: ${name}`);
+console.log(`年龄: ${age}岁`);
+console.log(`是否在职: ${isEmployed ? "是" : "否"}`);
+console.log(`身高: ${height}厘米`);</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            姓名: 张三<br>
+            年龄: 28岁<br>
+            是否在职: 是<br>
+            身高: 175厘米
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 3.2：数组遍历</h3>
+        <p><strong>题目：</strong>创建一个字符串数组包含 5 个水果名称，使用 `forEach` 遍历并打印每个水果。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 水果数组
+const fruits: string[] = ["苹果", "香蕉", "橙子", "葡萄", "西瓜"];
+
+console.log("水果列表：");
+fruits.forEach((fruit, index) => {
+  console.log(`${index + 1}. ${fruit}`);
+});
+
+// 使用 forEach 带索引的写法
+fruits.forEach((fruit, idx) => {
+  const emoji = fruit === "苹果" ? "🍎" :
+                fruit === "香蕉" ? "🍌" :
+                fruit === "橙子" ? "🍊" :
+                fruit === "葡萄" ? "🍇" : "🍉";
+  console.log(`${emoji} ${fruit}`);
+});</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            水果列表：<br>
+            1. 苹果<br>
+            2. 香蕉<br>
+            3. 橙子<br>
+            4. 葡萄<br>
+            5. 西瓜<br><br>
+            🍎 苹果<br>
+            🍌 香蕉<br>
+            🍊 橙子<br>
+            🍇 葡萄<br>
+            🍉 西瓜
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 3.3：学生信息对象</h3>
+        <p><strong>题目：</strong>创建一个对象表示学生信息，包含姓名、年龄、课程列表（数组）。使用可选属性表示学生的邮箱。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 学生接口定义
+interface Student {
+  name: string;
+  age: number;
+  courses: string[];
+  email?: string;  // 可选属性
+  grade?: number;  // 可选属性
+}
+
+// 创建学生对象
+const student1: Student = {
+  name: "Alice",
+  age: 20,
+  courses: ["数学", "物理", "化学"]
+};
+
+const student2: Student = {
+  name: "Bob",
+  age: 21,
+  courses: ["英语", "历史", "地理"],
+  email: "bob@example.com",
+  grade: 85
+};
+
+// 打印学生信息
+function printStudentInfo(student: Student): void {
+  console.log(`姓名: ${student.name}`);
+  console.log(`年龄: ${student.age}`);
+  console.log(`课程: ${student.courses.join(", ")}`);
+  if (student.email) {
+    console.log(`邮箱: ${student.email}`);
+  }
+  if (student.grade !== undefined) {
+    console.log(`成绩: ${student.grade}分`);
+  }
+  console.log("---");
+}
+
+printStudentInfo(student1);
+printStudentInfo(student2);</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            姓名: Alice<br>
+            年龄: 20<br>
+            课程: 数学, 物理, 化学<br>
+            ---<br>
+            姓名: Bob<br>
+            年龄: 21<br>
+            课程: 英语, 历史, 地理<br>
+            邮箱: bob@example.com<br>
+            成绩: 85分<br>
+            ---
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 3.4：Result 联合类型</h3>
+        <p><strong>题目：</strong>创建一个类型别名 `Result`，表示可能的值：`"success"`、`"error"` 或 `{code: number, message: string}`。编写一个函数处理这个类型。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// Result 联合类型定义
+type Result =
+  | "success"
+  | "error"
+  | { code: number; message: string };
+
+// 处理 Result 类型的函数
+function handleResult(result: Result): string {
+  if (result === "success") {
+    return "✅ 操作成功！";
+  }
+
+  if (result === "error") {
+    return "❌ 操作失败！";
+  }
+
+  // result 是 { code: number; message: string }
+  return `⚠️ [${result.code}] ${result.message}`;
+}
+
+// 测试各种情况
+const results: Result[] = [
+  "success",
+  "error",
+  { code: 400, message: "请求参数错误" },
+  { code: 401, message: "未授权访问" },
+  { code: 500, message: "服务器内部错误" }
+];
+
+console.log("处理结果：");
+results.forEach((result, index) => {
+  console.log(`结果${index + 1}: ${handleResult(result)}`);
+});</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            处理结果：<br>
+            结果1: ✅ 操作成功！<br>
+            结果2: ❌ 操作失败！<br>
+            结果3: ⚠️ [400] 请求参数错误<br>
+            结果4: ⚠️ [401] 未授权访问<br>
+            结果5: ⚠️ [500] 服务器内部错误
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 3.5：状态枚举</h3>
+        <p><strong>题目：</strong>定义一个状态枚举，包含 `Pending`、`Processing`、`Completed`、`Failed` 四个状态。编写一个函数接受状态并返回对应的描述文字。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 状态枚举定义
+enum TaskStatus {
+  Pending = "PENDING",
+  Processing = "PROCESSING",
+  Completed = "COMPLETED",
+  Failed = "FAILED"
+}
+
+// 获取状态描述的函数
+function getStatusDescription(status: TaskStatus): string {
+  const descriptions: Record<TaskStatus, string> = {
+    [TaskStatus.Pending]: "⏳ 等待中 - 任务正在等待处理",
+    [TaskStatus.Processing]: "🔄 处理中 - 任务正在执行",
+    [TaskStatus.Completed]: "✅ 完成 - 任务已成功完成",
+    [TaskStatus.Failed]: "❌ 失败 - 任务执行失败"
+  };
+  return descriptions[status];
+}
+
+// 测试
+const tasks = [
+  { name: "下载文件", status: TaskStatus.Pending },
+  { name: "处理数据", status: TaskStatus.Processing },
+  { name: "生成报告", status: TaskStatus.Completed },
+  { name: "发送邮件", status: TaskStatus.Failed }
+];
+
+console.log("任务状态管理：");
+tasks.forEach(task => {
+  console.log(`${task.name}: ${getStatusDescription(task.status)}`);
+});</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            任务状态管理：<br>
+            下载文件: ⏳ 等待中 - 任务正在等待处理<br>
+            处理数据: 🔄 处理中 - 任务正在执行<br>
+            生成报告: ✅ 完成 - 任务已成功完成<br>
+            发送邮件: ❌ 失败 - 任务执行失败
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 3.6：分数转换类型</h3>
+        <p><strong>题目：</strong>创建一个表示分数的类型，它可以是以下类型之一：数字、`"A"`、`"B"`、`"C"`、`"D"`、`"F"`。编写一个函数将分数转换为对应的数值（90-100→A，80-89→B，以此类推）。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 分数类型定义
+type Grade = number | "A" | "B" | "C" | "D" | "F";
+
+// 等级到数值的映射
+const gradeToNumber: Record<string, number> = {
+  "A": 90,
+  "B": 80,
+  "C": 70,
+  "D": 60,
+  "F": 0
+};
+
+// 数值到等级的转换函数
+function numericToGrade(score: number): "A" | "B" | "C" | "D" | "F" {
+  if (score >= 90) return "A";
+  if (score >= 80) return "B";
+  if (score >= 70) return "C";
+  if (score >= 60) return "D";
+  return "F";
+}
+
+// 等级到数值的转换函数
+function gradeToNumeric(grade: string): number {
+  return gradeToNumber[grade] ?? 0;
+}
+
+// 综合处理函数
+function processGrade(grade: Grade): { grade: string; numeric: number; description: string } {
+  let numeric: number;
+  let description: string;
+
+  if (typeof grade === "number") {
+    numeric = grade;
+  } else {
+    numeric = gradeToNumeric(grade);
+  }
+
+  const letterGrade = numericToGrade(numeric);
+
+  switch (letterGrade) {
+    case "A": description = "优秀"; break;
+    case "B": description = "良好"; break;
+    case "C": description = "中等"; break;
+    case "D": description = "及格"; break;
+    case "F": description = "不及格"; break;
+  }
+
+  return {
+    grade: letterGrade,
+    numeric: numeric,
+    description: description
+  };
+}
+
+// 测试
+const scores: Grade[] = [95, 88, 78, 65, 42, "A", "B", "C", "D", "F"];
+
+console.log("分数转换系统：");
+console.log("================");
+scores.forEach(score => {
+  const result = processGrade(score);
+  console.log(`输入: ${typeof score === "number" ? score : `"${score}"`} → 等级: ${result.grade}, 分数: ${result.numeric}, 评价: ${result.description}`);
+});</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            分数转换系统：<br>
+            ================<br>
+            输入: 95 → 等级: A, 分数: 95, 评价: 优秀<br>
+            输入: 88 → 等级: B, 分数: 88, 评价: 良好<br>
+            输
+
+入: 78 → 等级: C, 分数: 78, 评价: 中等<br>
+            输入: 65 → 等级: D, 分数: 65, 评价: 及格<br>
+            输入: 42 → 等级: F, 分数: 42, 评价: 不及格<br>
+            输入: "A" → 等级: A, 分数: 90, 评价: 优秀<br>
+            输入: "B" → 等级: B, 分数: 80, 评价: 良好<br>
+            输入: "C" → 等级: C, 分数: 70, 评价: 中等<br>
+            输入: "D" → 等级: D, 分数: 60, 评价: 及格<br>
+            输入: "F" → 等级: F, 分数: 0, 评价: 不及格
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 3.7：可选属性工具类型</h3>
+        <p><strong>题目：</strong>创建一个工具类型，将对象的所有属性变为可选，并创建一个函数演示其用法。</p>
+        <p><strong>TypeScript 代码：</strong></p>
+        <pre><code>// 工具类型：将 T 的所有属性变为可选
+type Partial<T> = {
+  [P in keyof T]?: T[P];
+};
+
+// 用户类型
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  age: number;
+  address: string;
+  phone: string;
+}
+
+// 使用 Partial 创建可选类型
+type PartialUser = Partial<User>;
+
+// 演示函数
+function createUser(defaults: PartialUser): User {
+  // 使用默认值填充缺失的属性
+  return {
+    id: defaults.id || generateId(),
+    name: defaults.name || "Unknown User",
+    email: defaults.email || "",
+    age: defaults.age || 0,
+    address: defaults.address || "",
+    phone: defaults.phone || ""
+  };
+}
+
+// 辅助函数：生成随机 ID
+function generateId(): string {
+  return "user_" + Math.random().toString(36).substr(2, 9);
+}
+
+// 测试
+console.log("使用 Partial 类型创建用户：");
+
+// 创建完整用户
+const fullUser = createUser({
+  id: "user-001",
+  name: "Alice",
+  email: "alice@example.com",
+  age: 25
+});
+console.log("完整用户:", fullUser);
+
+// 创建部分用户
+const partialUser = createUser({
+  name: "Bob"
+});
+console.log("部分用户:", partialUser);
+
+// 创建空用户
+const emptyUser = createUser({});
+console.log("空用户:", emptyUser);
+
+// 验证原始类型仍然需要所有属性
+// const test: User = { name: "Test" };  // 错误：缺少属性</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            使用 Partial 类型创建用户：<br>
+            完整用户: {<br>
+            &nbsp;&nbsp;id: 'user-001',<br>
+            &nbsp;&nbsp;name: 'Alice',<br>
+            &nbsp;&nbsp;email: 'alice@example.com',<br>
+            &nbsp;&nbsp;age: 25,<br>
+            &nbsp;&nbsp;address: '',<br>
+            &nbsp;&nbsp;phone: ''<br>
+            }<br>
+            部分用户: {<br>
+            &nbsp;&nbsp;id: 'user_abc123',<br>
+            &nbsp;&nbsp;name: 'Bob',<br>
+            &nbsp;&nbsp;email: '',<br>
+            &nbsp;&nbsp;age: 0,<br>
+            &nbsp;&address: '',<br>
+            &nbsp;&nbsp;phone: ''<br>
+            }<br>
+            空用户: {<br>
+            &nbsp;&nbsp;id: 'user_xyz789',<5>name: 'Unknown User',<br>
+            &nbsp;&nbsp;email: '',<br>
+            &nbsp;&nbsp;age: 0,<br>
+            &nbsp;&nbsp;address: '',<br>
+            &nbsp;&nbsp;phone: ''<br>
+            }
+        </div>
+    </div>
+
+    <p style="text-align: center; color: #666; margin-top: 40px;">
+        练习题答案仅供参考，建议自己动手实践加深理解。
+    </p>
+</body>
+</html>

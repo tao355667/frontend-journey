@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOM 更新示例</title>
+    <style>
+        .container { margin: 20px; padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
+        .item { padding: 10px; margin: 5px 0; background-color: #f0f0f0; border-radius: 3px; }
+        button { margin: 5px; padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>DOM 更新示例</h1>
+    
+    <div class="container">
+        <h2>内容修改</h2>
+        <div id="content-demo">
+            <p>原始段落内容。</p>
+        </div>
+        <button id="changeContentBtn">修改文本内容</button>
+        <button id="changeHTMLBtn">修改 HTML 内容</button>
+    </div>
+    
+    <div class="container">
+        <h2>创建元素</h2>
+        <input type="text" id="new-item-input" placeholder="输入项目文本">
+        <button id="addItemBtn">添加项目</button>
+        <button id="removeLastBtn">删除最后一个</button>
+        <div id="item-list">
+            <div class="item">项目 1</div>
+            <div class="item">项目 2</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>样式修改</h2>
+        <div id="style-demo" style="padding: 20px; background-color: lightgray;">
+            这是一个样式演示框
+        </div>
+        <button id="changeStyleBtn">修改样式</button>
+        <button id="toggleClassBtn">切换类名</button>
+    </div>
+
+    <div class="container">
+        <h2>属性修改</h2>
+        <a id="demo-link" href="https://example.com" target="_blank">示例链接</a>
+        <br>
+        <button id="changeHrefBtn">修改链接地址</button>
+        <button id="removeAttrBtn">移除 target 属性</button>
+    </div>
+
+    <script>
+        // 内容修改功能
+        document.getElementById('changeContentBtn').addEventListener('click', function() {
+            document.getElementById('content-demo').textContent = '文本内容已修改！';
+        });
+        
+        document.getElementById('changeHTMLBtn').addEventListener('click', function() {
+            document.getElementById('content-demo').innerHTML = '<strong>HTML 内容已修改！</strong>';
+        });
+        
+        // 创建和删除元素功能
+        document.getElementById('addItemBtn').addEventListener('click', function() {
+            const input = document.getElementById('new-item-input');
+            const list = document.getElementById('item-list');
+            
+            if (input.value.trim()) {
+                const newItem = document.createElement('div');
+                newItem.className = 'item';
+                newItem.textContent = input.value;
+                list.appendChild(newItem);
+                input.value = '';
+            }
+        });
+        
+        document.getElementById('removeLastBtn').addEventListener('click', function() {
+            const list = document.getElementById('item-list');
+            if (list.lastChild && list.lastChild.className === 'item') {
+                list.removeChild(list.lastChild);
+            }
+        });
+        
+        // 样式修改功能
+        document.getElementById('changeStyleBtn').addEventListener('click', function() {
+            const demo = document.getElementById('style-demo');
+            demo.style.backgroundColor = 'lightblue';
+            demo.style.color = 'darkblue';
+            demo.style.border = '2px solid darkblue';
+            demo.style.borderRadius = '5px';
+        });
+        
+        document.getElementById('toggleClassBtn').addEventListener('click', function() {
+            const demo = document.getElementById('style-demo');
+            demo.classList.toggle('highlight');
+        });
+        
+        // 属性修改功能
+        document.getElementById('changeHrefBtn').addEventListener('click', function() {
+            const link = document.getElementById('demo-link');
+            link.setAttribute('href', 'https://google.com');
+            link.textContent = 'Google 链接';
+        });
+        
+        document.getElementById('removeAttrBtn').addEventListener('click', function() {
+            const link = document.getElementById('demo-link');
+            link.removeAttribute('target');
+            console.log('已移除 target 属性');
+        });
+    </script>
+</body>
+</html>

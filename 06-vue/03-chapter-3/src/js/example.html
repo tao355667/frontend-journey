@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 3: data 与 methods - JavaScript 示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .demo-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .demo-section h2 {
+      color: #42b883;
+      border-bottom: 2px solid #42b883;
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+    .highlight {
+      background-color: #fffacd;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      margin: 10px 0;
+    }
+    .calculator {
+      display: inline-block;
+      background: #f0f0f0;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    .calc-display {
+      background: #333;
+      color: #0f0;
+      padding: 10px;
+      font-size: 24px;
+      text-align: right;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      font-family: monospace;
+    }
+    .calc-btn {
+      width: 50px;
+      height: 50px;
+      margin: 5px;
+      font-size: 18px;
+      background: #42b883;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .calc-btn:hover {
+      background: #369870;
+    }
+    .todo-item {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .todo-item.completed {
+      text-decoration: line-through;
+      color: #999;
+    }
+    input[type="text"], input[type="number"] {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin: 5px;
+    }
+    button {
+      padding: 8px 16px;
+      background: #42b883;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #369870;
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      background: #f9f9f9;
+      margin: 5px 0;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1 style="text-align: center; color: #42b883;">🧠 data 与 methods 详解</h1>
+
+    <!-- 1. data 响应式数据基础 -->
+    <div class="demo-section">
+      <h2>1. data 响应式数据</h2>
+      <p>计数器: <span class="highlight">{{ count }}</span></p>
+      <p>用户信息: {{ user.name }} ({{ user.age }}岁)</p>
+      <p>商品数量: {{ products.length }} 件</p>
+      
+      <button @click="incrementCount">增加计数</button>
+      <button @click="updateUserAge">用户年龄+1</button>
+      <button @click="addProduct">添加商品</button>
+      
+      <div class="code-block">
+// data 函数返回响应式数据对象
+data() {
+  return {
+    count: 0,
+    user: { name: '张三', age: 25 },
+    products: [
+      { id: 1, name: '苹果', price: 5 },
+      { id: 2, name: '香蕉', price: 3 }
+    ]
+  }
+}
+      </div>
+    </div>
+
+    <!-- 2. methods 方法定义 -->
+    <div class="demo-section">
+      <h2>2. methods 方法定义</h2>
+      
+      <div class="calculator">
+        <div class="calc-display">{{ calcResult !== null ? calcResult : calcDisplay }}</div>
+        <div>
+          <input type="number" v-model.number="num1" placeholder="数字1" style="width: 80px;">
+          <select v-model="operator" style="padding: 8px; margin: 5px;">
+            <option value="+">+</option>
+            <option value="-">-</option>
+            <option value="*">×</option>
+            <option value="/">÷</option>
+          </select>
+          <input type="number" v-model.number="num2" placeholder="数字2" style="width: 80px;">
+        </div>
+        <div style="margin-top: 10px;">
+          <button class="calc-btn" @click="calculate">=</button>
+          <button class="calc-btn" @click="resetCalc" style="background: #e74c3c;">C</button>
+        </div>
+      </div>
+      
+      <div class="code-block">
+// methods 定义组件方法
+methods: {
+  calculate() {
+    const { num1, num2, operator } = this
+    switch(operator) {
+      case '+': this.calcResult = num1 + num2; break
+      case '-': this.calcResult = num1 - num2; break
+      case '*': this.calcResult = num1 * num2; break
+      case '/': this.calcResult = num2 !== 0 ? num1 / num2 : '错误'
+    }
+  },
+  
+  resetCalc() {
+    this.num1 = 0
+    this.num2 = 0
+    this.operator = '+'
+    this.calcResult = null
+  }
+}
+      </div>
+    </div>
+
+    <!-- 3. 方法间的互相调用 -->
+    <div class="demo-section">
+      <h2>3. 方法间的互相调用</h2>
+      <p>当前等级: {{ level }}</p>
+      <p>当前经验: {{ exp }}</p>
+      <p>升级所需: {{ expNeeded }}</p>
+      
+      <button @click="gainExp(50)">获得50经验</button>
+      <button @click="gainExp(200)">获得200经验</button>
+      <button @click="resetGame">重置游戏</button>
+      
+      <div class="code-block">
+// 方法间可以互相调用
+methods: {
+  gainExp(amount) {
+    this.exp += amount
+    this.checkLevelUp()  // 调用另一个方法
+  },
+  
+  checkLevelUp() {
+    if (this.exp >= this.expNeeded) {
+      this.levelUp()
+    }
+  },
+  
+  levelUp() {
+    this.level++
+    this.exp = 0
+    this.expNeeded = this.level * 100
+    alert(`恭喜升级到 ${this.level} 级！`)
+  }
+}
+      </div>
+    </div>
+
+    <!-- 4. 数组操作 -->
+    <div class="demo-section">
+      <h2>4. 响应式数组操作</h2>
+      
+      <h4>商品列表：</h4>
+      <ul>
+        <li v-for="product in products" :key="product.id">
+          {{ product.name }} - ¥{{ product.price }}
+          <button @click="removeProduct(product.id)">删除</button>
+        </li>
+      </ul>
+      
+      <input type="text" v-model="newProductName" placeholder="商品名称">
+      <input type="number" v-model.number="newProductPrice" placeholder="价格">
+      <button @click="addNewProduct">添加商品</button>
+      <button @click="clearAllProducts">清空列表</button>
+      
+      <div class="code-block">
+// 响应式数组方法
+methods: {
+  addNewProduct() {
+    // push 方法会触发响应式更新
+    this.products.push({
+      id: Date.now(),
+      name: this.newProductName,
+      price: this.newProductPrice
+    })
+  },
+  
+  removeProduct(id) {
+    // filter 返回新数组，也是响应式的
+    this.products = this.products.filter(p => p.id !== id)
+  }
+}
+      </div>
+    </div>
+
+    <!-- 5. 复杂对象操作 -->
+    <div class="demo-section">
+      <h2>5. 复杂对象操作</h2>
+      
+      <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px;">
+        <h4>购物车</h4>
+        <p>会员状态: {{ cart.isVip ? 'VIP会员' : '普通用户' }}</p>
+        <p>商品数量: {{ cart.items.length }}</p>
+        <p>总价: ¥{{ cart.total }}</p>
+        
+        <div v-for="(item, index) in cart.items" :key="index" class="cart-item">
+          <span>{{ item.name }}</span>
+          <span>¥{{ item.price }} × {{ item.quantity }}</span>
+        </div>
+      </div>
+      
+      <button @click="toggleVipStatus">切换会员状态</button>
+      <button @click="addToCart({name: '键盘', price: 299})">添加键盘</button>
+      <button @click="addToCart({name: '鼠标', price: 99})">添加鼠标</button>
+      <button @click="checkout">结算</button>
+      
+      <div class="code-block">
+// 操作嵌套对象
+data() {
+  return {
+    cart: {
+      items: [],
+      total: 0,
+      isVip: false
+    }
+  }
+},
+
+methods: {
+  addToCart(product) {
+    // 修改嵌套对象的属性是响应式的
+    this.cart.items.push({...product, quantity: 1})
+    this.updateCartTotal()
+  },
+  
+  updateCartTotal() {
+    // 计算总价
+    this.cart.total = this.cart.items.reduce((sum, item) => {
+      return sum + item.price * item.quantity
+    }, 0)
+    
+    // VIP 享受9折优惠
+    if (this.cart.isVip) {
+      this.cart.total *= 0.9
+    }
+  }
+}
+      </div>
+    </div>
+
+    <!-- 6. 注意事项演示 -->
+    <div class="demo-section">
+      <h2>6. ⚠️ 常见注意事项</h2>
+      
+      <h4>不要直接修改数组长度：</h4>
+      <p>列表长度: {{ demoList.length }}</p>
+      <button @click="wrongClear">错误方式清空（视图不更新）</button>
+      <button @click="correctClear">正确方式清空（视图更新）</button>
+      <ul>
+        <li v-for="(item, index) in demoList" :key="index">{{ item }}</li>
+      </ul>
+      
+      <div class="code-block">
+// ✗ 错误 - 直接修改 length 不会触发更新
+wrongClear() {
+  this.demoList.length = 0  // 视图不会更新！
+}
+
+// ✓ 正确 - 使用 splice 或赋新数组
+correctClear() {
+  this.demoList.splice(0, this.demoList.length)
+  // 或者 this.demoList = []
+}
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      // ============ data 选项：定义响应式数据 ============
+      data() {
+        return {
+          // 基础数据类型
+          count: 0,
+          
+          // 对象
+          user: {
+            name: '张三',
+            age: 25
+          },
+          
+          // 数组
+          products: [
+            { id: 1, name: '苹果', price: 5 },
+            { id: 2, name: '香蕉', price: 3 }
+          ],
+          
+          // 计算器数据
+          num1: 0,
+          num2: 0,
+          operator: '+',
+          calcResult: null,
+          
+          // 游戏数据
+          level: 1,
+          exp: 0,
+          expNeeded: 100,
+          
+          // 新商品输入
+          newProductName: '',
+          newProductPrice: 0,
+          
+          // 购物车
+          cart: {
+            items: [],
+            total: 0,
+            isVip: false
+          },
+          
+          // 演示列表
+          demoList: ['项目1', '项目2', '项目3']
+        };
+      },
+
+      // ============ computed 属性 ============
+      computed: {
+        // 计算器显示文本
+        calcDisplay() {
+          return `${this.num1} ${this.operator} ${this.num2}`;
+        }
+      },
+
+      // ============ methods 选项：定义组件方法 ============
+      methods: {
+        // ===== 基础数据操作 =====
+        incrementCount() {
+          this.count++;
+        },
+        
+        updateUserAge() {
+          this.user.age++;
+        },
+        
+        addProduct() {
+          const newId = this.products.length + 1;
+          this.products.push({
+            id: newId,
+            name: `商品${newId}`,
+            price: Math.floor(Math.random() * 100)
+          });
+        },
+
+        // ===== 计算器方法 =====
+        calculate() {
+          const { num1, num2, operator } = this;
+          switch(operator) {
+            case '+':
+              this.calcResult = num1 + num2;
+              break;
+            case '-':
+              this.calcResult = num1 - num2;
+              break;
+            case '*':
+              this.calcResult = num1 * num2;
+              break;
+            case '/':
+              this.calcResult = num2 !== 0 ? (num1 / num2).toFixed(2) : '除数不能为0';
+              break;
+          }
+        },
+        
+        resetCalc() {
+          this.num1 = 0;
+          this.num2 = 0;
+          this.operator = '+';
+          this.calcResult = null;
+        },
+
+        // ===== 游戏方法（方法间互相调用） =====
+        gainExp(amount) {
+          this.exp += amount;
+          this.checkLevelUp(); // 调用另一个方法
+        },
+        
+        checkLevelUp() {
+          if (this.exp >= this.expNeeded) {
+            this.levelUp();
+          }
+        },
+        
+        levelUp() {
+          this.level++;
+          this.exp = 0;
+          this.expNeeded = this.level * 100;
+          alert(`🎉 恭喜升级到 ${this.level} 级！\n下一级需要 ${this.expNeeded} 经验`);
+        },
+        
+        resetGame() {
+          this.level = 1;
+          this.exp = 0;
+          this.expNeeded = 100;
+        },
+
+        // ===== 商品管理方法 =====
+        addNewProduct() {
+          if (!this.newProductName || this.newProductPrice <= 0) {
+            alert('请输入有效的商品名称和价格');
+            return;
+          }
+          
+          this.products.push({
+            id: Date.now(),
+            name: this.newProductName,
+            price: this.newProductPrice
+          });
+          
+          this.newProductName = '';
+          this.newProductPrice = 0;
+        },
+        
+        removeProduct(id) {
+          this.products = this.products.filter(p => p.id !== id);
+        },
+        
+        clearAllProducts() {
+          this.products = [];
+        },
+
+        // ===== 购物车方法 =====
+        toggleVipStatus() {
+          this.cart.isVip = !this.cart.isVip;
+          this.updateCartTotal(); // VIP状态改变后重新计算总价
+        },
+        
+        addToCart(product) {
+          // 检查是否已存在
+          const existingItem = this.cart.items.find(item => item.name === product.name);
+          
+          if (existingItem) {
+            existingItem.quantity++;
+          } else {
+            this.cart.items.push({
+              ...product,
+              quantity: 1
+            });
+          }
+          
+          this.updateCartTotal();
+        },
+        
+        updateCartTotal() {
+          let total = this.cart.items.reduce((sum, item) => {
+            return sum + item.price * item.quantity;
+          }, 0);
+          
+          // VIP 享受9折优惠
+          if (this.cart.isVip) {
+            total = total * 0.9;
+          }
+          
+          this.cart.total = total.toFixed(2);
+        },
+        
+        checkout() {
+          if (this.cart.items.length === 0) {
+            alert('购物车是空的！');
+            return;
+          }
+          
+          const discountText = this.cart.isVip ? '（已享受VIP 9折优惠）' : '';
+          alert(`结算成功！${discountText}\n总价: ¥${this.cart.total}`);
+          
+          // 清空购物车
+          this.cart.items = [];
+          this.cart.total = 0;
+        },
+
+        // ===== 注意事项演示 =====
+        wrongClear() {
+          // ✗ 错误方式：直接修改 length 不会触发视图更新
+          this.demoList.length = 0;
+          console.log('列表长度已设为0，但视图未更新！', this.demoList);
+        },
+        
+        correctClear() {
+          // ✓ 正确方式 1：使用 splice
+          this.demoList.splice(0, this.demoList.length);
+          
+          // ✓ 正确方式 2：赋新数组（取消上面注释，注释掉 splice）
+          // this.demoList = [];
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 3: data 与 methods - 练习题答案</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .level-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 10px;
+    }
+    .basic { background: #42b883; }
+    .advanced { background: #f39c12; }
+    .challenge { background: #e74c3c; }
+    .solution-card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .demo-area {
+      background: #f8f9fa;
+      border: 2px dashed #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 15px 0;
+    }
+    .calculator-advanced {
+      background: #2c3e50;
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 300px;
+    }
+    .calc-screen {
+      background: #34495e;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: right;
+      font-size: 28px;
+      margin-bottom: 15px;
+      min-height: 40px;
+    }
+    .calc-history {
+      font-size: 14px;
+      color: #95a5a6;
+      margin-bottom: 5px;
+    }
+    .calc-btn-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .calc-btn {
+      padding: 15px;
+      font-size: 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #7f8c8d;
+      color: white;
+    }
+    .calc-btn.number { background: #95a5a6; }
+    .calc-btn.operator { background: #f39c12; }
+    .calc-btn.equals { background: #42b883; }
+    .calc-btn.clear { background: #e74c3c; }
+    .todo-list {
+      max-width: 400px;
+    }
+    .todo-item {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      margin: 8px 0;
+    }
+    .todo-item.completed {
+      background: #f5f5f5;
+    }
+    .todo-item.completed .todo-text {
+      text-decoration: line-through;
+      color: #999;
+    }
+    .todo-checkbox {
+      margin-right: 12px;
+    }
+    .todo-text {
+      flex: 1;
+    }
+    .delete-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .stats-bar {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      background: #ecf0f1;
+      border-radius: 6px;
+      margin: 10px 0;
+    }
+    .cart-system {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .product-card {
+      border: 2px solid #42b883;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+    }
+    .cart-summary {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px;
+      background: white;
+      margin: 5px 0;
+      border-radius: 4px;
+    }
+    input[type="text"] {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      width: 250px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #42b883;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .code-explanation {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 15px 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1 style="text-align: center; color: white; margin-bottom: 30px;">
+      📚 data 与 methods 练习题答案
+    </h1>
+
+    <!-- 基础练习答案：简易计算器 -->
+    <div class="solution-card">
+      <span class="level-badge basic">基础练习</span>
+      <h2>简易计算器</h2>
+      <p>使用 data 存储状态和 methods 实现运算逻辑。</p>
+      
+      <div class="demo-area" style="display: flex; justify-content: center;">
+        <div class="calculator-advanced">
+          <div class="calc-screen">
+            <div class="calc-history">{{ calcExpression }}</div>
+            <div>{{ calcDisplay }}</div>
+          </div>
+          <div class="calc-btn-grid">
+            <button class="calc-btn clear" @click="clear()">AC</button>
+            <button class="calc-btn operator" @click="setOperator('/')">÷</button>
+            <button class="calc-btn operator" @click="setOperator('*')">×</button>
+            <button class="calc-btn operator" @click="deleteLast()">←</button>
+            
+            <button class="calc-btn number" @click="inputNumber('7')">7</button>
+            <button class="calc-btn number" @click="inputNumber('8')">8</button>
+            <button class="calc-btn number" @click="inputNumber('9')">9</button>
+            <button class="calc-btn operator" @click="setOperator('-')">-</button>
+            
+            <button class="calc-btn number" @click="inputNumber('4')">4</button>
+            <button class="calc-btn number" @click="inputNumber('5')">5</button>
+            <button class="calc-btn number" @click="inputNumber('6')">6</button>
+            <button class="calc-btn operator" @click="setOperator('+')">+</button>
+            
+            <button class="calc-btn number" @click="inputNumber('1')">1</button>
+            <button class="calc-btn number" @click="inputNumber('2')">2</button>
+            <button class="calc-btn number" @click="inputNumber('3')">3</button>
+            <button class="calc-btn equals" @click="calculate()" style="grid-row: span 2;">=</button>
+            
+            <button class="calc-btn number" @click="inputNumber('0')" style="grid-column: span 2;">0</button>
+            <button class="calc-btn number" @click="inputNumber('.')">.</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="code-explanation">
+        <strong>核心代码：</strong><br><br>
+        data() {
+          return {
+            current: '0',      // 当前输入
+            previous: null,    // 前一个数字
+            operator: null,    // 运算符
+            shouldReset: false // 是否重置显示
+          }
+        },
+        methods: {
+          inputNumber(num) {
+            if (this.shouldReset) {
+              this.current = num
+              this.shouldReset = false
+            } else {
+              this.current = this.current === '0' ? num : this.current + num
+            }
+          },
+          calculate() {
+            const prev = parseFloat(this.previous)
+            const current = parseFloat(this.current)
+            switch(this.operator) {
+              case '+': this.current = (prev + current).toString(); break
+              case '-': this.current = (prev - current).toString(); break
+              case '*': this.current = (prev * current).toString(); break
+              case '/': this.current = current !== 0 ? (prev / current).toString() : 'Error'
+            }
+          }
+        }
+      </div>
+    </div>
+
+    <!-- 进阶练习答案：Todo List -->
+    <div class="solution-card">
+      <span class="level-badge advanced">进阶练习</span>
+      <h2>Todo List 管理器</h2>
+      <p>完整的任务管理功能，包括增删改查和统计。</p>
+      
+      <div class="demo-area">
+        <div class="todo-list">
+          <h4>添加新任务</h4>
+          <input 
+            type="text" 
+            v-model="newTodoText" 
+            @keyup.enter="addTodo()"
+            placeholder="输入任务内容，按回车添加"
+          >
+          <button @click="addTodo()">添加</button>
+          
+          <div class="stats-bar">
+            <span>总任务: {{ todos.length }}</span>
+            <span>已完成: {{ completedCount }}</span>
+            <span>未完成: {{ todos.length - completedCount }}</span>
+          </div>
+          
+          <div v-for="todo in todos" :key="todo.id" class="todo-item" :class="{ completed: todo.completed }">
+            <input 
+              type="checkbox" 
+              class="todo-checkbox"
+              :checked="todo.completed"
+              @change="toggleTodo(todo.id)"
+            >
+            <span class="todo-text">{{ todo.text }}</span>
+            <button class="delete-btn" @click="removeTodo(todo.id)">删除</button>
+          </div>
+          
+          <div style="margin-top: 15px;">
+            <button @click="clearCompleted()" v-if="completedCount > 0">
+              清除已完成 ({{ completedCount }})
+            </button>
+            <button @click="clearAll()" v-if="todos.length > 0">
+              清空所有
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="code-explanation">
+        <strong>核心代码：</strong><br><br>
+        data() {
+          return {
+            todos: [],
+            newTodoText: '',
+            nextId: 1
+          }
+        },
+        computed: {
+          completedCount() {
+            return this.todos.filter(t => t.completed).length
+          }
+        },
+        methods: {
+          addTodo() {
+            if (!this.newTodoText.trim()) return
+            this.todos.push({
+              id: this.nextId++,
+              text: this.newTodoText,
+              completed: false
+            })
+            this.newTodoText = ''
+          },
+          removeTodo(id) {
+            this.todos = this.todos.filter(t => t.id !== id)
+          },
+          toggleTodo(id) {
+            const todo = this.todos.find(t => t.id === id)
+            if (todo) todo.completed = !todo.completed
+          },
+          clearCompleted() {
+            this.todos = this.todos.filter(t => !t.completed)
+          }
+        }
+      </div>
+    </div>
+
+    <!-- 挑战练习答案：购物车系统 -->
+    <div class="solution-card">
+      <span class="level-badge challenge">挑战练习</span>
+      <h2>完整购物车系统</h2>
+      <p>包含商品展示、购物车管理、数量修改、价格计算等功能。</p>
+      
+      <div class="demo-area">
+        <div class="cart-system">
+          <!-- 商品列表 -->
+          <div>
+            <h4>🛍️ 商品列表</h4>
+            <div class="product-grid">
+              <div v-for="product in products" :key="product.id" class="product-card">
+                <h5>{{ product.name }}</h5>
+                <p style="color: #e74c3c; font-size: 20px;">¥{{ product.price }}</p>
+                <p style="color: #999; font-size: 12px;">库存: {{ product.stock }}</p>
+                <button @click="addToCart(product)" :disabled="product.stock === 0">
+                  {{ product.stock === 0 ? '缺货' : '加入购物车' }}
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 购物车 -->
+          <div class="cart-summary">
+            <h4>🛒 购物车</h4>
+            <div v-if="cart.items.length === 0" style="color: #999; text-align: center; padding: 20px;">
+              购物车是空的
+            </div>
+            <div v-else>
+              <div v-for="item in cart.items" :key="item.productId" class="cart-item">
+                <div>
+                  <strong>{{ item.name }}</strong>
+                  <br>
+                  <small>¥{{ item.price }}</small>
+                </div>
+                <div>
+                  <button @click="updateQuantity(item.productId, item.quantity - 1)">-</button>
+                  <span style="margin: 0 10px;">{{ item.quantity }}</span>
+                  <button @click="updateQuantity(item.productId, item.quantity + 1)">+</button>
+                  <button @click="removeFromCart(item.productId)" style="margin-left: 10px; background: #e74c3c;">×</button>
+                </div>
+              </div>
+              
+              <div style="border-top: 2px solid #ddd; margin-top: 15px; padding-top: 15px;">
+                <p>商品总数: {{ getCartItemCount() }}</p>
+                <p style="font-size: 24px; color: #e74c3c;">
+                  总价: ¥{{ getCartTotal() }}
+                </p>
+                <button @click="checkout()" style="width: 100%; padding: 15px; font-size: 16px;">
+                  结算
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="code-explanation">
+        <strong>核心代码：</strong><br><br>
+        data() {
+          return {
+            products: [
+              { id: 1, name: '笔记本电脑', price: 5999, stock: 5 },
+              { id: 2, name: '无线鼠标', price: 99, stock: 20 },
+              { id: 3, name: '机械键盘', price: 399, stock: 10 },
+              { id: 4, name: '显示器', price: 1299, stock: 8 }
+            ],
+            cart: {
+              items: []  // { productId, name, price, quantity }
+            }
+          }
+        },
+        methods: {
+          addToCart(product) {
+            const existingItem = this.cart.items.find(
+              item => item.productId === product.id
+            )
+            if (existingItem) {
+              existingItem.quantity++
+            } else {
+              this.cart.items.push({
+                productId: product.id,
+                name: product.name,
+                price: product.price,
+                quantity: 1
+              })
+            }
+            product.stock--
+          },
+          removeFromCart(productId) {
+            const item = this.cart.items.find(i => i.productId === productId)
+            const product = this.products.find(p => p.id === productId)
+            if (item && product) {
+              product.stock += item.quantity
+            }
+            this.cart.items = this.cart.items.filter(
+              i => i.productId !== productId
+            )
+          },
+          updateQuantity(productId, quantity) {
+            if (quantity <= 0) {
+              this.removeFromCart(productId)
+              return
+            }
+            const item = this.cart.items.find(i => i.productId === productId)
+            const product = this.products.find(p => p.id === productId)
+            if (item && product) {
+              const diff = quantity - item.quantity
+              if (diff > 0 && product.stock >= diff) {
+                item.quantity = quantity
+                product.stock -= diff
+              } else if (diff < 0) {
+                item.quantity = quantity
+                product.stock -= diff  // diff 是负数，所以是加回来
+              }
+            }
+          },
+          getCartTotal() {
+            return this.cart.items.reduce((total, item) => {
+              return total + item.price * item.quantity
+            }, 0).toFixed(2)
+          },
+          getCartItemCount() {
+            return this.cart.items.reduce((count, item) => count + item.quantity, 0)
+          },
+          checkout() {
+            if (this.cart.items.length === 0) {
+              alert('购物车是空的！')
+              return
+            }
+            const total = this.getCartTotal()
+            alert(`订单提交成功！\n商品数量: ${this.getCartItemCount()}\n总金额: ¥${total}`)
+            this.cart.items = []
+          }
+        }
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          // ===== 基础练习：计算器数据 =====
+          current: '0',
+          previous: null,
+          operator: null,
+          shouldReset: false,
+          
+          // ===== 进阶练习：Todo List 数据 =====
+          todos: [],
+          newTodoText: '',
+          nextId: 1,
+          
+          // ===== 挑战练习：购物车数据 =====
+          products: [
+            { id: 1, name: '笔记本电脑', price: 5999, stock: 5 },
+            { id: 2, name: '无线鼠标', price: 99, stock: 20 },
+            { id: 3, name: '机械键盘', price: 399, stock: 10 },
+            { id: 4, name: '显示器', price: 1299, stock: 8 }
+          ],
+          cart: {
+            items: []
+          }
+        };
+      },
+
+      computed: {
+        // 基础练习：计算器显示
+        calcDisplay() {
+          return this.current;
+        },
+        
+        calcExpression() {
+          if (this.operator && this.previous) {
+            return `${this.previous} ${this.operator}`;
+          }
+          return '';
+        },
+        
+        // 进阶练习：已完成任务数
+        completedCount() {
+          return this.todos.filter(t => t.completed).length;
+        }
+      },
+
+      methods: {
+        // ===== 基础练习：计算器方法 =====
+        inputNumber(num) {
+          if (this.shouldReset) {
+            this.current = num;
+            this.shouldReset = false;
+          } else {
+            this.current = this.current === '0' ? num : this.current + num;
+          }
+        },
+        
+        setOperator(op) {
+          if (this.operator && !this.shouldReset) {
+            this.calculate();
+          }
+          this.previous = this.current;
+          this.operator = op;
+          this.shouldReset = true;
+        },
+        
+        calculate() {
+          if (!this.operator || !this.previous) return;
+          
+          const prev = parseFloat(this.previous);
+          const current = parseFloat(this.current);
+          let result;
+          
+          switch(this.operator) {
+            case '+':
+              result = prev + current;
+              break;
+            case '-':
+              result = prev - current;
+              break;
+            case '*':
+              result = prev * current;
+              break;
+            case '/':
+              result = current !== 0 ? prev / current : NaN;
+              break;
+          }
+          
+          this.current = isNaN(result) ? 'Error' : String(result);
+          this.operator = null;
+          this.previous = null;
+          this.shouldReset = true;
+        },
+        
+        clear() {
+          this.current = '0';
+          this.previous = null;
+          this.operator = null;
+          this.shouldReset = false;
+        },
+        
+        deleteLast() {
+          if (this.current.length > 1) {
+            this.current = this.current.slice(0, -1);
+          } else {
+            this.current = '0';
+          }
+        },
+
+        // ===== 进阶练习：Todo List 方法 =====
+        addTodo() {
+          if (!this.newTodoText.trim()) {
+            alert('请输入任务内容');
+            return;
+          }
+          
+          this.todos.push({
+            id: this.nextId++,
+            text: this.newTodoText.trim(),
+            completed: false
+          });
+          
+          this.newTodoText = '';
+        },
+        
+        removeTodo(id) {
+          this.todos = this.todos.filter(t => t.id !== id);
+        },
+        
+        toggleTodo(id) {
+          const todo = this.todos.find(t => t.id === id);
+          if (todo) {
+            todo.completed = !todo.completed;
+          }
+        },
+        
+        clearCompleted() {
+          this.todos = this.todos.filter(t => !t.completed);
+        },
+        
+        clearAll() {
+          if (confirm('确定要清空所有任务吗？')) {
+            this.todos = [];
+            this.nextId = 1;
+          }
+        },
+
+        // ===== 挑战练习：购物车方法 =====
+        addToCart(product) {
+          if (product.stock <= 0) {
+            alert('商品库存不足');
+            return;
+          }
+          
+          const existingItem = this.cart.items.find(
+            item => item.productId === product.id
+          );
+          
+          if (existingItem) {
+            existingItem.quantity++;
+          } else {
+            this.cart.items.push({
+              productId: product.id,
+              name: product.name,
+              price: product.price,
+              quantity: 1
+            });
+          }
+          
+          product.stock--;
+        },
+        
+        removeFromCart(productId) {
+          const item = this.cart.items.find(i => i.productId === productId);
+          const product = this.products.find(p => p.id === productId);
+          
+          if (item && product) {
+            product.stock += item.quantity;
+          }
+          
+          this.cart.items = this.cart.items.filter(
+            i => i.productId !== productId
+          );
+        },
+        
+        updateQuantity(productId, quantity) {
+          if (quantity <= 0) {
+            this.removeFromCart(productId);
+            return;
+          }
+          
+          const item = this.cart.items.find(i => i.productId === productId);
+          const product = this.products.find(p => p.id === productId);
+          
+          if (item && product) {
+            const diff = quantity - item.quantity;
+            
+            if (diff > 0 && product.stock >= diff) {
+              item.quantity = quantity;
+              product.stock -= diff;
+            } else if (diff < 0) {
+              item.quantity = quantity;
+              product.stock -= diff;
+            } else if (diff > 0 && product.stock < diff) {
+              alert('库存不足');
+            }
+          }
+        },
+        
+        getCartTotal() {
+          return this.cart.items.reduce((total, item) => {
+            return total + item.price * item.quantity;
+          }, 0).toFixed(2);
+        },
+        
+        getCartItemCount() {
+          return this.cart.items.reduce((count, item) => {
+            return count + item.quantity;
+          }, 0);
+        },
+        
+        checkout() {
+          if (this.cart.items.length === 0) {
+            alert('购物车是空的！');
+            return;
+          }
+          
+          const total = this.getCartTotal();
+          const itemCount = this.getCartItemCount();
+          
+          alert(`🎉 订单提交成功！\n\n商品数量: ${itemCount} 件\n总金额: ¥${total}\n\n感谢您的购买！`);
+          
+          this.cart.items = [];
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

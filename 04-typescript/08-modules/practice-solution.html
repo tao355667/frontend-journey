@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第八章练习题答案</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #31708f;
+            border-bottom: 2px solid #31708f;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #3c763d;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #31708f;
+            margin-top: 25px;
+        }
+        .exercise {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #31708f;
+        }
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .output {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 4px solid #4caf50;
+        }
+        .note {
+            background-color: #e7f3ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+        }
+        .file-tree {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            white-space: pre;
+        }
+    </style>
+</head>
+<body>
+    <h1>第八章：模块系统 - 练习题答案</h1>
+
+    <div class="exercise">
+        <h3>练习 8.1：数学工具模块</h3>
+        <p><strong>题目：</strong>创建一个 `utils` 模块，包含判断偶数、质数和计算阶乘的函数。</p>
+        <p><strong>utils/math.ts：</strong></p>
+        <pre><code>// 判断是否为偶数
+export function isEven(n: number): boolean {
+  return n % 2 === 0;
+}
+
+// 判断是否为质数
+export function isPrime(n: number): boolean {
+  if (n < 2) return false;
+  if (n === 2) return true;
+  if (n % 2 === 0) return false;
+
+  const sqrt = Math.sqrt(n);
+  for (let i = 3; i <= sqrt; i += 2) {
+    if (n % i === 0) return false;
+  }
+
+  return true;
+}
+
+// 计算阶乘
+export function factorial(n: number): number {
+  if (n < 0) {
+    throw new Error("负数没有阶乘");
+  }
+  if (n <= 1) return 1;
+
+  let result = 1;
+  for (let i = 2; i <= n; i++) {
+    result *= i;
+  }
+  return result;
+}
+
+// 额外工具函数
+export function fibonacci(n: number): number {
+  if (n <= 1) return n;
+  let a = 0, b = 1;
+  for (let i = 2; i <= n; i++) {
+    [a, b] = [b, a + b];
+  }
+  return b;
+}
+
+// utils/index.ts - 统一导出
+export * from "./math";</code></pre>
+        <p><strong>使用示例：</strong></p>
+        <pre><code>import { isEven, isPrime, factorial } from "./utils/math";
+
+console.log("=== 数学工具模块测试 ===");
+
+console.log("偶数判断：");
+console.log(`isEven(2): ${isEven(2)}`);      // true
+console.log(`isEven(3): ${isEven(3)}`);      // false
+
+console.log("\n质数判断：");
+console.log(`isPrime(2): ${isPrime(2)}`);    // true
+console.log(`isPrime(7): ${isPrime(7)}`);    // true
+console.log(`isPrime(9): ${isPrime(9)}`);    // false
+
+console.log("\n阶乘计算：");
+console.log(`factorial(5): ${factorial(5)}`);  // 120
+console.log(`factorial(0): ${factorial(0)}`);  // 1</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === 数学工具模块测试 ===<br>
+            偶数判断：<br>
+            isEven(2): true<br>
+            isEven(3): false<br><br>
+            质数判断：<br>
+            isPrime(2): true<br>
+            isPrime(7): true<br>
+            isPrime(9): false<br><br>
+            阶乘计算：<br>
+            factorial(5): 120<br>
+            factorial(0): 1
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 8.2：User 类默认导出</h3>
+        <p><strong>题目：</strong>创建一个 `User` 类，使用默认导出。</p>
+        <p><strong>user/User.ts：</strong></p>
+        <pre><code>export default class User {
+  constructor(
+    public name: string,
+    public age: number,
+    private email?: string
+  ) {}
+
+  introduce(): string {
+    return `我叫${this.name}，今年${this.age}岁`;
+  }
+
+  getEmail(): string | undefined {
+    return this.email;
+  }
+
+  setEmail(email: string): void {
+    this.email = email;
+  }
+
+  isAdult(): boolean {
+    return this.age >= 18;
+  }
+}</code></pre>
+        <p><strong>使用示例：</strong></p>
+        <pre><code>import User from "./user/User";
+
+console.log("=== User 类测试 ===");
+
+const user1 = new User("张三", 25);
+console.log(user1.introduce());
+console.log(`成年人: ${user1.isAdult()}`);
+
+const user2 = new User("李四", 15, "lisi@example.com");
+console.log(user2.introduce());
+console.log(`成年人: ${user2.isAdult()}`);
+console.log(`邮箱: ${user2.getEmail()}`);
+
+user2.setEmail("newemail@example.com");
+console.log(`新邮箱: ${user2.getEmail()}`);</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === User 类测试 ===<br>
+            我叫张三，今年25岁<br>
+            成年人: true<br>
+            我叫李四，今年15岁<br>
+            成年人: false<br>
+            邮箱: lisi@example.com<br>
+            新邮箱: newemail@example.com
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 8.3：图形模块导入</h3>
+        <p><strong>题目：</strong>创建 Rectangle 和 Circle 模块并导入使用。</p>
+        <p><strong>项目结构：</strong></p>
+        <div class="file-tree">src/
+├── shapes/
+│   ├── Rectangle.ts
+│   ├── Circle.ts
+│   └── index.ts
+└── main.ts</div>
+        <p><strong>shapes/Rectangle.ts：</strong></p>
+        <pre><code>export class Rectangle {
+  constructor(
+    public width: number,
+    public height: number
+  ) {}
+
+  getArea(): number {
+    return this.width * this.height;
+  }
+
+  getPerimeter(): number {
+    return 2 * (this.width + this.height);
+  }
+
+  isSquare(): boolean {
+    return this.width === this.height;
+  }
+}</code></pre>
+        <p><strong>shapes/Circle.ts：</strong></p>
+        <pre><code>export class Circle {
+  constructor(public radius: number) {}
+
+  getArea(): number {
+    return Math.PI * this.radius * this.radius;
+  }
+
+  getPerimeter(): number {
+    return 2 * Math.PI * this.radius;
+  }
+
+  getDiameter(): number {
+    return this.radius * 2;
+  }
+}</code></pre>
+        <p><strong>shapes/index.ts：</strong></p>
+        <pre><code>export { Rectangle } from "./Rectangle";
+export { Circle } from "./Circle";</code></pre>
+        <p><strong>main.ts：</strong></p>
+        <pre><code>import { Rectangle, Circle } from "./shapes";
+
+console.log("=== 图形模块测试 ===");
+
+const rect = new Rectangle(10, 5);
+console.log(`矩形 (${rect.width}x${rect.height}):`);
+console.log(`  面积: ${rect.getArea()}`);
+console.log(`  周长: ${rect.getPerimeter()}`);
+console.log(`  是正方形: ${rect.isSquare()}`);
+
+const circle = new Circle(5);
+console.log(`圆形 (r=${circle.radius}):`);
+console.log(`  面积: ${circle.getArea().toFixed(2)}`);
+console.log(`  周长: ${circle.getPerimeter().toFixed(2)}`);
+console.log(`  直径: ${circle.getDiameter()}`);</code></pre>
+        <p><strong>运行结果：</strong></p>
+        <div class="output">
+            === 图形模块测试 ===<br>
+            矩形 (10x5):<br>
+            &nbsp;&nbsp;面积: 50<br>
+            &nbsp;&nbsp;周长: 30<br>
+            &nbsp;&nbsp;是正方形: false<br><br>
+            圆形 (r=5):<br>
+            &nbsp;&nbsp;面积: 78.54<br>
+            &nbsp;&nbsp;周长: 31.42<br>
+            &nbsp;&nbsp;直径: 10
+        </div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 8.4：电商模块结构设计</h3>
+        <p><strong>题目：</strong>设计电商应用的模块结构。</p>
+        <p><strong>推荐的目录结构：</strong></p>
+        <div class="file-tree">src/
+├── types/                      # 类型定义
+│   ├── index.ts
+│   ├── user.ts
+│   ├── product.ts
+│   └── order.ts
+│
+├── services/                   # API 服务
+│   ├── auth.ts
+│   ├── product.ts
+│   ├── order.ts
+│   └── payment.ts
+│
+├── stores/                     # 状态管理
+│   ├── userStore.ts
+│   ├── cartStore.ts
+│   └── index.ts
+│
+├── components/                 # UI 组件
+│   ├── common/
+│   │   ├── Button/
+│   │   └── Modal/
+│   ├── product/
+│   │   ├── ProductList/
+│   │   └── ProductCard/
+│   └── cart/
+│       ├── CartItem/
+│       └── CartSummary/
+│
+├── pages/                      # 页面组件
+│   ├── Home/
+│   ├── ProductDetail/
+│   ├── Cart/
+│   └── Checkout/
+│
+├── utils/                      # 工具函数
+│   ├── format.ts
+│   └── validation.ts
+│
+├── config/                     # 配置
+│   └── index.ts
+│
+└── index.ts                    # 入口文件</div>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 8.5：路径别名配置</h3>
+        <p><strong>题目：</strong>配置 tsconfig.json 添加路径别名。</p>
+        <p><strong>tsconfig.json：</strong></p>
+        <pre><code>{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["./*"],
+      "@components/*": ["./components/*"],
+      "@utils/*": ["./utils/*"],
+      "@services/*": ["./services/*"],
+      "@stores/*": ["./stores/*"],
+      "@types/*": ["./types/*"],
+      "@config/*": ["./config/*"]
+    },
+    "esModuleInterop": true,
+    "resolveJsonModule": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}</code></pre>
+        <p><strong>使用示例：</strong></p>
+        <pre><code>// 使用路径别名导入
+import Button from "@components/Button/Button";
+import { formatDate } from "@utils/format";
+import { api } from "@services/api";
+import { User } from "@types/user";
+
+// 在代码中可以直接使用
+const user: User = {
+  id: "1",
+  name: "Alice"
+};</code></pre>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 8.6：工具库模块化</h3>
+        <p><strong>题目：</strong>创建一个模块化的工具库。</p>
+        <p><strong>项目结构：</strong></p>
+        <div class="file-tree">src/
+├── utils/
+│   ├── index.ts               # barrel file
+│   ├── array/
+│   │   ├── index.ts
+│   │   ├── chunk.ts
+│   │   ├── unique.ts
+│   │   └── shuffle.ts
+│   ├── object/
+│   │   ├── index.ts
+│   │   ├── keys.ts
+│   │   └── values.ts
+│   ├── string/
+│   │   ├── index.ts
+│   │   ├── capitalize.ts
+│   │   └── truncate.ts
+│   └── type/
+│       ├── index.ts
+│       ├── isArray.ts
+│       └── isObject.ts</div>
+        <p><strong>utils/array/index.ts：</strong></p>
+        <pre><code>export { default as chunk } from "./chunk";
+export { default as unique } from "./unique";
+export { default as shuffle } from "./shuffle";</code></pre>
+        <p><strong>utils/index.ts（barrel file）：</strong></p>
+        <pre><code>export * from "./array";
+export * from "./object";
+export * from "./string";
+export * from "./type";</code></pre>
+        <p><strong>使用示例：</strong></p>
+        <pre><code>// 从 barrel file 导入所有工具
+import {
+  chunk,
+  unique,
+  capitalize,
+  truncate,
+  isArray,
+  isObject
+} from "./utils";
+
+console.log("chunk([1,2,3,4,5,6], 2):", chunk([1,2,3,4,5,6], 2));
+console.log("unique([1,2,2,3,3,3]):", unique([1,2,2,3,3,3]));
+console.log("capitalize('hello'):", capitalize("hello"));
+console.log("truncate('Hello World', 5):", truncate("Hello World", 5));
+console.log("isArray([]):", isArray([]));
+console.log("isObject({}):", isObject({}));</code></pre>
+    </div>
+
+    <div class="exercise">
+        <h3>练习 8.7：待办应用模块结构</h3>
+        <p><strong>题目：</strong>为待办事项应用设计完整的模块结构。</p>
+        <p><strong>推荐的项目结构：</strong></p>
+        <div class="file-tree">src/
+├── types/
+│   ├── index.ts               # 导出所有类型
+│   ├── todo.ts                # Todo 相关类型
+│   └── user.ts                # User 相关类型
+│
+├── services/
+│   ├── api.ts                 # API 基类
+│   ├── todoService.ts         # Todo API 服务
+│   └── authService.ts         # 认证服务
+│
+├── stores/
+│   ├── todoStore.ts           # Todo 状态管理
+│   ├── userStore.ts           # User 状态管理
+│   └── index.ts               # 导出所有 store
+│
+├── components/
+│   ├── TodoItem/              # 待办事项组件
+│   ├── TodoList/              # 待办列表组件
+│   ├── TodoInput/             # 添加输入组件
+│   └── FilterBar/             # 过滤栏组件
+│
+├── utils/
+│   ├── dateUtils.ts           # 日期工具
+│   └── storageUtils.ts        # 本地存储工具
+│
+├── constants/
+│   ├── todoConstants.ts       # 待办常量
+│   └── filterOptions.ts       # 过滤选项
+│
+├── App.tsx                    # 主应用组件
+└── index.tsx                  # 入口文件</div>
+        <p><strong>types/todo.ts：</strong></p>
+        <pre><code>export type TodoStatus = "todo" | "doing" | "done";
+
+export interface Todo {
+  id: string;
+  title: string;
+  description?: string;
+  status: TodoStatus;
+  priority: "low" | "medium" | "high";
+  createdAt: Date;
+  updatedAt: Date;
+  dueDate?: Date;
+}
+
+export interface CreateTodoInput {
+  title: string;
+  description?: string;
+  priority?: "low" | "medium" | "high";
+  dueDate?: Date;
+}
+
+export interface UpdateTodoInput {
+  title?: string;
+  description?: string;
+  status?: TodoStatus;
+  priority?: "low" | "medium" | "high";
+  dueDate?: Date;
+}</code></pre>
+        <p><strong>stores/todoStore.ts：</strong></p>
+        <pre><code>import { Todo, CreateTodoInput, UpdateTodoInput, TodoStatus } from "../types";
+
+class TodoStore {
+  private todos: Todo[] = [];
+  private listeners: (() => void)[] = [];
+
+  add(input: CreateTodoInput): Todo {
+    const todo: Todo = {
+      id: crypto.randomUUID(),
+      ...input,
+      status: "todo",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.todos.push(todo);
+    this.notify();
+    return todo;
+  }
+
+  update(id: string, updates: UpdateTodoInput): Todo | undefined {
+    const index = this.todos.findIndex(t => t.id === id);
+    if (index === -1) return undefined;
+
+    this.todos[index] = {
+      ...this.todos[index],
+      ...updates,
+      updatedAt: new Date()
+    };
+    this.notify();
+    return this.todos[index];
+  }
+
+  delete(id: string): boolean {
+    const index = this.todos.findIndex(t => t.id === id);
+    if (index === -1) return false;
+
+    this.todos.splice(index, 1);
+    this.notify();
+    return true;
+  }
+
+  getById(id: string): Todo | undefined {
+    return this.todos.find(t => t.id === id);
+  }
+
+  getAll(): Todo[] {
+    return [...this.todos];
+  }
+
+  getByStatus(status: TodoStatus): Todo[] {
+    return this.todos.filter(t => t.status === status);
+  }
+
+  subscribe(listener: () => void): () => void {
+    this.listeners.push(listener);
+    return () => {
+      this.listeners = this.listeners.filter(l => l !== listener);
+    };
+  }
+
+  private notify(): void {
+    this.listeners.forEach(l => l());
+  }
+}
+
+export const todoStore = new TodoStore();</code></pre>
+    </div>
+
+    <p style="text-align: center; color: #666; margin-top: 40px;">
+        练习题答案仅供参考，建议自己动手实践加深理解。
+    </p>
+</body>
+</html>

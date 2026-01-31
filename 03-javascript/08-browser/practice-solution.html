@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第八章：浏览器存储 - 练习题答案</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .todo-item {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #f0f0f0;
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>第八章：浏览器存储 - 练习题答案</h1>
+
+    <!-- 基础练习 -->
+
+    <div class="section">
+        <h2>基础练习 1：保存用户名</h2>
+        <input type="text" id="usernameInput" placeholder="输入用户名">
+        <button onclick="saveUsername()">保存用户名</button>
+        <div id="usernameDisplay" class="status"></div>
+    </div>
+
+    <div class="section">
+        <h2>基础练习 2：计数器持久化</h2>
+        <div style="font-size: 48px; margin: 20px 0;" id="counter">0</div>
+        <button onclick="incrementCounter()">增加</button>
+        <button onclick="decrementCounter()">减少</button>
+        <button onclick="resetCounter()">重置</button>
+    </div>
+
+    <div class="section">
+        <h2>基础练习 3：待办事项列表</h2>
+        <input type="text" id="todoInput" placeholder="输入待办事项">
+        <button onclick="addTodo()">添加</button>
+        <button onclick="clearTodos()">清空全部</button>
+        <div id="todoList"></div>
+    </div>
+
+    <!-- 进阶练习 -->
+
+    <div class="section">
+        <h2>进阶练习 1：表单数据保存</h2>
+        <div class="form-group">
+            <label>姓名：</label>
+            <input type="text" id="formName" oninput="autoSaveForm()">
+        </div>
+        <div class="form-group">
+            <label>邮箱：</label>
+            <input type="email" id="formEmail" oninput="autoSaveForm()">
+        </div>
+        <div class="form-group">
+            <label>电话：</label>
+            <input type="tel" id="formPhone" oninput="autoSaveForm()">
+        </div>
+        <button onclick="clearForm()">清空表单</button>
+        <div id="formStatus" class="status"></div>
+    </div>
+
+    <div class="section">
+        <h2>进阶练习 2：存储空间检查</h2>
+        <button onclick="checkStorageSpace()">检查存储空间</button>
+        <div id="storageInfo" class="status"></div>
+    </div>
+
+    <div class="section">
+        <h2>进阶练习 3：过期数据清理</h2>
+        <input type="text" id="cacheKey" placeholder="缓存键名">
+        <input type="text" id="cacheValue" placeholder="缓存值">
+        <select id="cacheTTL">
+            <option value="60000">1 分钟</option>
+            <option value="300000">5 分钟</option>
+            <option value="600000">10 分钟</option>
+        </select>
+        <button onclick="setCache()">设置缓存</button>
+        <button onclick="getCache()">获取缓存</button>
+        <button onclick="cleanExpiredCache()">清理过期缓存</button>
+        <div id="cacheStatus" class="status"></div>
+    </div>
+
+    <!-- 挑战练习 -->
+
+    <div class="section">
+        <h2>挑战练习 1：存储封装</h2>
+        <input type="text" id="wrapperKey" placeholder="键名">
+        <input type="text" id="wrapperValue" placeholder="值">
+        <button onclick="useWrapperSet()">设置</button>
+        <button onclick="useWrapperGet()">获取</button>
+        <button onclick="useWrapperRemove()">删除</button>
+        <button onclick="useWrapperClear()">清空全部</button>
+        <button onclick="useWrapperKeys()">获取所有键</button>
+        <div id="wrapperStatus" class="status"></div>
+    </div>
+
+    <div class="section">
+        <h2>挑战练习 2：跨标签页通信</h2>
+        <input type="text" id="messageInput" placeholder="输入消息">
+        <button onclick="sendMessage()">发送消息</button>
+        <div id="messageList" class="status"></div>
+        <button onclick="openNewTab()">在新标签页打开</button>
+    </div>
+
+    <div class="section">
+        <h2>挑战练习 3：分页状态保存</h2>
+        <div style="margin-bottom: 20px;">
+            <span>当前页：<strong id="currentPage">1</strong></span>
+            <button onclick="changePage(-1)">上一页</button>
+            <button onclick="changePage(1)">下一页</button>
+            <button onclick="resetPage()">重置页码</button>
+        </div>
+        <div id="pageContent" class="status">第 1 页内容</div>
+    </div>
+
+    <script>
+        // 存储工具类
+        class StorageWrapper {
+            constructor(prefix = 'app_') {
+                this.prefix = prefix;
+                this.storage = localStorage;
+            }
+
+            set(key, value, ttl) {
+                const data = {
+                    value: value,
+                    timestamp: Date.now(),
+                    ttl: ttl
+                };
+                this.storage.setItem(this.prefix + key, JSON.stringify(data));
+            }
+
+            get(key) {
+                const dataStr = this.storage.getItem(this.prefix + key);
+                if (!dataStr) return null;
+
+                try {
+                    const data = JSON.parse(dataStr);
+                    
+                    if (data.ttl && Date.now() - data.timestamp > data.ttl) {
+                        this.remove(key);
+                        return null;
+                    }
+                    
+                    return data.value;
+                } catch (e) {
+                    console.log('解析存储数据失败:', e);
+                    return null;
+                }
+            }
+
+            remove(key) {
+                this.storage.removeItem(this.prefix + key);
+            }
+
+            clear() {
+                const keys = this.keys();
+                keys.forEach(key => this.remove(key));
+            }
+
+            keys() {
+                const keys = [];
+                for (let i = 0; i < this.storage.length; i++) {
+                    const key = this.storage.key(i);
+                    if (key.startsWith(this.prefix)) {
+                        keys.push(key.substring(this.prefix.length));
+                    }
+                }
+                return keys;
+            }
+        }
+
+        const storage = new StorageWrapper();
+
+        // 基础练习 1：保存用户名
+        function saveUsername() {
+            const username = document.getElementById('usernameInput').value;
+            if (username) {
+                localStorage.setItem('username', username);
+                alert('用户名已保存！');
+                loadUsername();
+            }
+        }
+
+        function loadUsername() {
+            const username = localStorage.getItem('username');
+            const display = document.getElementById('usernameDisplay');
+            if (username) {
+                display.textContent = `欢迎回来，${username}！`;
+            } else {
+                display.textContent = '请输入用户名';
+            }
+        }
+
+        loadUsername();
+
+        // 基础练习 2：计数器持久化
+        function updateCounter() {
+            const count = parseInt(localStorage.getItem('counter') || '0');
+            document.getElementById('counter').textContent = count;
+        }
+
+        function incrementCounter() {
+            let count = parseInt(localStorage.getItem('counter') || '0');
+            count++;
+            localStorage.setItem('counter', count.toString());
+            updateCounter();
+        }
+
+        function decrementCounter() {
+            let count = parseInt(localStorage.getItem('counter') || '0');
+            count--;
+            localStorage.setItem('counter', count.toString());
+            updateCounter();
+        }
+
+        function resetCounter() {
+            localStorage.setItem('counter', '0');
+            updateCounter();
+        }
+
+        updateCounter();
+
+        // 基础练习 3：待办事项列表
+        function loadTodos() {
+            const todos = JSON.parse(localStorage.getItem('todos') || '[]');
+            const todoList = document.getElementById('todoList');
+            todoList.innerHTML = todos.map((todo, index) => `
+                <div class="todo-item">
+                    <span>${todo.text}</span>
+                    <button onclick="deleteTodo(${index})">删除</button>
+                </div>
+            `).join('');
+        }
+
+        function addTodo() {
+            const input = document.getElementById('todoInput');
+            const text = input.value.trim();
+            if (text) {
+                const todos = JSON.parse(localStorage.getItem('todos') || '[]');
+                todos.push({ text, createdAt: Date.now() });
+                localStorage.setItem('todos', JSON.stringify(todos));
+                input.value = '';
+                loadTodos();
+            }
+        }
+
+        function deleteTodo(index) {
+            const todos = JSON.parse(localStorage.getItem('todos') || '[]');
+            todos.splice(index, 1);
+            localStorage.setItem('todos', JSON.stringify(todos));
+            loadTodos();
+        }
+
+        function clearTodos() {
+            if (confirm('确定要清空所有待办事项吗？')) {
+                localStorage.removeItem('todos');
+                loadTodos();
+            }
+        }
+
+        loadTodos();
+
+        // 进阶练习 1：表单数据自动保存
+        function autoSaveForm() {
+            const formData = {
+                name: document.getElementById('formName').value,
+                email: document.getElementById('formEmail').value,
+                phone: document.getElementById('formPhone').value,
+                savedAt: Date.now()
+            };
+            localStorage.setItem('formData', JSON.stringify(formData));
+            document.getElementById('formStatus').textContent = '表单已自动保存';
+        }
+
+        function loadForm() {
+            const formDataStr = localStorage.getItem('formData');
+            if (formDataStr) {
+                const formData = JSON.parse(formDataStr);
+                document.getElementById('formName').value = formData.name || '';
+                document.getElementById('formEmail').value = formData.email || '';
+                document.getElementById('formPhone').value = formData.phone || '';
+                const savedTime = new Date(formData.savedAt).toLocaleString('zh-CN');
+                document.getElementById('formStatus').textContent = `已加载上次保存的数据（${savedTime}）`;
+            }
+        }
+
+        function clearForm() {
+            localStorage.removeItem('formData');
+            document.getElementById('formName').value = '';
+            document.getElementById('formEmail').value = '';
+            document.getElementById('formPhone').value = '';
+            document.getElementById('formStatus').textContent = '表单数据已清空';
+        }
+
+        loadForm();
+
+        // 进阶练习 2：检查存储空间
+        function checkStorageSpace() {
+            let totalSize = 0;
+            for (let key in localStorage) {
+                if (localStorage.hasOwnProperty(key)) {
+                    totalSize += localStorage[key].length;
+                }
+            }
+
+            const sizeInKB = (totalSize / 1024).toFixed(2);
+            const remaining = (5 * 1024 - sizeInKB).toFixed(2);
+
+            document.getElementById('storageInfo').innerHTML = `
+                存储使用情况：<br>
+                已使用：${sizeInKB} KB<br>
+                剩余：约 ${remaining} KB（假设总容量 5MB）<br>
+                项目数：${localStorage.length}
+            `;
+        }
+
+        // 进阶练习 3：过期数据清理
+        function setCache() {
+            const key = document.getElementById('cacheKey').value;
+            const value = document.getElementById('cacheValue').value;
+            const ttl = parseInt(document.getElementById('cacheTTL').value);
+
+            if (key && value) {
+                storage.set(key, value, ttl);
+                document.getElementById('cacheStatus').textContent = `缓存已设置（${ttl / 1000} 秒后过期）`;
+            }
+        }
+
+        function getCache() {
+            const key = document.getElementById('cacheKey').value;
+            const value = storage.get(key);
+            if (value !== null) {
+                document.getElementById('cacheStatus').textContent = `缓存值：${value}`;
+            } else {
+                document.getElementById('cacheStatus').textContent = '缓存不存在或已过期';
+            }
+        }
+
+        function cleanExpiredCache() {
+            const keys = storage.keys();
+            keys.forEach(key => {
+                storage.get(key);
+            });
+            document.getElementById('cacheStatus').textContent = '已清理所有过期缓存';
+        }
+
+        // 挑战练习 1：使用存储封装
+        function useWrapperSet() {
+            const key = document.getElementById('wrapperKey').value;
+            const value = document.getElementById('wrapperValue').value;
+            if (key && value) {
+                storage.set(key, value);
+                document.getElementById('wrapperStatus').textContent = `已设置 ${key} = ${value}`;
+            }
+        }
+
+        function useWrapperGet() {
+            const key = document.getElementById('wrapperKey').value;
+            const value = storage.get(key);
+            if (value !== null) {
+                document.getElementById('wrapperStatus').textContent = `${key} 的值：${value}`;
+            } else {
+                document.getElementById('wrapperStatus').textContent = `${key} 不存在`;
+            }
+        }
+
+        function useWrapperRemove() {
+            const key = document.getElementById('wrapperKey').value;
+            storage.remove(key);
+            document.getElementById('wrapperStatus').textContent = `已删除 ${key}`;
+        }
+
+        function useWrapperClear() {
+            storage.clear();
+            document.getElementById('wrapperStatus').textContent = '已清空所有应用数据';
+        }
+
+        function useWrapperKeys() {
+            const keys = storage.keys();
+            document.getElementById('wrapperStatus').textContent = `所有键：${keys.join(', ')}`;
+        }
+
+        // 挑战练习 2：跨标签页通信
+        function sendMessage() {
+            const message = document.getElementById('messageInput').value;
+            if (message) {
+                localStorage.setItem('lastMessage', JSON.stringify({
+                    text: message,
+                    timestamp: Date.now()
+                }));
+                localStorage.removeItem('lastMessage');
+                addMessageToList('我', message);
+                document.getElementById('messageInput').value = '';
+            }
+        }
+
+        function addMessageToList(sender, text) {
+            const messageList = document.getElementById('messageList');
+            const time = new Date().toLocaleTimeString('zh-CN');
+            messageList.innerHTML += `<div><strong>${sender}</strong> (${time}): ${text}</div>`;
+        }
+
+        function openNewTab() {
+            window.open(window.location.href, '_blank');
+        }
+
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'lastMessage' && e.newValue) {
+                const message = JSON.parse(e.newValue);
+                addMessageToList('其他标签页', message.text);
+            }
+        });
+
+        // 挑战练习 3：分页状态保存
+        function loadPage() {
+            const page = parseInt(localStorage.getItem('currentPage') || '1');
+            document.getElementById('currentPage').textContent = page;
+            document.getElementById('pageContent').textContent = `第 ${page} 页内容`;
+        }
+
+        function changePage(delta) {
+            let page = parseInt(localStorage.getItem('currentPage') || '1');
+            page = Math.max(1, page + delta);
+            localStorage.setItem('currentPage', page.toString());
+            loadPage();
+        }
+
+        function resetPage() {
+            localStorage.setItem('currentPage', '1');
+            loadPage();
+        }
+
+        loadPage();
+    </script>
+</body>
+</html>

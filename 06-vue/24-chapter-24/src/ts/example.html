@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第二十四章：Teleport 与 Suspense - TypeScript 示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; }
+    .demo-section { border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 8px; }
+    button { padding: 8px 16px; margin: 5px; background: #42b983; color: white; border: none; border-radius: 4px; }
+    #modal-target { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; }
+    .modal { background: rgba(0,0,0,0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; pointer-events: auto; }
+    .modal-content { background: white; padding: 30px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>第二十四章：Teleport 与 Suspense（TypeScript）</h1>
+  <div id="modal-target"></div>
+  
+  <div id="app">
+    <ts-teleport-demo></ts-teleport-demo>
+  </div>
+
+  <script>
+    const { createApp, ref, Teleport, Suspense } = Vue;
+
+    /**
+     * @typedef {Object} User
+     * @property {number} id
+     * @property {string} name
+     */
+
+    const AsyncUserList = {
+      async setup() {
+        /** @type {import('vue').Ref<User[]>} */
+        const users = ref([]);
+        
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        users.value = [
+          { id: 1, name: '张三' },
+          { id: 2, name: '李四' }
+        ];
+        
+        return { users };
+      },
+      template: `
+        <ul>
+          <li v-for="user in users" :key="user.id">{{ user.name }}</li>
+        </ul>
+      `
+    };
+
+    const TsTeleportDemo = {
+      components: { Suspense },
+      setup() {
+        const showModal = ref(false);
+        const showAsync = ref(false);
+        
+        return { showModal, showAsync };
+      },
+      template: `
+        <div class="demo-section">
+          <h3>Teleport + Suspense 示例</h3>
+          
+          <button @click="showModal = true">打开模态框</button>
+          <Teleport to="#modal-target">
+            <div v-if="showModal" class="modal" @click.self="showModal = false">
+              <div class="modal-content">
+                <h4>模态框内容</h4>
+                <p>这是一个传送过来的模态框</p>
+                <button @click="showModal = false">关闭</button>
+              </div>
+            </div>
+          </Teleport>
+          
+          <hr>
+          
+          <button @click="showAsync = !showAsync">
+            {{ showAsync ? '隐藏' : '显示' }}异步组件
+          </button>
+          
+          <Suspense v-if="showAsync">
+            <template #default>
+              <async-user-list />
+            </template>
+            <template #fallback>
+              <p>加载中...</p>
+            </template>
+          </Suspense>
+        </div>
+      `
+    };
+
+    createApp({ components: { TsTeleportDemo } }).mount('#app');
+  </script>
+</body>
+</html>

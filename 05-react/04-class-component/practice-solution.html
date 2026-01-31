@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>类组件练习题参考答案</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        h2 {
+            color: #61dafb;
+            border-bottom: 2px solid #61dafb;
+            padding-bottom: 10px;
+        }
+        h3 {
+            color: #555;
+            margin-top: 0;
+        }
+        /* 计数器样式 */
+        .counter {
+            text-align: center;
+            padding: 20px;
+        }
+        .counter .count {
+            font-size: 48px;
+            font-weight: bold;
+            color: #333;
+            margin: 20px 0;
+        }
+        .counter button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+        }
+        .counter button:hover {
+            background: #f0f0f0;
+        }
+        /* 用户卡片样式 */
+        .user-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 300px;
+        }
+        .user-card h3 {
+            margin: 0 0 10px 0;
+        }
+        .user-card p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .user-card .field {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .user-card .field label {
+            width: 60px;
+            font-weight: bold;
+        }
+        .user-card .field span {
+            flex: 1;
+        }
+        .user-card .field input {
+            flex: 1;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        /* 定时器样式 */
+        .timer {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            color: white;
+        }
+        .timer .time-display {
+            font-size: 64px;
+            font-family: monospace;
+            margin: 20px 0;
+        }
+        .timer button {
+            padding: 12px 24px;
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        .timer button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .timer button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        /* 进度条样式 */
+        .progress-container {
+            margin-top: 15px;
+        }
+        .progress-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #4CAF50;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // ========== 基础练习 ==========
+        class Counter extends React.Component {
+            state = {
+                count: 0
+            };
+            
+            increment = () => {
+                this.setState({ count: this.state.count + 1 });
+            };
+            
+            decrement = () => {
+                this.setState({ count: this.state.count - 1 });
+            };
+            
+            reset = () => {
+                this.setState({ count: 0 });
+            };
+            
+            render() {
+                return (
+                    <div className="counter">
+                        <h3>计数器</h3>
+                        <div className="count">{this.state.count}</div>
+                        <button onClick={this.increment}>+1</button>
+                        <button onClick={this.decrement}>-1</button>
+                        <button onClick={this.reset}>重置</button>
+                    </div>
+                );
+            }
+        }
+
+        // ========== 进阶练习 ==========
+        class UserCard extends React.Component {
+            state = {
+                username: '张三',
+                age: 25,
+                profession: '软件工程师',
+                isEditing: false
+            };
+            
+            handleEdit = () => {
+                this.setState({ isEditing: true });
+            };
+            
+            handleSave = () => {
+                this.setState({ isEditing: false });
+            };
+            
+            handleChange = (field) => (e) => {
+                this.setState({ [field]: e.target.value });
+            };
+            
+            render() {
+                const { username, age, profession, isEditing } = this.state;
+                
+                return (
+                    <div className="user-card">
+                        <h3>用户信息卡片</h3>
+                        
+                        {isEditing ? (
+                            <div>
+                                <div className="field">
+                                    <label>姓名：</label>
+                                    <input 
+                                        type="text" 
+                                        value={username} 
+                                        onChange={this.handleChange('username')}
+                                    />
+                                </div>
+                                <div className="field">
+                                    <label>年龄：</label>
+                                    <input 
+                                        type="number" 
+                                        value={age} 
+                                        onChange={this.handleChange('age')}
+                                    />
+                                </div>
+                                <div className="field">
+                                    <label>职业：</label>
+                                    <input 
+                                        type="text" 
+                                        value={profession} 
+                                        onChange={this.handleChange('profession')}
+                                    />
+                                </div>
+                                <button onClick={this.handleSave}>保存</button>
+                            </div>
+                        ) : (
+                            <div>
+                                <p><strong>姓名：</strong>{username}</p>
+                                <p><strong>年龄：</strong>{age}岁</p>
+                                <p><strong>职业：</strong>{profession}</p>
+                                <button onClick={this.handleEdit}>编辑</button>
+                            </div>
+                        )}
+                    </div>
+                );
+            }
+        }
+
+        // ========== 挑战练习 ==========
+        class Timer extends React.Component {
+            state = {
+                time: 0,
+                isRunning: false
+            };
+            
+            timerInterval = null;
+            
+            componentDidMount() {
+                // 组件挂载后，不自动启动
+            }
+            
+            componentWillUnmount() {
+                // 组件卸载前清除定时器
+                this.clearTimer();
+            }
+            
+            clearTimer = () => {
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                }
+            };
+            
+            start = () => {
+                if (!this.state.isRunning) {
+                    this.timerInterval = setInterval(() => {
+                        this.setState(prevState => ({
+                            time: prevState.time + 1
+                        }));
+                    }, 1000);
+                    this.setState({ isRunning: true });
+                }
+            };
+            
+            stop = () => {
+                this.clearTimer();
+                this.setState({ isRunning: false });
+            };
+            
+            reset = () => {
+                this.stop();
+                this.setState({ time: 0 });
+            };
+            
+            formatTime = (seconds) => {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            };
+            
+            render() {
+                const { time, isRunning } = this.state;
+                
+                return (
+                    <div className="timer">
+                        <h3>定时器</h3>
+                        <div className="time-display">
+                            {this.formatTime(time)}
+                        </div>
+                        <div>
+                            <button onClick={this.start} disabled={isRunning}>
+                                开始
+                            </button>
+                            <button onClick={this.stop} disabled={!isRunning}>
+                                停止
+                            </button>
+                            <button onClick={this.reset}>
+                                重置
+                            </button>
+                        </div>
+                        <div className="progress-container">
+                            <div className="progress-bar">
+                                <div 
+                                    className="progress-fill" 
+                                    style={{ width: `${Math.min((time % 60) / 60 * 100, 100)}%` }}
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+        }
+
+        // ========== 额外示例：完整待办事项应用 ==========
+        class TodoApp extends React.Component {
+            state = {
+                todos: [
+                    { id: 1, text: '学习 React', completed: true },
+                    { id: 2, text: '完成练习题', completed: false },
+                    { id: 3, text: '阅读文档', completed: false }
+                ],
+                nextId: 4,
+                inputValue: ''
+            };
+            
+            handleInputChange = (e) => {
+                this.setState({ inputValue: e.target.value });
+            };
+            
+            handleAdd = () => {
+                if (this.state.inputValue.trim()) {
+                    this.setState(prevState => ({
+                        todos: [
+                            ...prevState.todos,
+                            { 
+                                id: prevState.nextId, 
+                                text: prevState.inputValue.trim(), 
+                                completed: false 
+                            }
+                        ],
+                        nextId: prevState.nextId + 1,
+                        inputValue: ''
+                    }));
+                }
+            };
+            
+            handleToggle = (id) => {
+                this.setState(prevState => ({
+                    todos: prevState.todos.map(todo =>
+                        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+                    )
+                }));
+            };
+            
+            handleDelete = (id) => {
+                this.setState(prevState => ({
+                    todos: prevState.todos.filter(todo => todo.id !== id)
+                }));
+            };
+            
+            render() {
+                const { todos, inputValue } = this.state;
+                
+                return (
+                    <div className="todo-app" style={{ maxWidth: '400px', margin: '0 auto' }}>
+                        <h3>待办事项</h3>
+                        <div style={{ display: 'flex', marginBottom: '10px' }}>
+                            <input
+                                type="text"
+                                value={inputValue}
+                                onChange={this.handleInputChange}
+                                placeholder="添加新任务..."
+                                style={{ flex: 1, padding: '8px' }}
+                            />
+                            <button onClick={this.handleAdd} style={{ marginLeft: '5px' }}>
+                                添加
+                            </button>
+                        </div>
+                        <ul style={{ listStyle: 'none', padding: 0 }}>
+                            {todos.map(todo => (
+                                <li 
+                                    key={todo.id} 
+                                    style={{ 
+                                        display: 'flex', 
+                                        alignItems: 'center',
+                                        padding: '8px',
+                                        borderBottom: '1px solid #eee'
+                                    }}
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={todo.completed}
+                                        onChange={() => this.handleToggle(todo.id)}
+                                        style={{ marginRight: '10px' }}
+                                    />
+                                    <span style={{ 
+                                        flex: 1,
+                                        textDecoration: todo.completed ? 'line-through' : 'none'
+                                    }}>
+                                        {todo.text}
+                                    </span>
+                                    <button 
+                                        onClick={() => this.handleDelete(todo.id)}
+                                        style={{ 
+                                            background: '#ff4444',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '4px 8px',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        删除
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                        <p style={{ color: '#666' }}>
+                            共 {todos.length} 个任务，{todos.filter(t => t.completed).length} 个已完成
+                        </p>
+                    </div>
+                );
+            }
+        }
+
+        // ========== 主应用组件 ==========
+        function App() {
+            return (
+                <div>
+                    <h1>类组件练习题参考答案</h1>
+                    
+                    {/* 基础练习 */}
+                    <section className="section">
+                        <h2>基础练习：计数器</h2>
+                        <Counter />
+                    </section>
+                    
+                    {/* 进阶练习 */}
+                    <section className="section">
+                        <h2>进阶练习：用户信息卡片</h2>
+                        <UserCard />
+                    </section>
+                    
+                    {/* 挑战练习 */}
+                    <section className="section">
+                        <h2>挑战练习：定时器</h2>
+                        <Timer />
+                    </section>
+                    
+                    {/* 额外示例 */}
+                    <section className="section">
+                        <h2>额外示例：待办事项应用</h2>
+                        <TodoApp />
+                    </section>
+                </div>
+            );
+        }
+
+        // 渲染应用
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

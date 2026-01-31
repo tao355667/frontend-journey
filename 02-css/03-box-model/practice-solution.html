@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>盒模型 - 基础练习答案</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f7fb;
+            color: #2c3e50;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .card {
+            width: 300px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin: 20px 0;
+            background-color: #fff;
+        }
+
+        .btn {
+            box-sizing: border-box;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            background-color: #1677ff;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: #0f5fd1;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(15, 95, 209, 0.3);
+        }
+
+        .compare {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .box {
+            width: 200px;
+            padding: 20px;
+            border: 5px solid #34495e;
+            background-color: #eef2ff;
+        }
+
+        .box--content {
+            box-sizing: content-box;
+        }
+
+        .box--border {
+            box-sizing: border-box;
+        }
+
+        .note {
+            margin-top: 10px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <main class="container" aria-label="盒模型基础练习">
+        <header>
+            <h1>盒模型基础练习答案</h1>
+        </header>
+
+        <section class="card" aria-label="卡片组件">
+            <h2>卡片组件</h2>
+            <p>卡片使用固定宽度、内边距、边框、圆角与外边距。</p>
+        </section>
+
+        <section aria-label="按钮组件">
+            <h2>按钮组件</h2>
+            <button class="btn" type="button" aria-label="示例按钮">立即开始</button>
+        </section>
+
+        <section aria-label="盒模型对比">
+            <h2>content-box 与 border-box 对比</h2>
+            <div class="compare">
+                <div class="box box--content">
+                    <strong>content-box</strong>
+                    <p class="note">总宽度 = 200 + padding + border</p>
+                </div>
+                <div class="box box--border">
+                    <strong>border-box</strong>
+                    <p class="note">总宽度 = 200</p>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

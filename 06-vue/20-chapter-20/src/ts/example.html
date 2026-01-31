@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第二十章：ref 与 reactive - TypeScript 示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .demo-section {
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    .demo-title {
+      color: #42b983;
+      margin-top: 0;
+    }
+    button {
+      padding: 8px 16px;
+      margin: 5px;
+      background: #42b983;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <h1>第二十章：ref 与 reactive（TypeScript）</h1>
+  <p>本章演示 TypeScript 中的类型定义和最佳实践。</p>
+
+  <div id="app">
+    <div class="demo-section">
+      <h2 class="demo-title">TypeScript 类型示例</h2>
+      <ts-ref-demo></ts-ref-demo>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, reactive, computed } = Vue;
+
+    const TsRefDemo = {
+      setup() {
+        // 带类型的 ref
+        /** @type {import('vue').Ref<number>} */
+        const count = ref(0);
+        
+        /** @type {import('vue').Ref<string>} */
+        const message = ref('Hello TypeScript');
+        
+        /**
+         * @typedef {Object} User
+         * @property {string} name
+         * @property {number} age
+         * @property {string[]} hobbies
+         */
+        
+        /** @type {import('vue').Ref<User>} */
+        const user = ref({
+          name: '张三',
+          age: 25,
+          hobbies: ['编程', '阅读']
+        });
+        
+        // 带类型的 reactive
+        /**
+         * @typedef {Object} Product
+         * @property {number} id
+         * @property {string} name
+         * @property {number} price
+         */
+        
+        /** @type {Product[]} */
+        const products = reactive([
+          { id: 1, name: '商品 A', price: 100 },
+          { id: 2, name: '商品 B', price: 200 }
+        ]);
+        
+        /**
+         * @param {number} id
+         * @returns {Product | undefined}
+         */
+        const findProduct = (id) => {
+          return products.find(p => p.id === id);
+        };
+        
+        const totalValue = computed(() => {
+          return products.reduce((sum, p) => sum + p.price, 0);
+        });
+        
+        return {
+          count,
+          message,
+          user,
+          products,
+          totalValue,
+          findProduct
+        };
+      },
+      template: `
+        <div>
+          <h4>类型定义示例</h4>
+          <p>计数：{{ count }}</p>
+          <p>消息：{{ message }}</p>
+          <p>用户：{{ user.name }} ({{ user.age }}岁)</p>
+          <p>爱好：{{ user.hobbies.join('、') }}</p>
+          
+          <h4>商品列表</h4>
+          <ul>
+            <li v-for="p in products" :key="p.id">
+              {{ p.name }} - ¥{{ p.price }}
+            </li>
+          </ul>
+          <p>总价值：¥{{ totalValue }}</p>
+          
+          <div class="code-block">
+// TypeScript 类型定义
+interface User {
+  name: string;
+  age: number;
+  hobbies: string[];
+}
+
+// 带类型的 ref
+const user = ref&lt;User&gt;({
+  name: '张三',
+  age: 25,
+  hobbies: ['编程', '阅读']
+});
+
+// 带类型的 reactive
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+}
+
+const products = reactive&lt;Product[]&gt;([
+  { id: 1, name: '商品 A', price: 100 }
+]);
+          </div>
+        </div>
+      `
+    };
+
+    createApp({
+      components: { TsRefDemo }
+    }).mount('#app');
+  </script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 4: 计算属性 - TypeScript 示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .demo-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .demo-section h2 {
+      color: #42b883;
+      border-bottom: 2px solid #42b883;
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+    .ts-badge {
+      background: #3178c6;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      margin-left: 10px;
+    }
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      margin: 10px 0;
+    }
+    input, select {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin: 5px;
+    }
+    button {
+      padding: 8px 16px;
+      background: #42b883;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1 style="text-align: center; color: #42b883;">
+      🧮 计算属性详解
+      <span class="ts-badge">TypeScript</span>
+    </h1>
+
+    <!-- TypeScript 接口定义 -->
+    <div class="demo-section">
+      <h2>TypeScript 类型定义</h2>
+      <div class="code-block">
+// TypeScript 接口定义
+
+interface CartItem {
+  id: number
+  name: string
+  price: number
+  quantity: number
+}
+
+interface AppData {
+  cart: CartItem[]
+  isVip: boolean
+  scores: number[]
+}
+
+// 计算属性返回类型
+interface ComputedGetters {
+  totalItems: number
+  subtotal: number
+  finalPrice: string
+  averageScore: string
+  allPassed: boolean
+}
+      </div>
+    </div>
+
+    <!-- 带类型的计算属性 -->
+    <div class="demo-section">
+      <h2>带类型的计算属性</h2>
+      
+      <h4>购物车</h4>
+      <div v-for="item in cart" :key="item.id" style="padding: 10px; border-bottom: 1px solid #eee;">
+        {{ item.name }} × {{ item.quantity }} = ¥{{ item.price * item.quantity }}
+      </div>
+      
+      <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+        <p>商品总数: {{ totalItems }}</p>
+        <p>小计金额: ¥{{ subtotal }}</p>
+        <p>应付总额: ¥{{ finalPrice }}</p>
+      </div>
+      
+      <div class="code-block">
+// TypeScript 计算属性 - 显式返回类型
+computed: {
+  // 返回 number 类型
+  totalItems(): number {
+    return this.cart.reduce((sum: number, item: CartItem) => {
+      return sum + item.quantity
+    }, 0)
+  },
+  
+  // 返回 number 类型
+  subtotal(): number {
+    return this.cart.reduce((sum: number, item: CartItem) => {
+      return sum + item.price * item.quantity
+    }, 0)
+  },
+  
+  // 返回 string 类型（格式化后的价格）
+  finalPrice(): string {
+    const price: number = this.isVip 
+      ? this.subtotal * 0.9 
+      : this.subtotal
+    return price.toFixed(2)
+  }
+}
+      </div>
+    </div>
+
+    <!-- 可写计算属性 -->
+    <div class="demo-section">
+      <h2>可写计算属性的类型定义</h2>
+      
+      <p>
+        <label>人民币: <input type="number" v-model.number="rmbPrice"> 元</label>
+      </p>
+      <p>
+        <label>美元: <input type="number" v-model.number="usdPrice"> USD</label>
+      </p>
+      
+      <div class="code-block">
+// 可写计算属性的完整类型
+data() {
+  return {
+    rmbPrice: 720  // number 类型
+  }
+},
+
+computed: {
+  usdPrice: {
+    // getter 返回 number
+    get(): number {
+      return Number((this.rmbPrice / 7.2).toFixed(2))
+    },
+    // setter 接收 number 类型参数
+    set(value: number): void {
+      this.rmbPrice = Number((value * 7.2).toFixed(2))
+    }
+  }
+}
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    /**
+     * @typedef {Object} CartItem
+     * @property {number} id
+     * @property {string} name
+     * @property {number} price
+     * @property {number} quantity
+     */
+
+    /**
+     * @typedef {Object} AppData
+     * @property {CartItem[]} cart
+     * @property {boolean} isVip
+     * @property {number[]} scores
+     * @property {number} rmbPrice
+     */
+
+    createApp({
+      /**
+       * @returns {AppData}
+       */
+      data() {
+        return {
+          /** @type {CartItem[]} */
+          cart: [
+            { id: 1, name: '笔记本电脑', price: 5999, quantity: 1 },
+            { id: 2, name: '无线鼠标', price: 99, quantity: 2 },
+            { id: 3, name: '键盘', price: 299, quantity: 1 }
+          ],
+          /** @type {boolean} */
+          isVip: false,
+          /** @type {number[]} */
+          scores: [85, 92, 78, 88, 95],
+          /** @type {number} */
+          rmbPrice: 720
+        };
+      },
+
+      computed: {
+        /**
+         * 商品总数
+         * @returns {number}
+         */
+        totalItems() {
+          return this.cart.reduce((sum, item) => sum + item.quantity, 0);
+        },
+
+        /**
+         * 小计金额
+         * @returns {number}
+         */
+        subtotal() {
+          return this.cart.reduce((sum, item) => {
+            return sum + item.price * item.quantity;
+          }, 0);
+        },
+
+        /**
+         * 最终价格（格式化字符串）
+         * @returns {string}
+         */
+        finalPrice() {
+          const price = this.isVip ? this.subtotal * 0.9 : this.subtotal;
+          return price.toFixed(2);
+        },
+
+        /**
+         * 平均分
+         * @returns {string}
+         */
+        averageScore() {
+          const total = this.scores.reduce((sum, score) => sum + score, 0);
+          return (total / this.scores.length).toFixed(1);
+        },
+
+        /**
+         * 是否全部及格
+         * @returns {boolean}
+         */
+        allPassed() {
+          return this.scores.every(score => score >= 60);
+        },
+
+        /**
+         * 美元价格（可写计算属性）
+         * @returns {number}
+         */
+        usdPrice: {
+          get() {
+            return Number((this.rmbPrice / 7.2).toFixed(2));
+          },
+          set(value) {
+            this.rmbPrice = Number((value * 7.2).toFixed(2));
+          }
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

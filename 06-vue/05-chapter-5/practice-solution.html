@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 5: 侦听器 - 练习题答案</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .level-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 10px;
+    }
+    .basic { background: #42b883; }
+    .advanced { background: #f39c12; }
+    .challenge { background: #e74c3c; }
+    .solution-card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .demo-area {
+      background: #f8f9fa;
+      border: 2px dashed #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 15px 0;
+    }
+    .form-group {
+      margin: 15px 0;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    input, select {
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      width: 250px;
+      transition: border-color 0.3s;
+    }
+    input.valid { border-color: #42b883; background: #e8f5e9; }
+    input.invalid { border-color: #e74c3c; background: #ffebee; }
+    .validation-icon {
+      margin-left: 10px;
+    }
+    .converter-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+    .currency-input {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    .rate-info {
+      text-align: center;
+      padding: 20px;
+      background: #e3f2fd;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .profile-editor {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .editor-form {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    .status-panel {
+      background: #f5f5f5;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    .status-item {
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .status-item.saved { background: #e8f5e9; color: #2e7d32; }
+    .status-item.unsaved { background: #fff3e0; color: #ef6c00; }
+    .history-btn {
+      padding: 8px 16px;
+      margin: 5px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .history-btn.undo { background: #f39c12; color: white; }
+    .history-btn.redo { background: #3498db; color: white; }
+    .history-btn:disabled { background: #ccc; cursor: not-allowed; }
+    .code-explanation {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 15px 0;
+      font-size: 14px;
+    }
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #42b883;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    button {
+      padding: 10px 20px;
+      background: #42b883;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1 style="text-align: center; color: white; margin-bottom: 30px;">
+      📚 侦听器练习题答案
+    </h1>
+
+    <!-- 基础练习答案：表单验证器 -->
+    <div class="solution-card">
+      <span class="level-badge basic">基础练习</span>
+      <h2>表单验证器</h2>
+      <p>使用侦听器实现实时表单验证，自动启用/禁用提交按钮。</p>
+      
+      <div class="demo-area">
+        <div class="form-group">
+          <label>用户名 (3-20字符，字母数字)：</label>
+          <input 
+            v-model="form.username" 
+            :class="validation.username.valid ? 'valid' : 'invalid'"
+            placeholder="输入用户名"
+          >
+          <span class="validation-icon">{{ validation.username.valid ? '✓' : '✗' }}</span>
+          <div style="font-size: 12px; margin-top: 5px;" :style="{ color: validation.username.valid ? '#42b883' : '#e74c3c' }">
+            {{ validation.username.message }}
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>邮箱：</label>
+          <input 
+            v-model="form.email" 
+            :class="validation.email.valid ? 'valid' : 'invalid'"
+            placeholder="输入邮箱"
+          >
+          <span class="validation-icon">{{ validation.email.valid ? '✓' : '✗' }}</span>
+          <div style="font-size: 12px; margin-top: 5px;" :style="{ color: validation.email.valid ? '#42b883' : '#e74c3c' }">
+            {{ validation.email.message }}
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>密码 (至少6位)：</label>
+          <input 
+            v-model="form.password" 
+            type="password"
+            :class="validation.password.valid ? 'valid' : 'invalid'"
+            placeholder="输入密码"
+          >
+          <span class="validation-icon">{{ validation.password.valid ? '✓' : '✗' }}</span>
+          <div style="font-size: 12px; margin-top: 5px;" :style="{ color: validation.password.valid ? '#42b883' : '#e74c3c' }">
+            {{ validation.password.message }}
+          </div>
+        </div>
+        
+        <button :disabled="!isFormValid" @click="submitForm">
+          {{ isFormValid ? '✓ 提交表单' : '请完成所有字段' }}
+        </button>
+      </div>
+      
+      <div class="code-explanation">
+        <strong>核心代码：</strong><br><br>
+        watch: {
+          'form.username'(newValue) {
+            if (!newValue) {
+              this.validation.username = { valid: false, message: '用户名不能为空' }
+            } else if (newValue.length < 3 || newValue.length > 20) {
+              this.validation.username = { valid: false, message: '长度应为3-20字符' }
+            } else if (!/^[a-zA-Z0-9]+$/.test(newValue)) {
+              this.validation.username = { valid: false, message: '只能包含字母数字' }
+            } else {
+              this.validation.username = { valid: true, message: '用户名有效' }
+            }
+          },
+          'form.email'(newValue) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+            this.validation.email = {
+              valid: emailRegex.test(newValue),
+              message: emailRegex.test(newValue) ? '邮箱格式正确' : '邮箱格式不正确'
+            }
+          },
+          'form.password'(newValue) {
+            this.validation.password = {
+              valid: newValue && newValue.length >= 6,
+              message: newValue && newValue.length >= 6 ? '密码强度合格' : '密码至少6位'
+            }
+          }
+        }
+      </div>
+    </div>
+
+    <!-- 进阶练习答案：汇率转换器 -->
+    <div class="solution-card">
+      <span class="level-badge advanced">进阶练习</span>
+      <h2>实时汇率转换器（带防抖）</h2>
+      <p>监听金额或货币变化，异步获取汇率并转换。</p>
+      
+      <div class="demo-area">
+        <div class="converter-box">
+          <div class="currency-input">
+            <h4>源货币</h4>
+            <div class="form-group">
+              <label>金额：</label>
+              <input type="number" v-model.number="amount" min="0" step="0.01">
+            </div>
+            <div class="form-group">
+              <label>货币：</label>
+              <select v-model="fromCurrency">
+                <option value="CNY">CNY 人民币</option>
+                <option value="USD">USD 美元</option>
+                <option value="EUR">EUR 欧元</option>
+                <option value="JPY">JPY 日元</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="currency-input">
+            <h4>目标货币</h4>
+            <div class="form-group">
+              <label>转换结果：</label>
+              <div style="font-size: 32px; color: #42b883; font-weight: bold;">
+                {{ convertedAmount }}
+                <span v-if="isLoading" class="loading-spinner"></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>货币：</label>
+              <select v-model="toCurrency">
+                <option value="USD">USD 美元</option>
+                <option value="CNY">CNY 人民币</option>
+                <option value="EUR">EUR 欧元</option>
+                <option value="JPY">JPY 日元</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <div class="rate-info">
+          <p style="margin: 0; font-size: 18px;">
+            当前汇率: 1 {{ fromCurrency }} = {{ currentRate }} {{ toCurrency }}
+          </p>
+          <p style="margin: 5px 0 0 0; font-size: 12px; color: #666;">
+            {{ lastUpdateTime ? `最后更新: ${lastUpdateTime}` : '等待输入...' }}
+          </p>
+        </div>
+      </div>
+      
+      <div class="code-explanation">
+        <strong>核心代码（防抖 + 异步）：</strong><br><br>
+        watch: {
+          // 监听多个数据源
+          amount() { this.debouncedConvert() },
+          fromCurrency() { this.debouncedConvert() },
+          toCurrency() { this.debouncedConvert() }
+        },
+
+        created() {
+          // 创建防抖函数
+          this.debouncedConvert = this.debounce(this.convertCurrency, 500)
+        },
+
+        methods: {
+          debounce(fn, delay) {
+            let timer = null
+            return function(...args) {
+              clearTimeout(timer)
+              timer = setTimeout(() => fn.apply(this, args), delay)
+            }
+          },
+          
+          async convertCurrency() {
+            this.isLoading = true
+            
+            // 模拟异步获取汇率
+            await new Promise(resolve => setTimeout(resolve, 600))
+            
+            // 模拟汇率数据
+            const rates = {
+              'CNY-USD': 0.14, 'CNY-EUR': 0.13, 'CNY-JPY': 20.5,
+              'USD-CNY': 7.2, 'USD-EUR': 0.92, 'USD-JPY': 148,
+              'EUR-CNY': 7.8, 'EUR-USD': 1.09, 'EUR-JPY': 161,
+              'JPY-CNY': 0.049, 'JPY-USD': 0.0068, 'JPY-EUR': 0.0062
+            }
+            
+            const key = `${this.fromCurrency}-${this.toCurrency}`
+            this.currentRate = rates[key] || 1
+            this.convertedAmount = (this.amount * this.currentRate).toFixed(2)
+            this.lastUpdateTime = new Date().toLocaleTimeString()
+            this.isLoading = false
+          }
+        }
+      </div>
+    </div>
+
+    <!-- 挑战练习答案：用户资料编辑器 -->
+    <div class="solution-card">
+      <span class="level-badge challenge">挑战练习</span>
+      <h2>用户资料编辑器（自动保存 + 撤销/重做）</h2>
+      <p>深度侦听用户对象，实现自动保存、历史记录和离开提示。</p>
+      
+      <div class="demo-area">
+        <div class="profile-editor">
+          <div class="editor-form">
+            <h4>编辑资料</h4>
+            <div class="form-group">
+              <label>姓名：</label>
+              <input v-model="profile.name">
+            </div>
+            <div class="form-group">
+              <label>年龄：</label>
+              <input type="number" v-model.number="profile.age">
+            </div>
+            <div class="form-group">
+              <label>邮箱：</label>
+              <input v-model="profile.email">
+            </div>
+            <div class="form-group">
+              <label>城市：</label>
+              <input v-model="profile.address.city">
+            </div>
+            <div class="form-group">
+              <label>电话：</label>
+              <input v-model="profile.contact.phone">
+            </div>
+            
+            <div style="margin-top: 20px;">
+              <button class="history-btn undo" @click="undo" :disabled="!canUndo">
+                ↩ 撤销 ({{ historyIndex }})
+              </button>
+              <button class="history-btn redo" @click="redo" :disabled="!canRedo">
+                ↪ 重做 ({{ history.length - historyIndex - 1 }})
+              </button>
+              <button @click="resetProfile" style="background: #e74c3c;">重置</button>
+            </div>
+          </div>
+          
+          <div class="status-panel">
+            <h4>状态面板</h4>
+            <div :class="['status-item', hasUnsavedChanges ? 'unsaved' : 'saved']">
+              {{ hasUnsavedChanges ? '⚠ 有未保存的更改' : '✓ 所有更改已保存' }}
+            </div>
+            <div class="status-item" style="background: #e3f2fd;">
+              <strong>当前数据：</strong><br>
+              <pre style="margin: 5px 0; font-size: 12px;">{{ JSON.stringify(profile, null, 2) }}</pre>
+            </div>
+            <div class="status-item" style="background: #fff3e0;">
+              <strong>本地存储：</strong><br>
+              <button @click="loadFromStorage" style="margin-top: 5px;">从 localStorage 加载</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="code-explanation">
+        <strong>核心代码：</strong><br><br>
+        data() {
+          return {
+            profile: { name: '', age: null, email: '', address: { city: '' }, contact: { phone: '' } },
+            history: [],  // 历史记录
+            historyIndex: -1,  // 当前历史位置
+            hasUnsavedChanges: false,
+            saveTimer: null
+          }
+        },
+
+        watch: {
+          profile: {
+            deep: true,
+            handler(newVal, oldVal) {
+              // 添加到历史记录
+              if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
+                this.addToHistory(newVal)
+              }
+              
+              // 标记未保存
+              this.hasUnsavedChanges = true
+              
+              // 自动保存防抖
+              clearTimeout(this.saveTimer)
+              this.saveTimer = setTimeout(() => {
+                this.saveToLocalStorage()
+              }, 3000)
+            }
+          }
+        },
+
+        methods: {
+          addToHistory(profile) {
+            // 删除当前位置之后的历史
+            this.history = this.history.slice(0, this.historyIndex + 1)
+            // 添加新历史
+            this.history.push(JSON.parse(JSON.stringify(profile)))
+            this.historyIndex++
+          },
+          
+          undo() {
+            if (this.canUndo) {
+              this.historyIndex--
+              this.profile = JSON.parse(JSON.stringify(this.history[this.historyIndex]))
+            }
+          },
+          
+          redo() {
+            if (this.canRedo) {
+              this.historyIndex++
+              this.profile = JSON.parse(JSON.stringify(this.history[this.historyIndex]))
+            }
+          },
+          
+          saveToLocalStorage() {
+            localStorage.setItem('userProfile', JSON.stringify(this.profile))
+            this.hasUnsavedChanges = false
+          }
+        }
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          // ===== 基础练习：表单验证数据 =====
+          form: {
+            username: '',
+            email: '',
+            password: ''
+          },
+          validation: {
+            username: { valid: false, message: '' },
+            email: { valid: false, message: '' },
+            password: { valid: false, message: '' }
+          },
+
+          // ===== 进阶练习：汇率转换数据 =====
+          amount: 100,
+          fromCurrency: 'CNY',
+          toCurrency: 'USD',
+          convertedAmount: '0.00',
+          currentRate: 0,
+          isLoading: false,
+          lastUpdateTime: null,
+
+          // ===== 挑战练习：用户资料数据 =====
+          profile: {
+            name: '张三',
+            age: 28,
+            email: 'zhangsan@example.com',
+            address: {
+              city: '北京'
+            },
+            contact: {
+              phone: '13800138000'
+            }
+          },
+          history: [],
+          historyIndex: -1,
+          hasUnsavedChanges: false,
+          saveTimer: null,
+          isInitialized: false
+        };
+      },
+
+      computed: {
+        isFormValid() {
+          return this.validation.username.valid &&
+                 this.validation.email.valid &&
+                 this.validation.password.valid;
+        },
+
+        canUndo() {
+          return this.historyIndex > 0;
+        },
+
+        canRedo() {
+          return this.historyIndex < this.history.length - 1;
+        }
+      },
+
+      watch: {
+        // ===== 基础练习：表单验证侦听 =====
+        'form.username'(newValue) {
+          if (!newValue) {
+            this.validation.username = { valid: false, message: '用户名不能为空' };
+          } else if (newValue.length < 3 || newValue.length > 20) {
+            this.validation.username = { valid: false, message: '长度应为3-20字符' };
+          } else if (!/^[a-zA-Z0-9]+$/.test(newValue)) {
+            this.validation.username = { valid: false, message: '只能包含字母数字' };
+          } else {
+            this.validation.username = { valid: true, message: '用户名有效' };
+          }
+        },
+
+        'form.email'(newValue) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!newValue) {
+            this.validation.email = { valid: false, message: '邮箱不能为空' };
+          } else if (!emailRegex.test(newValue)) {
+            this.validation.email = { valid: false, message: '邮箱格式不正确' };
+          } else {
+            this.validation.email = { valid: true, message: '邮箱格式正确' };
+          }
+        },
+
+        'form.password'(newValue) {
+          if (!newValue) {
+            this.validation.password = { valid: false, message: '密码不能为空' };
+          } else if (newValue.length < 6) {
+            this.validation.password = { valid: false, message: '密码至少6位' };
+          } else {
+            this.validation.password = { valid: true, message: '密码强度合格' };
+          }
+        },
+
+        // ===== 进阶练习：汇率转换侦听 =====
+        amount() { this.debouncedConvert(); },
+        fromCurrency() { this.debouncedConvert(); },
+        toCurrency() { this.debouncedConvert(); },
+
+        // ===== 挑战练习：用户资料深度侦听 =====
+        profile: {
+          deep: true,
+          handler(newVal, oldVal) {
+            // 初始化时不记录历史
+            if (!this.isInitialized) {
+              this.isInitialized = true;
+              this.addToHistory(newVal);
+              return;
+            }
+
+            // 检查是否真的变化了（避免相同值的重复记录）
+            if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
+              this.addToHistory(newVal);
+            }
+
+            // 标记未保存
+            this.hasUnsavedChanges = true;
+
+            // 自动保存防抖（3秒）
+            clearTimeout(this.saveTimer);
+            this.saveTimer = setTimeout(() => {
+              this.saveToLocalStorage();
+            }, 3000);
+          }
+        }
+      },
+
+      created() {
+        // 创建防抖函数
+        this.debouncedConvert = this.debounce(this.convertCurrency, 500);
+        
+        // 尝试从 localStorage 加载
+        this.loadFromStorage();
+      },
+
+      beforeUnmount() {
+        // 清理定时器
+        clearTimeout(this.saveTimer);
+      },
+
+      methods: {
+        // ===== 工具方法：防抖 =====
+        debounce(fn, delay) {
+          let timer = null;
+          return function(...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn.apply(this, args), delay);
+          };
+        },
+
+        // ===== 基础练习方法 =====
+        submitForm() {
+          if (this.isFormValid) {
+            alert('表单验证通过！\n' + JSON.stringify(this.form, null, 2));
+          }
+        },
+
+        // ===== 进阶练习方法 =====
+        async convertCurrency() {
+          if (this.amount <= 0) {
+            this.convertedAmount = '0.00';
+            return;
+          }
+
+          this.isLoading = true;
+
+          // 模拟 API 延迟
+          await new Promise(resolve => setTimeout(resolve, 600));
+
+          // 模拟汇率数据
+          const rates = {
+            'CNY-USD': 0.14, 'CNY-EUR': 0.13, 'CNY-JPY': 20.5,
+            'USD-CNY': 7.2, 'USD-EUR': 0.92, 'USD-JPY': 148,
+            'EUR-CNY': 7.8, 'EUR-USD': 1.09, 'EUR-JPY': 161,
+            'JPY-CNY': 0.049, 'JPY-USD': 0.0068, 'JPY-EUR': 0.0062
+          };
+
+          const key = `${this.fromCurrency}-${this.toCurrency}`;
+          this.currentRate = rates[key] || 1;
+          this.convertedAmount = (this.amount * this.currentRate).toFixed(2);
+          this.lastUpdateTime = new Date().toLocaleTimeString();
+          
+          this.isLoading = false;
+        },
+
+        // ===== 挑战练习方法 =====
+        addToHistory(profile) {
+          // 删除当前位置之后的历史
+          this.history = this.history.slice(0, this.historyIndex + 1);
+          
+          // 添加新历史（深拷贝）
+          this.history.push(JSON.parse(JSON.stringify(profile)));
+          this.historyIndex++;
+          
+          // 限制历史记录数量
+          if (this.history.length > 50) {
+            this.history.shift();
+            this.historyIndex--;
+          }
+        },
+
+        undo() {
+          if (this.canUndo) {
+            this.historyIndex--;
+            // 深拷贝避免引用问题
+            this.profile = JSON.parse(JSON.stringify(this.history[this.historyIndex]));
+          }
+        },
+
+        redo() {
+          if (this.canRedo) {
+            this.historyIndex++;
+            this.profile = JSON.parse(JSON.stringify(this.history[this.historyIndex]));
+          }
+        },
+
+        saveToLocalStorage() {
+          localStorage.setItem('userProfile', JSON.stringify(this.profile));
+          this.hasUnsavedChanges = false;
+        },
+
+        loadFromStorage() {
+          const saved = localStorage.getItem('userProfile');
+          if (saved) {
+            try {
+              this.profile = JSON.parse(saved);
+              this.history = [];
+              this.historyIndex = -1;
+              this.isInitialized = false;
+              this.hasUnsavedChanges = false;
+              alert('已从 localStorage 加载数据');
+            } catch (e) {
+              console.error('加载失败:', e);
+            }
+          } else {
+            alert('localStorage 中没有保存的数据');
+          }
+        },
+
+        resetProfile() {
+          if (confirm('确定要重置所有数据吗？')) {
+            this.profile = {
+              name: '',
+              age: null,
+              email: '',
+              address: { city: '' },
+              contact: { phone: '' }
+            };
+            this.history = [];
+            this.historyIndex = -1;
+            this.isInitialized = false;
+            localStorage.removeItem('userProfile');
+          }
+        }
+      }
+    }).mount('#app');
+
+    // 页面离开提示
+    window.addEventListener('beforeunload', (e) => {
+      const app = document.querySelector('#app').__vue_app__;
+      if (app && app._instance && app._instance.data.hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '有未保存的更改，确定要离开吗？';
+      }
+    });
+  </script>
+</body>
+</html>

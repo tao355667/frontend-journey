@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>组件基础 - JavaScript 版本</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    
+    .container { max-width: 1000px; margin: 0 auto; }
+    
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 36px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .demo-card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    
+    .demo-title {
+      color: #667eea;
+      font-size: 24px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 3px solid #667eea;
+    }
+    
+    /* Button 组件样式 */
+    .my-button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .my-button-primary { background: #42b883; color: white; }
+    .my-button-primary:hover { background: #369870; transform: translateY(-2px); }
+    
+    .my-button-danger { background: #dc3545; color: white; }
+    .my-button-danger:hover { background: #c82333; transform: translateY(-2px); }
+    
+    .my-button-warning { background: #ffc107; color: #212529; }
+    .my-button-warning:hover { background: #e0a800; transform: translateY(-2px); }
+    
+    .my-button-small { padding: 6px 12px; font-size: 14px; }
+    .my-button-medium { padding: 10px 20px; font-size: 16px; }
+    .my-button-large { padding: 14px 28px; font-size: 18px; }
+    
+    .my-button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    
+    /* Card 组件样式 */
+    .my-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .my-card:hover { transform: translateY(-5px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+    
+    .card-header {
+      padding: 20px;
+      background: #f8f9fa;
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    .card-body { padding: 20px; }
+    .card-footer {
+      padding: 15px 20px;
+      background: #f8f9fa;
+      border-top: 1px solid #dee2e6;
+      display: flex;
+      gap: 10px;
+    }
+    
+    /* CardList 样式 */
+    .card-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    
+    .loading-state {
+      text-align: center;
+      padding: 40px;
+      color: #6c757d;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 40px;
+      color: #6c757d;
+    }
+    
+    .empty-icon { font-size: 48px; margin-bottom: 15px; }
+    
+    .component-demo {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+    
+    .code-block {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #d63384;
+      margin-top: 15px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>🧩 组件基础演示</h1>
+      
+      <!-- Demo 1: Button 组件 -->
+      <div class="demo-card">
+        <h2 class="demo-title">1. Button 组件</h2>
+        
+        <div class="component-demo">
+          <my-button @click="handleClick">默认按钮</my-button>
+          <my-button type="danger" @click="handleClick">危险按钮</my-button>
+          <my-button type="warning" @click="handleClick">警告按钮</my-button>
+        </div>
+        
+        <div class="component-demo">
+          <my-button size="small">小按钮</my-button>
+          <my-button size="medium">中按钮</my-button>
+          <my-button size="large">大按钮</my-button>
+        </div>
+        
+        <div class="component-demo">
+          <my-button :disabled="true">禁用按钮</my-button>
+        </div>
+        
+        <div class="code-block">
+&lt;my-button type="primary" size="medium" @click="handleClick"&gt;
+  点击我
+&lt;/my-button&gt;
+        </div>
+      </div>
+      
+      <!-- Demo 2: Card 组件 -->
+      <div class="demo-card">
+        <h2 class="demo-title">2. Card 组件（使用插槽）</h2>
+        
+        <my-card>
+          <template #header>
+            <h3>卡片标题</h3>
+          </template>
+          
+          <p>这是卡片的主要内容区域。可以使用默认插槽放置任何内容。</p>
+          <p style="margin-top: 10px; color: #6c757d;">卡片组件支持 header、默认内容和 footer 三个插槽。</p>
+          
+          <template #footer>
+            <my-button type="primary" size="small">确认</my-button>
+            <my-button size="small">取消</my-button>
+          </template>
+        </my-card>
+      </div>
+      
+      <!-- Demo 3: CardList 组件 -->
+      <div class="demo-card">
+        <h2 class="demo-title">3. CardList 组件（列表渲染组件）</h2>
+        
+        <div style="margin-bottom: 15px;">
+          <label>
+            <input type="checkbox" v-model="showLoading"> 显示加载状态
+          </label>
+          <label style="margin-left: 20px;">
+            <input type="checkbox" v-model="showEmpty"> 显示空状态
+          </label>
+        </div>
+        
+        <card-list 
+          :items="cardItems"
+          :loading="showLoading"
+          @item-click="handleItemClick"
+        >
+          <template #empty>
+            <div class="empty-state">
+              <div class="empty-icon">📭</div>
+              <p>暂无数据，点击刷新按钮重试</p>
+              <my-button type="primary" style="margin-top: 15px;" @click="refreshData">
+                刷新
+              </my-button>
+            </div>
+          </template>
+        </card-list>
+      </div>
+      
+      <!-- Demo 4: 动态组件 -->
+      <div class="demo-card">
+        <h2 class="demo-title">4. 动态组件演示</h2>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+          <my-button 
+            v-for="tab in tabs" 
+            :key="tab.name"
+            :type="currentTab === tab.name ? 'primary' : 'default'"
+            @click="currentTab = tab.name"
+          >
+            {{ tab.label }}
+          </my-button>
+        </div>
+        
+        <component :is="currentComponent" />
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed } = Vue
+    
+    // Button 组件
+    const MyButton = {
+      props: {
+        type: { type: String, default: 'primary' },
+        size: { type: String, default: 'medium' },
+        disabled: { type: Boolean, default: false }
+      },
+      emits: ['click'],
+      template: `
+        <button 
+          class="my-button"
+          :class="[`my-button-${type}`, `my-button-${size}`]"
+          :disabled="disabled"
+          @click="$emit('click')"
+        >
+          <slot>默认文字</slot>
+        </button>
+      `
+    }
+    
+    // Card 组件
+    const MyCard = {
+      template: `
+        <div class="my-card">
+          <div class="card-header" v-if="$slots.header">
+            <slot name="header"></slot>
+          </div>
+          <div class="card-body">
+            <slot></slot>
+          </div>
+          <div class="card-footer" v-if="$slots.footer">
+            <slot name="footer"></slot>
+          </div>
+        </div>
+      `
+    }
+    
+    // CardList 组件
+    const CardList = {
+      props: {
+        items: { type: Array, required: true },
+        loading: { type: Boolean, default: false }
+      },
+      emits: ['item-click'],
+      template: `
+        <div>
+          <div v-if="loading" class="loading-state">
+            <p>加载中...</p>
+          </div>
+          <div v-else-if="items.length === 0" class="empty-state">
+            <slot name="empty">
+              <div class="empty-icon">📭</div>
+              <p>暂无数据</p>
+            </slot>
+          </div>
+          <div v-else class="card-list">
+            <my-card 
+              v-for="item in items" 
+              :key="item.id"
+              @click="$emit('item-click', item)"
+              style="cursor: pointer;"
+            >
+              <template #header>
+                <h4>{{ item.title }}</h4>
+              </template>
+              <p>{{ item.description }}</p>
+              <p style="margin-top: 10px; color: #667eea; font-weight: bold;">
+                ¥{{ item.price }}
+              </p>
+            </my-card>
+          </div>
+        </div>
+      `
+    }
+    
+    // 动态组件
+    const TabHome = {
+      template: '<div style="padding: 20px; background: #f8f9fa; border-radius: 8px;"><h3>🏠 首页内容</h3><p>这是首页组件</p></div>'
+    }
+    
+    const TabAbout = {
+      template: '<div style="padding: 20px; background: #f8f9fa; border-radius: 8px;"><h3>📖 关于内容</h3><p>这是关于页面组件</p></div>'
+    }
+    
+    const TabContact = {
+      template: '<div style="padding: 20px; background: #f8f9fa; border-radius: 8px;"><h3>📧 联系内容</h3><p>这是联系页面组件</p></div>'
+    }
+    
+    createApp({
+      components: {
+        MyButton,
+        MyCard,
+        CardList,
+        TabHome,
+        TabAbout,
+        TabContact
+      },
+      setup() {
+        const handleClick = () => {
+          alert('按钮被点击！')
+        }
+        
+        const cardItems = ref([
+          { id: 1, title: '商品 1', description: '这是一个很好的商品', price: 99 },
+          { id: 2, title: '商品 2', description: '这是另一个商品', price: 199 },
+          { id: 3, title: '商品 3', description: '更多商品描述', price: 299 }
+        ])
+        
+        const showLoading = ref(false)
+        const showEmpty = ref(false)
+        
+        const handleItemClick = (item) => {
+          alert(`点击了: ${item.title}`)
+        }
+        
+        const refreshData = () => {
+          showEmpty.value = false
+          cardItems.value = [
+            { id: Date.now(), title: '新商品', description: '刷新后的数据', price: 150 }
+          ]
+        }
+        
+        const currentTab = ref('home')
+        const tabs = [
+          { name: 'home', label: '首页', component: 'TabHome' },
+          { name: 'about', label: '关于', component: 'TabAbout' },
+          { name: 'contact', label: '联系', component: 'TabContact' }
+        ]
+        
+        const currentComponent = computed(() => {
+          const tab = tabs.find(t => t.name === currentTab.value)
+          return tab ? tab.component : 'TabHome'
+        })
+        
+        return {
+          handleClick,
+          cardItems,
+          showLoading,
+          showEmpty,
+          handleItemClick,
+          refreshData,
+          currentTab,
+          tabs,
+          currentComponent
+        }
+      }
+    }).mount('#app')
+  </script>
+</body>
+</html>

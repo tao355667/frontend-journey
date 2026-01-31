@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>语义化标签示例</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; line-height: 1.6; max-width: 900px; margin: 0 auto; padding: 16px; }
+      header, footer { background: #f5f5f5; padding: 12px; }
+      main { display: grid; grid-template-columns: 1fr 260px; gap: 16px; }
+      article { background: #fff; padding: 12px; border: 1px solid #eee; }
+      aside { background: #fafafa; padding: 12px; border: 1px solid #eee; }
+      nav a { margin-right: 8px; }
+      section { margin: 12px 0; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>我的语义化页面</h1>
+      <nav aria-label="主导航">
+        <a href="#home">首页</a>
+        <a href="#articles">文章</a>
+        <a href="#contact">联系</a>
+      </nav>
+    </header>
+
+    <main>
+      <article>
+        <header>
+          <h2 id="articles">文章标题：语义化的意义</h2>
+          <p><time datetime="2026-01-24">发表于 2026-01-24</time></p>
+        </header>
+
+        <section>
+          <h3>为什么使用语义标签？</h3>
+          <p>更好的可读性、可访问性、SEO，以及更清晰的结构。</p>
+        </section>
+
+        <section>
+          <h3>常见标签</h3>
+          <ul>
+            <li>结构：header / nav / main / section / article / aside / footer</li>
+            <li>辅助：time / address（联系信息）</li>
+          </ul>
+        </section>
+
+        <footer>
+          <p>作者：语义爱好者</p>
+        </footer>
+      </article>
+
+      <aside>
+        <h3>侧边栏</h3>
+        <p>这里可以放作者信息、相关文章、广告等。</p>
+        <address id="contact">联系：example@example.com</address>
+      </aside>
+    </main>
+
+    <footer>
+      <p>&copy; 2026 语义化示例站点</p>
+    </footer>
+  </body>
+</html>

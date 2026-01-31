@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第二十一章练习题答案 - computed 与 watch</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
+    .exercise { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .exercise-title { color: #42b983; border-bottom: 2px solid #42b983; padding-bottom: 10px; }
+    button { padding: 10px 20px; margin: 5px; background: #42b983; color: white; border: none; border-radius: 4px; }
+    input { padding: 8px; margin: 5px; width: 80px; }
+    .grade { font-size: 24px; font-weight: bold; color: #42b983; }
+    .warning { background: #fff3cd; padding: 10px; border-radius: 4px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>第二十一章练习题答案</h1>
+  <div id="app">
+    <div class="exercise">
+      <h2 class="exercise-title">练习 1：成绩计算器</h2>
+      <grade-calculator></grade-calculator>
+    </div>
+    <div class="exercise">
+      <h2 class="exercise-title">练习 2：实时汇率转换器</h2>
+      <currency-converter></currency-converter>
+    </div>
+    <div class="exercise">
+      <h2 class="exercise-title">练习 3：用户资料管理器</h2>
+      <user-profile-manager></user-profile-manager>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, reactive, computed, watch, watchEffect } = Vue;
+
+    // 练习 1：成绩计算器
+    const GradeCalculator = {
+      setup() {
+        const scores = ref([85, 90, 78]);
+        
+        const total = computed(() => scores.value.reduce((a, b) => a + b, 0));
+        const average = computed(() => (total.value / scores.value.length).toFixed(1));
+        const grade = computed(() => {
+          const avg = parseFloat(average.value);
+          if (avg >= 90) return 'A';
+          if (avg >= 80) return 'B';
+          if (avg >= 70) return 'C';
+          if (avg >= 60) return 'D';
+          return 'F';
+        });
+        
+        watch(scores, (newVal) => {
+          newVal.forEach((score, index) => {
+            if (score < 0) scores.value[index] = 0;
+            if (score > 100) scores.value[index] = 100;
+          });
+        }, { deep: true });
+        
+        return { scores, total, average, grade };
+      },
+      template: `
+        <div>
+          <div v-for="(score, index) in scores" :key="index">
+            科目 {{ index + 1 }}: <input v-model.number="scores[index]" type="number" min="0" max="100">
+          </div>
+          <p>总分：{{ total }}</p>
+          <p>平均分：{{ average }}</p>
+          <p class="grade">等级：{{ grade }}</p>
+        </div>
+      `
+    };
+
+    // 练习 2：汇率转换器
+    const CurrencyConverter = {
+      setup() {
+        const rmb = ref(100);
+        const warning = ref('');
+        
+        const rates = {
+          usd: 0.14,
+          eur: 0.13,
+          jpy: 20.5
+        };
+        
+        const usd = computed(() => (rmb.value * rates.usd).toFixed(2));
+        const eur = computed(() => (rmb.value * rates.eur).toFixed(2));
+        const jpy = computed(() => (rmb.value * rates.jpy).toFixed(2));
+        
+        watchEffect(() => {
+          console.log(`转换日志：${rmb.value} RMB`);
+          if (rmb.value > 10000) {
+            warning.value = '警告：金额超过 10000！';
+          } else {
+            warning.value = '';
+          }
+        });
+        
+        return { rmb, usd, eur, jpy, warning };
+      },
+      template: `
+        <div>
+          <p>人民币：<input v-model.number="rmb" type="number"></p>
+          <p>美元：${{ usd }}</p>
+          <p>欧元：€{{ eur }}</p>
+          <p>日元：¥{{ jpy }}</p>
+          <div v-if="warning" class="warning">{{ warning }}</div>
+        </div>
+      `
+    };
+
+    // 练习 3：用户资料管理器
+    const UserProfileManager = {
+      setup() {
+        const user = reactive({
+          name: '',
+          email: '',
+          phone: '',
+          age: ''
+        });
+        
+        const emailError = ref('');
+        const savedData = ref(null);
+        
+        const completion = computed(() => {
+          const fields = ['name', 'email', 'phone', 'age'];
+          const filled = fields.filter(f => user[f]).length;
+          return (filled / fields.length * 100).toFixed(0);
+        });
+        
+        const isValid = computed(() => {
+          return completion.value === '100' && !emailError.value;
+        });
+        
+        const card = computed(() => {
+          return `${user.name || '未命名'} | ${user.email || '无邮箱'} | ${user.phone || '无电话'} | ${user.age || '无年龄'}岁`;
+        });
+        
+        watch(() => user.email, (newVal) => {
+          if (newVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newVal)) {
+            emailError.value = '邮箱格式不正确';
+          } else {
+            emailError.value = '';
+          }
+        });
+        
+        watchEffect(() => {
+          localStorage.setItem('userProfile', JSON.stringify(user));
+        });
+        
+        const loadFromStorage = () => {
+          const saved = localStorage.getItem('userProfile');
+          if (saved) {
+            savedData.value = JSON.parse(saved);
+            Object.assign(user, savedData.value);
+          }
+        };
+        
+        return { user, completion, isValid, card, emailError, loadFromStorage };
+      },
+      template: `
+        <div>
+          <p>资料完成度：{{ completion }}%</p>
+          <div class="form-group">
+            <input v-model="user.name" placeholder="姓名">
+            <input v-model="user.email" placeholder="邮箱">
+            <span v-if="emailError" style="color: red;">{{ emailError }}</span>
+          </div>
+          <div class="form-group">
+            <input v-model="user.phone" placeholder="手机">
+            <input v-model="user.age" placeholder="年龄" type="number">
+          </div>
+          <p>资料卡片：{{ card }}</p>
+          <p>是否有效：{{ isValid ? '是' : '否' }}</p>
+          <button @click="loadFromStorage">从 localStorage 恢复</button>
+        </div>
+      `
+    };
+
+    createApp({
+      components: { GradeCalculator, CurrencyConverter, UserProfileManager }
+    }).mount('#app');
+  </script>
+</body>
+</html>

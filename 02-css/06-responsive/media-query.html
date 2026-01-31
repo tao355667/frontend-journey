@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>媒体查询演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            color: #34495e;
+            margin: 30px 0 15px 0;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
+        
+        /* 基础样式 */
+        .demo-section {
+            background-color: white;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        /* 响应式网格 */
+        .responsive-grid {
+            display: grid;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        /* 默认：移动优先 - 单列 */
+        .grid-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        /* 平板设备 - 2列 */
+        @media (min-width: 768px) {
+            .responsive-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .container {
+                padding: 30px;
+            }
+                            <button class="card-button" type="button" aria-label="了解移动优先">了解更多</button>
+        
+        /* 桌面设备 - 3列 */
+        @media (min-width: 1024px) {
+            .responsive-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+                            <button class="card-button" type="button" aria-label="了解弹性布局">了解更多</button>
+        @media (min-width: 1200px) {
+            .responsive-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        /* 响应式文字 */
+        .responsive-text h3 {
+                            <button class="card-button" type="button" aria-label="了解响应式图片">了解更多</button>
+            margin-bottom: 15px;
+        }
+        
+        .responsive-text p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+                            <button class="card-button" type="button" aria-label="了解媒体查询">了解更多</button>
+        @media (min-width: 768px) {
+            .responsive-text h3 {
+                font-size: 1.8rem;
+            }
+            
+            .responsive-text p {
+                font-size: 1.1rem;
+            }
+                            <button class="card-button" type="button" aria-label="了解最佳实践">了解更多</button>
+        
+        @media (min-width: 1024px) {
+            .responsive-text h3 {
+                font-size: 2rem;
+            }
+            
+            .responsive-text p {
+                font-size: 1.2rem;
+                            <button class="card-button" type="button" aria-label="了解最佳实践">了解更多</button>
+        }
+        
+        /* 响应式导航 */
+        .responsive-nav {
+            background-color: #2c3e50;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .nav-brand {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .nav-menu {
+            list-style: none;
+            text-align: center;
+        }
+        
+        .nav-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+            background-color: #34495e;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-menu a:hover {
+            background-color: #3498db;
+        }
+        
+        @media (min-width: 768px) {
+            .responsive-nav {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 15px 30px;
+            }
+            
+            .nav-brand {
+                margin-bottom: 0;
+                text-align: left;
+            }
+            
+            .nav-menu {
+                display: flex;
+                gap: 20px;
+                text-align: left;
+            }
+            
+            .nav-menu li {
+                margin-bottom: 0;
+            }
+            
+            .nav-menu a {
+                background-color: transparent;
+                padding: 5px 10px;
+            }
+            
+            .nav-menu a:hover {
+                background-color: rgba(52, 152, 219, 0.2);
+            }
+        }
+        
+        /* 响应式卡片 */
+        .card-container {
+            display: grid;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-image {
+            height: 200px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3em;
+        }
+        
+        .card-content {
+            padding: 20px;
+        }
+        
+        .card-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .card-text {
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+        
+        .card-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .card-button:hover {
+            background-color: #2980b9;
+        }
+        
+        /* 移动设备：单列 */
+        @media (max-width: 767px) {
+            .card-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* 平板设备：2列 */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .card-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* 桌面设备：3列 */
+        @media (min-width: 1024px) {
+            .card-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        /* 响应式布局 */
+        .layout-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .layout-header {
+            background-color: #e74c3c;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+        }
+        
+        .layout-main {
+            background-color: #27ae60;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .layout-sidebar {
+            background-color: #f39c12;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .layout-footer {
+            background-color: #9b59b6;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+        }
+        
+        @media (min-width: 768px) {
+            .layout-container {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .layout-header {
+                flex: 1 1 100%;
+            }
+            
+            .layout-main {
+                flex: 2 1 300px;
+            }
+            
+            .layout-sidebar {
+                flex: 1 1 200px;
+            }
+            
+            .layout-footer {
+                flex: 1 1 100%;
+            }
+        }
+        
+        /* 设备特性演示 */
+        .device-info {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .device-info::before {
+            content: "当前设备: 移动设备";
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.2rem;
+        }
+        
+        @media (min-width: 768px) {
+            .device-info::before {
+                content: "当前设备: 平板设备";
+                color: #27ae60;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .device-info::before {
+                content: "当前设备: 桌面设备";
+                color: #3498db;
+            }
+        }
+        
+        /* 方向检测 */
+        .orientation-info {
+            background-color: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .orientation-info::before {
+            content: "屏幕方向: 竖屏";
+            font-weight: bold;
+            color: #856404;
+        }
+        
+        @media (orientation: landscape) {
+            .orientation-info::before {
+                content: "屏幕方向: 横屏";
+                color: #d63384;
+            }
+        }
+        
+        /* 高分辨率屏幕 */
+        .resolution-info {
+            background-color: #d1ecf1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .resolution-info::before {
+            content: "标准分辨率屏幕";
+            font-weight: bold;
+            color: #0c5460;
+        }
+        
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .resolution-info::before {
+                content: "高分辨率屏幕 (Retina)";
+                color: #155724;
+            }
+        }
+        
+        /* 打印样式 */
+        @media print {
+            body {
+                background-color: white;
+                color: black;
+            }
+            
+            .demo-section {
+                box-shadow: none;
+                border: 1px solid #ccc;
+                break-inside: avoid;
+            }
+            
+            .responsive-nav,
+            .card-button {
+                display: none;
+            }
+        }
+        
+        /* 说明样式 */
+        .explanation {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .code-example {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            border-radius: 4px;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+        
+        /* 响应式表格 */
+        .responsive-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .responsive-table th,
+        .responsive-table td {
+            border: 1px solid #dee2e6;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .responsive-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        @media (max-width: 767px) {
+            .responsive-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+        
+        /* 响应式图片 */
+        .responsive-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .image-placeholder {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            margin: 20px 0;
+        }
+        
+        @media (min-width: 768px) {
+            .image-placeholder {
+                height: 400px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .image-placeholder {
+                height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="container" aria-label="媒体查询演示内容">
+        <header>
+            <h1>媒体查询演示</h1>
+        </header>
+        
+        <div class="explanation">
+            <h3>什么是媒体查询？</h3>
+            <p>媒体查询是 CSS3 的一个重要特性，它允许根据设备的特性（如屏幕宽度、高度、方向等）应用不同的样式。这是实现响应式设计的核心技术。</p>
+        </div>
+        
+        <div class="device-info"></div>
+        <div class="orientation-info"></div>
+        <div class="resolution-info"></div>
+        
+        <section class="demo-section">
+            <h2>响应式网格布局</h2>
+            <p>这个网格会根据屏幕宽度自动调整列数：</p>
+            <ul>
+                <li>移动设备 (&lt;768px)：单列</li>
+                <li>平板设备 (≥768px)：2列</li>
+                <li>桌面设备 (≥1024px)：3列</li>
+                <li>大屏设备 (≥1200px)：4列</li>
+            </ul>
+            
+            <div class="responsive-grid">
+                <div class="grid-item">项目 1</div>
+                <div class="grid-item">项目 2</div>
+                <div class="grid-item">项目 3</div>
+                <div class="grid-item">项目 4</div>
+                <div class="grid-item">项目 5</div>
+                <div class="grid-item">项目 6</div>
+                <div class="grid-item">项目 7</div>
+                <div class="grid-item">项目 8</div>
+            </div>
+        </section>
+        
+        <section class="demo-section">
+            <h2>响应式文字</h2>
+            <div class="responsive-text">
+                <h3>响应式标题</h3>
+                <p>这段文字的大小会根据屏幕尺寸自动调整。在移动设备上使用较小的字体，在桌面设备上使用较大的字体，以提供最佳的阅读体验。</p>
+                <p>响应式设计不仅仅是布局的调整，还包括文字大小、间距、颜色等各个方面的优化，确保用户在任何设备上都能获得良好的体验。</p>
+            </div>
+        </section>
+        
+        <section class="demo-section">
+            <h2>响应式导航</h2>
+            <nav class="responsive-nav" aria-label="示例导航">
+                <div class="nav-brand">🌟 网站Logo</div>
+                <ul class="nav-menu">
+                    <li><a href="#">首页</a></li>
+                    <li><a href="#">关于</a></li>
+                    <li><a href="#">服务</a></li>
+                    <li><a href="#">联系</a></li>
+                </ul>
+            </nav>
+        </section>
+        
+        <section class="demo-section">
+            <h2>响应式卡片布局</h2>
+            <div class="card-container">
+                <div class="card">
+                    <div class="card-image">📱</div>
+                    <div class="card-content">
+                        <h3 class="card-title">移动优先</h3>
+                        <p class="card-text">从移动设备开始设计，然后逐步增强到更大的屏幕。</p>
+                        <button class="card-button" type="button" aria-label="了解移动优先">了解更多</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-image">💻</div>
+                    <div class="card-content">
+                        <h3 class="card-title">灵活布局</h3>
+                        <p class="card-text">使用 Flexbox 和 Grid 创建灵活的响应式布局。</p>
+                        <button class="card-button" type="button" aria-label="了解弹性布局">了解更多</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-image">🎨</div>
+                    <div class="card-content">
+                        <h3 class="card-title">视觉设计</h3>
+                        <p class="card-text">根据设备特性调整视觉元素和交互方式。</p>
+                        <button class="card-button" type="button" aria-label="了解响应式图片">了解更多</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-image">⚡</div>
+                    <div class="card-content">
+                        <h3 class="card-title">性能优化</h3>
+                        <p class="card-text">针对不同设备优化加载速度和性能表现。</p>
+                        <button class="card-button" type="button" aria-label="了解媒体查询">了解更多</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-image">🔧</div>
+                    <div class="card-content">
+                        <h3 class="card-title">开发工具</h3>
+                        <p class="card-text">使用现代工具和框架提高开发效率。</p>
+                        <button class="card-button" type="button" aria-label="了解开发工具">了解更多</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-image">🚀</div>
+                    <div class="card-content">
+                        <h3 class="card-title">最佳实践</h3>
+                        <p class="card-text">遵循行业标准和最佳实践创建优秀体验。</p>
+                        <button class="card-button" type="button" aria-label="了解最佳实践">了解更多</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="demo-section">
+            <h2>响应式布局结构</h2>
+            <div class="layout-container">
+                <div class="layout-header">页眉 (Header)</div>
+                <div class="layout-main">主要内容 (Main Content)</div>
+                <div class="layout-sidebar">侧边栏 (Sidebar)</div>
+                <div class="layout-footer">页脚 (Footer)</div>
+            </div>
+        </section>
+        
+        <section class="demo-section">
+            <h2>响应式图片</h2>
+            <div class="image-placeholder">
+                🖼️ 响应式图片区域
+            </div>
+            <p>图片的高度会根据屏幕宽度自动调整，保持良好的比例。</p>
+        </section>
+        
+        <section class="demo-section">
+            <h2>响应式表格</h2>
+            <div style="overflow-x: auto;">
+                <table class="responsive-table">
+                    <thead>
+                        <tr>
+                            <th>特性</th>
+                            <th>移动设备</th>
+                            <th>平板设备</th>
+                            <th>桌面设备</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>布局</td>
+                            <td>单列</td>
+                            <td>2列</td>
+                            <td>3列以上</td>
+                        </tr>
+                        <tr>
+                            <td>导航</td>
+                            <td>汉堡菜单</td>
+                            <td>水平导航</td>
+                            <td>完整导航</td>
+                        </tr>
+                        <tr>
+                            <td>字体大小</td>
+                            <td>14px</td>
+                            <td>16px</td>
+                            <td>18px+</td>
+                        </tr>
+                        <tr>
+                            <td>交互方式</td>
+                            <td>触摸</td>
+                            <td>触摸/鼠标</td>
+                            <td>鼠标</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <section class="demo-section">
+            <h2>媒体查询语法</h2>
+            <div class="code-example">
+/* 基本语法 */
+@media (min-width: 768px) {
+    /* 平板设备样式 */
+}
+
+/* 多个条件 */
+@media (min-width: 768px) and (max-width: 1024px) {
+    /* 平板设备专用样式 */
+}
+
+/* 设备特性 */
+@media (orientation: landscape) {
+    /* 横屏样式 */
+}
+
+/* 高分辨率屏幕 */
+@media (-webkit-min-device-pixel-ratio: 2) {
+    /* Retina 屏幕样式 */
+}
+
+/* 打印样式 */
+@media print {
+    /* 打印专用样式 */
+}
+            </div>
+        </section>
+        
+        <section class="demo-section">
+            <h2>常用断点</h2>
+            <div class="code-example">
+/* 移动设备 */
+@media (max-width: 767px) { }
+
+/* 平板设备 */
+@media (min-width: 768px) and (max-width: 1023px) { }
+
+/* 桌面设备 */
+@media (min-width: 1024px) { }
+
+/* 大屏设备 */
+@media (min-width: 1200px) { }
+            </div>
+        </section>
+        
+        <div class="explanation">
+            <h3>响应式设计原则</h3>
+            <ul>
+                <li><strong>移动优先</strong>：先为移动设备设计，再增强到桌面设备</li>
+                <li><strong>流式布局</strong>：使用相对单位而非固定像素</li>
+                <li><strong>弹性图片</strong>：图片能够自适应容器大小</li>
+                <li><strong>媒体查询</strong>：根据设备特性应用不同样式</li>
+                <li><strong>性能优化</strong>：针对不同设备优化加载和性能</li>
+            </ul>
+        </div>
+        
+        <div class="explanation">
+            <h3>测试方法</h3>
+            <ul>
+                <li>使用浏览器开发者工具的设备模拟器</li>
+                <li>调整浏览器窗口大小测试响应式效果</li>
+                <li>在真实设备上测试体验</li>
+                <li>测试不同屏幕方向的显示效果</li>
+            </ul>
+        </div>
+    </main>
+    
+    <script>
+        // 显示当前视口信息
+        function updateViewportInfo() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const deviceType = width < 768 ? '移动设备' : width < 1024 ? '平板设备' : '桌面设备';
+            const orientation = width > height ? '横屏' : '竖屏';
+            
+            console.log(`视口宽度: ${width}px, 高度: ${height}px`);
+            console.log(`设备类型: ${deviceType}`);
+            console.log(`屏幕方向: ${orientation}`);
+        }
+        
+        // 页面加载和窗口大小改变时更新信息
+        window.addEventListener('load', updateViewportInfo);
+        window.addEventListener('resize', updateViewportInfo);
+        
+        // 添加交互效果
+        document.querySelectorAll('.card-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const cardTitle = this.closest('.card').querySelector('.card-title').textContent;
+                alert(`您点击了: ${cardTitle}`);
+            });
+        });
+    </script>
+</body>
+</html>

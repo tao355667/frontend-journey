@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第17章：过渡动画 - JavaScript示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #f5f5f5; }
+    h1 { text-align: center; color: #333; margin-bottom: 30px; }
+    h2 { color: #42b883; margin: 30px 0 15px; border-bottom: 2px solid #42b883; padding-bottom: 10px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    .card { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin: 5px; transition: all 0.2s; }
+    .btn-primary { background: #42b883; color: white; }
+    .btn-danger { background: #ff5252; color: white; }
+    .btn-default { background: #e0e0e0; color: #333; }
+    .btn:hover { opacity: 0.8; }
+    
+    /* ===== 基础过渡动画 ===== */
+    
+    /* 1. 淡入淡出 */
+    .fade-enter-active,
+    .fade-leave-active {
+      transition: opacity 0.5s ease;
+    }
+    .fade-enter-from,
+    .fade-leave-to {
+      opacity: 0;
+    }
+    
+    /* 2. 滑动 */
+    .slide-enter-active,
+    .slide-leave-active {
+      transition: all 0.3s ease-out;
+    }
+    .slide-enter-from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    .slide-leave-to {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    
+    /* 3. 缩放 */
+    .zoom-enter-active {
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .zoom-leave-active {
+      transition: all 0.3s ease-in;
+    }
+    .zoom-enter-from,
+    .zoom-leave-to {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    
+    /* 4. 弹窗效果 */
+    .modal-enter-active {
+      transition: all 0.3s ease-out;
+    }
+    .modal-leave-active {
+      transition: all 0.2s ease-in;
+    }
+    .modal-enter-from {
+      opacity: 0;
+      transform: translateY(-30px) scale(0.95);
+    }
+    .modal-leave-to {
+      opacity: 0;
+      transform: translateY(-20px) scale(0.95);
+    }
+    
+    /* 5. 高度展开 */
+    .expand-enter-active,
+    .expand-leave-active {
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    .expand-enter-from,
+    .expand-leave-to {
+      opacity: 0;
+      height: 0;
+      padding: 0;
+    }
+    
+    /* 6. 翻转效果 */
+    .flip-enter-active {
+      transition: all 0.4s ease-out;
+    }
+    .flip-leave-active {
+      display: none;
+    }
+    .flip-enter-from {
+      opacity: 0;
+      transform: rotateY(-90deg);
+    }
+    
+    /* 内容样式 */
+    .demo-box {
+      background: linear-gradient(135deg, #42b883, #347474);
+      color: white;
+      padding: 30px;
+      border-radius: 8px;
+      text-align: center;
+      margin-top: 15px;
+    }
+    
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      min-width: 300px;
+      max-width: 500px;
+    }
+    
+    /* 列表样式 */
+    .todo-list {
+      list-style: none;
+      padding: 0;
+      position: relative;
+    }
+    .todo-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px;
+      background: #f8f8f8;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      transition: all 0.3s;
+    }
+    .todo-item:hover {
+      background: #e8e8e8;
+    }
+    .todo-item.done span {
+      text-decoration: line-through;
+      color: #999;
+    }
+    .todo-input {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .todo-input input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    /* 列表过渡 */
+    .list-enter-active,
+    .list-leave-active {
+      transition: all 0.4s ease;
+    }
+    .list-enter-from {
+      opacity: 0;
+      transform: translateX(-50px);
+    }
+    .list-leave-to {
+      opacity: 0;
+      transform: translateX(50px);
+    }
+    .list-leave-active {
+      position: absolute;
+      width: calc(100% - 30px);
+    }
+    .list-move {
+      transition: transform 0.4s;
+    }
+    
+    /* 标签页样式 */
+    .tab-nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      border: none;
+      background: #e0e0e0;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .tab-btn.active {
+      background: #42b883;
+      color: white;
+    }
+    
+    /* 图片画廊 */
+    .gallery-container {
+      position: relative;
+      height: 300px;
+      background: #f8f8f8;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gallery-image {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover;
+    }
+    .gallery-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.5);
+      color: white;
+      border: none;
+      padding: 15px 10px;
+      cursor: pointer;
+      font-size: 20px;
+    }
+    .gallery-nav.prev { left: 10px; }
+    .gallery-nav.next { right: 10px; }
+    
+    /* 手风琴 */
+    .accordion-item {
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .accordion-header {
+      padding: 15px;
+      background: #f8f8f8;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 500;
+    }
+    .accordion-header:hover {
+      background: #e8e8e8;
+    }
+    .accordion-icon {
+      transition: transform 0.3s;
+    }
+    .accordion-icon.open {
+      transform: rotate(180deg);
+    }
+    .accordion-content {
+      padding: 0 15px;
+      background: white;
+    }
+    .accordion-body {
+      padding: 15px 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>Vue 3 过渡动画示例</h1>
+      
+      <h2>1. 基础淡入淡出 (fade)</h2>
+      
+      <div class="card">
+        <button class="btn btn-primary" @click="showFade = !showFade">
+          {{ showFade ? '隐藏' : '显示' }}
+        </button>
+        <Transition name="fade">
+          <div v-if="showFade" class="demo-box">
+            <h3>淡入淡出效果</h3>
+            <p>使用了 fade-enter-active 和 fade-leave-active 类</p>
+          </div>
+        </Transition>
+      </div>
+      
+      <h2>2. 滑动效果 (slide)</h2>
+      
+      <div class="card">
+        <button class="btn btn-primary" @click="showSlide = !showSlide">
+          {{ showSlide ? '隐藏' : '显示' }}
+        </button>
+        <Transition name="slide">
+          <div v-if="showSlide" class="demo-box">
+            <h3>滑动效果</h3>
+            <p>从左侧滑入，向右侧滑出</p>
+          </div>
+        </Transition>
+      </div>
+      
+      <h2>3. 缩放效果 (zoom)</h2>
+      
+      <div class="card">
+        <button class="btn btn-primary" @click="showZoom = !showZoom">
+          {{ showZoom ? '隐藏' : '显示' }}
+        </button>
+        <Transition name="zoom">
+          <div v-if="showZoom" class="demo-box" style="width: 200px; margin: 15px auto;">
+            <h3>缩放</h3>
+          </div>
+        </Transition>
+      </div>
+      
+      <h2>4. 模态框过渡 (modal)</h2>
+      
+      <div class="card">
+        <button class="btn btn-primary" @click="showModal = true">打开模态框</button>
+        
+        <Transition name="modal">
+          <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
+            <div class="modal-content">
+              <h3>动画模态框</h3>
+              <p>带有淡入和从上往下的滑入效果</p>
+              <p>点击遮罩层或下方按钮关闭</p>
+              <button class="btn btn-default" @click="showModal = false">关闭</button>
+            </div>
+          </div>
+        </Transition>
+      </div>
+      
+      <h2>5. 高度展开 (expand) - 手风琴效果</h2>
+      
+      <div class="card">
+        <button class="btn btn-primary" @click="showExpand = !showExpand">
+          {{ showExpand ? '收起' : '展开' }}
+        </button>
+        <Transition name="expand">
+          <div v-show="showExpand" class="demo-box" style="margin-top: 15px;">
+            <h3>可展开内容</h3>
+            <p>这是第一行内容</p>
+            <p>这是第二行内容</p>
+            <p>这是第三行内容</p>
+          </div>
+        </Transition>
+      </div>
+      
+      <h2>6. 列表过渡 (TransitionGroup)</h2>
+      
+      <div class="card">
+        <div class="todo-input">
+          <input v-model="newTodo" @keyup.enter="addTodo" placeholder="输入待办事项，按回车添加" />
+          <button class="btn btn-primary" @click="addTodo">添加</button>
+        </div>
+        
+        <TransitionGroup name="list" tag="ul" class="todo-list">
+          <li v-for="(todo, index) in todos" :key="todo.id" :class="['todo-item', { done: todo.done }]">
+            <span @click="todo.done = !todo.done" style="cursor: pointer; flex: 1;">
+              {{ todo.text }}
+            </span>
+            <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" @click="removeTodo(index)">
+              删除
+            </button>
+          </li>
+        </TransitionGroup>
+        
+        <p v-if="todos.length === 0" style="text-align: center; color: #999; padding: 20px;">
+          暂无待办事项，添加一个吧！
+        </p>
+      </div>
+      
+      <h2>7. 带模式的组件切换 (mode="out-in")</h2>
+      
+      <div class="card">
+        <div class="tab-nav">
+          <button 
+            v-for="tab in tabs" 
+            :key="tab.id"
+            :class="['tab-btn', { active: currentTab === tab.id }]"
+            @click="currentTab = tab.id"
+          >
+            {{ tab.label }}
+          </button>
+        </div>
+        
+        <div style="background: #f8f8f8; padding: 20px; border-radius: 4px; min-height: 150px;">
+          <Transition name="slide" mode="out-in">
+            <div :key="currentTab">
+              <h4>{{ currentTabContent.title }}</h4>
+              <p>{{ currentTabContent.content }}</p>
+            </div>
+          </Transition>
+        </div>
+      </div>
+      
+      <h2>8. 图片画廊切换</h2>
+      
+      <div class="card">
+        <div class="gallery-container">
+          <Transition name="slide" mode="out-in">
+            <img 
+              :key="currentImage"
+              :src="images[currentImage]" 
+              class="gallery-image"
+              alt="画廊图片"
+            />
+          </Transition>
+          <button class="gallery-nav prev" @click="prevImage">‹</button>
+          <button class="gallery-nav next" @click="nextImage">›</button>
+        </div>
+        <p style="text-align: center; margin-top: 10px; color: #666;">
+          {{ currentImage + 1 }} / {{ images.length }}
+        </p>
+      </div>
+      
+      <h2>9. 手风琴面板组</h2>
+      
+      <div class="card">
+        <div v-for="(item, index) in accordionItems" :key="index" class="accordion-item">
+          <div class="accordion-header" @click="toggleAccordion(index)">
+            <span>{{ item.title }}</span>
+            <span :class="['accordion-icon', { open: openAccordion === index }]">▼</span>
+          </div>
+          <Transition name="expand">
+            <div v-show="openAccordion === index" class="accordion-content">
+              <div class="accordion-body">
+                {{ item.content }}
+              </div>
+            </div>
+          </Transition>
+        </div>
+      </div>
+      
+      <h2>10. 翻转卡片效果</h2>
+      
+      <div class="card">
+        <button class="btn btn-primary" @click="showFlip = !showFlip">
+          {{ showFlip ? '翻回正面' : '翻到背面' }}
+        </button>
+        <div style="perspective: 1000px; margin-top: 15px;">
+          <Transition name="flip">
+            <div v-if="!showFlip" class="demo-box" style="transform-style: preserve-3d;">
+              <h3>正面</h3>
+              <p>点击按钮翻转</p>
+            </div>
+            <div v-else class="demo-box" style="background: linear-gradient(135deg, #ff5252, #c62828); transform-style: preserve-3d;">
+              <h3>背面</h3>
+              <p>翻转过来了！</p>
+            </div>
+          </Transition>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed } = Vue;
+
+    createApp({
+      setup() {
+        // 基础显示状态
+        const showFade = ref(true);
+        const showSlide = ref(true);
+        const showZoom = ref(true);
+        const showModal = ref(false);
+        const showExpand = ref(true);
+        const showFlip = ref(false);
+        
+        // 待办事项列表
+        const newTodo = ref('');
+        const todos = ref([
+          { id: 1, text: '学习 Vue 过渡动画', done: false },
+          { id: 2, text: '练习 Transition 组件', done: false },
+          { id: 3, text: '练习 TransitionGroup 组件', done: true }
+        ]);
+        let todoId = 4;
+        
+        const addTodo = () => {
+          if (newTodo.value.trim()) {
+            todos.value.push({
+              id: todoId++,
+              text: newTodo.value,
+              done: false
+            });
+            newTodo.value = '';
+          }
+        };
+        
+        const removeTodo = (index) => {
+          todos.value.splice(index, 1);
+        };
+        
+        // 标签页
+        const currentTab = ref('home');
+        const tabs = [
+          { id: 'home', label: '首页' },
+          { id: 'about', label: '关于' },
+          { id: 'contact', label: '联系' }
+        ];
+        
+        const tabContents = {
+          home: { title: '欢迎来到首页', content: '这是首页的内容区域，使用了 mode="out-in" 确保平滑切换。' },
+          about: { title: '关于我们', content: '这是关于页面的内容，展示了过渡动画如何让界面切换更流畅。' },
+          contact: { title: '联系我们', content: '这是联系页面的内容，你可以在这里添加表单或其他信息。' }
+        };
+        
+        const currentTabContent = computed(() => tabContents[currentTab.value]);
+        
+        // 图片画廊
+        const currentImage = ref(0);
+        const images = [
+          'https://picsum.photos/400/300?random=1',
+          'https://picsum.photos/400/300?random=2',
+          'https://picsum.photos/400/300?random=3',
+          'https://picsum.photos/400/300?random=4'
+        ];
+        
+        const prevImage = () => {
+          currentImage.value = (currentImage.value - 1 + images.length) % images.length;
+        };
+        
+        const nextImage = () => {
+          currentImage.value = (currentImage.value + 1) % images.length;
+        };
+        
+        // 手风琴
+        const openAccordion = ref(null);
+        const accordionItems = [
+          { title: '什么是 Vue 过渡？', content: 'Vue 提供了一套过渡系统，让你在元素插入、更新或移除时添加动画效果。' },
+          { title: 'Transition 组件', content: '用于单元素/组件的过渡，提供了进入和离开的类名钩子。' },
+          { title: 'TransitionGroup 组件', content: '用于列表的过渡，支持列表项的添加、删除和排序动画。' },
+          { title: '如何使用？', content: '通过 CSS 类名或 JavaScript 钩子来定义动画，Vue 会自动处理过渡时机。' }
+        ];
+        
+        const toggleAccordion = (index) => {
+          openAccordion.value = openAccordion.value === index ? null : index;
+        };
+        
+        return {
+          showFade,
+          showSlide,
+          showZoom,
+          showModal,
+          showExpand,
+          showFlip,
+          newTodo,
+          todos,
+          addTodo,
+          removeTodo,
+          currentTab,
+          tabs,
+          currentTabContent,
+          currentImage,
+          images,
+          prevImage,
+          nextImage,
+          openAccordion,
+          accordionItems,
+          toggleAccordion
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

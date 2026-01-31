@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOM 事件示例</title>
+    <style>
+        .box {
+            width: 200px;
+            height: 200px;
+            background-color: lightblue;
+            margin: 20px;
+            padding: 20px;
+            border: 2px solid blue;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .box:hover {
+            background-color: lightgreen;
+            transform: scale(1.05);
+        }
+        .clicked {
+            background-color: coral;
+            border-color: red;
+        }
+        input, button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .event-log {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .keyboard-demo {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>DOM 事件示例</h1>
+    
+    <div class="box" id="clickBox">
+        <h3>点击我！</h3>
+        <p>点击次数: <span id="clickCount">0</span></p>
+    </div>
+    
+    <div>
+        <input type="text" id="textInput" placeholder="在这里输入...">
+        <button id="clearBtn">清空</button>
+        <button id="disableBtn">禁用输入框</button>
+    </div>
+    
+    <div class="keyboard-demo">
+        <h3>键盘事件</h3>
+        <input type="text" id="keyboardInput" placeholder="在这里按键...">
+        <p>最后按下的键: <span id="lastKey">无</span></p>
+        <p>键代码: <span id="keyCode">-</span></p>
+    </div>
+    
+    <div>
+        <h3>鼠标事件</h3>
+        <div id="mouseArea" style="width: 300px; height: 150px; background-color: #f0f0f0; border: 1px solid #ccc; margin: 10px; padding: 10px;">
+            <p>鼠标位置: <span id="mousePos">X: 0, Y: 0</span></p>
+            <p>事件: <span id="mouseEvent">无</span></p>
+        </div>
+    </div>
+    
+    <div class="event-log" id="eventLog">
+        <strong>事件日志:</strong><br>
+    </div>
+
+    <script>
+        // 事件日志函数
+        function logEvent(message) {
+            const eventLog = document.getElementById('eventLog');
+            const timestamp = new Date().toLocaleTimeString();
+            eventLog.innerHTML += `${timestamp}: ${message}<br>`;
+            eventLog.scrollTop = eventLog.scrollHeight;
+        }
+        
+        // 点击事件
+        let clickCount = 0;
+        const clickBox = document.getElementById('clickBox');
+        
+        clickBox.addEventListener('click', function(event) {
+            clickCount++;
+            document.getElementById('clickCount').textContent = clickCount;
+            this.classList.toggle('clicked');
+            logEvent(`盒子被点击！次数: ${clickCount}`);
+            console.log('事件对象:', event);
+        });
+        
+        clickBox.addEventListener('dblclick', function() {
+            logEvent('盒子被双击！');
+            this.style.backgroundColor = 'purple';
+            setTimeout(() => {
+                this.style.backgroundColor = '';
+            }, 1000);
+        });
+        
+        // 鼠标事件
+        clickBox.addEventListener('mouseenter', function() {
+            logEvent('鼠标进入盒子');
+        });
+        
+        clickBox.addEventListener('mouseleave', function() {
+            logEvent('鼠标离开盒子');
+        });
+        
+        // 输入事件
+        const textInput = document.getElementById('textInput');
+        
+        textInput.addEventListener('input', function(event) {
+            logEvent(`输入内容改变: "${this.value}"`);
+        });
+        
+        textInput.addEventListener('focus', function() {
+            logEvent('输入框获得焦点');
+            this.style.backgroundColor = '#ffffcc';
+        });
+        
+        textInput.addEventListener('blur', function() {
+            logEvent('输入框失去焦点');
+            this.style.backgroundColor = '';
+        });
+        
+        // 按钮事件
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            textInput.value = '';
+            textInput.focus();
+            logEvent('输入框已清空');
+        });
+        
+        document.getElementById('disableBtn').addEventListener('click', function() {
+            textInput.disabled = !textInput.disabled;
+            this.textContent = textInput.disabled ? '启用输入框' : '禁用输入框';
+            logEvent(`输入框已${textInput.disabled ? '禁用' : '启用'}`);
+        });
+        
+        // 键盘事件
+        const keyboardInput = document.getElementById('keyboardInput');
+        
+        keyboardInput.addEventListener('keydown', function(event) {
+            document.getElementById('lastKey').textContent = event.key;
+            document.getElementById('keyCode').textContent = event.code;
+            
+            // 阻止某些键
+            if (event.key === ' ') {
+                event.preventDefault();
+                logEvent('空格键已被阻止！');
+            }
+        });
+        
+        keyboardInput.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                logEvent(`按下回车键！当前值: "${this.value}"`);
+            }
+        });
+        
+        // 鼠标位置追踪
+        const mouseArea = document.getElementById('mouseArea');
+        
+        mouseArea.addEventListener('mousemove', function(event) {
+            const rect = this.getBoundingClientRect();
+            const x = Math.round(event.clientX - rect.left);
+            const y = Math.round(event.clientY - rect.top);
+            document.getElementById('mousePos').textContent = `X: ${x}, Y: ${y}`;
+        });
+        
+        mouseArea.addEventListener('mousedown', function(event) {
+            document.getElementById('mouseEvent').textContent = `鼠标按下 (按钮: ${event.button})`;
+            logEvent(`鼠标按下，位置: (${event.clientX}, ${event.clientY})`);
+        });
+        
+        mouseArea.addEventListener('mouseup', function(event) {
+            document.getElementById('mouseEvent').textContent = `鼠标释放 (按钮: ${event.button})`;
+        });
+        
+        // 窗口事件
+        window.addEventListener('resize', function() {
+            logEvent(`窗口大小改变: ${window.innerWidth}x${window.innerHeight}`);
+        });
+        
+        window.addEventListener('scroll', function() {
+            logEvent(`页面滚动: 距离顶部 ${window.scrollY}px`);
+        });
+        
+        // 表单事件示例
+        const form = document.createElement('form');
+        form.innerHTML = `
+            <h3>表单事件</h3>
+            <input type="email" placeholder="邮箱" required>
+            <button type="submit">提交</button>
+        `;
+        document.body.insertBefore(form, document.querySelector('.event-log'));
+        
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            logEvent('表单已提交（已阻止默认行为）');
+            const email = form.querySelector('input[type="email"]').value;
+            console.log('提交的邮箱:', email);
+        });
+        
+        logEvent('页面加载完成 - 事件监听器已就绪！');
+    </script>
+</body>
+</html>

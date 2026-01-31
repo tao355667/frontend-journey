@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第15章：动态组件与异步组件 - JavaScript示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #f5f5f5; }
+    h1 { text-align: center; color: #333; margin-bottom: 30px; }
+    h2 { color: #42b883; margin: 30px 0 15px; border-bottom: 2px solid #42b883; padding-bottom: 10px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    .card { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin: 5px; transition: opacity 0.2s; }
+    .btn-primary { background: #42b883; color: white; }
+    .btn-danger { background: #ff5252; color: white; }
+    .btn-warning { background: #ff9800; color: white; }
+    .btn-default { background: #e0e0e0; color: #333; }
+    .btn:hover { opacity: 0.8; }
+    .btn.active { box-shadow: 0 0 0 2px #42b883; }
+    
+    /* 标签页样式 */
+    .tab-nav { display: flex; background: #f8f8f8; border-radius: 8px 8px 0 0; border-bottom: 2px solid #e0e0e0; }
+    .tab-btn { flex: 1; padding: 15px; border: none; background: none; cursor: pointer; transition: all 0.3s; font-size: 14px; }
+    .tab-btn:hover { background: #e8e8e8; }
+    .tab-btn.active { background: white; color: #42b883; border-bottom: 2px solid #42b883; margin-bottom: -2px; }
+    .tab-icon { margin-right: 5px; }
+    .tab-content { padding: 20px; min-height: 300px; background: white; border-radius: 0 0 8px 8px; }
+    
+    /* 组件特定样式 */
+    .counter-display { font-size: 72px; font-weight: bold; color: #42b883; text-align: center; padding: 40px; }
+    .counter-controls { text-align: center; }
+    .hint { background: #e8f5e9; color: #2e7d32; padding: 10px; border-radius: 4px; font-size: 13px; margin-top: 20px; }
+    
+    .message-list { list-style: none; }
+    .message-item { padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+    .message-item.unread { background: #fff3e0; }
+    .badge { background: #ff5252; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+    
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; color: #666; font-size: 13px; }
+    .form-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+    
+    /* 加载动画 */
+    .loading-container { text-align: center; padding: 60px; }
+    .loading-spinner { width: 50px; height: 50px; border: 4px solid #e0e0e0; border-top-color: #42b883; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { color: #666; }
+    
+    .error-container { text-align: center; padding: 60px; color: #ff5252; }
+    .error-icon { font-size: 48px; margin-bottom: 10px; }
+    
+    .profile-card { background: #f8f8f8; padding: 20px; border-radius: 8px; }
+    .profile-header { display: flex; align-items: center; margin-bottom: 20px; }
+    .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #42b883, #347474); display: flex; align-items: center; justify-content: center; color: white; font-size: 36px; font-weight: bold; margin-right: 20px; }
+    .profile-name { font-size: 24px; font-weight: bold; color: #333; }
+    .profile-role { color: #666; margin-top: 5px; }
+    .profile-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
+    .stat-box { background: white; padding: 15px; border-radius: 4px; text-align: center; }
+    .stat-value { font-size: 24px; font-weight: bold; color: #42b883; }
+    .stat-label { font-size: 12px; color: #666; margin-top: 5px; }
+    
+    /* 状态提示 */
+    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; margin-left: 10px; }
+    .status-active { background: #e8f5e9; color: #2e7d32; }
+    .status-cached { background: #fff3e0; color: #ef6c00; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>Vue 3 动态组件与异步组件示例</h1>
+      
+      <h2>1. 基础动态组件（无 KeepAlive）</h2>
+      
+      <div class="card">
+        <div style="margin-bottom: 15px;">
+          <button 
+            v-for="view in views" 
+            :key="view.id"
+            :class="['btn', { active: currentView === view.id }]"
+            @click="currentView = view.id"
+          >
+            {{ view.icon }} {{ view.name }}
+          </button>
+        </div>
+        
+        <div style="padding: 20px; background: #f8f8f8; border-radius: 4px;">
+          <component :is="viewComponents[currentView]" />
+        </div>
+        
+        <div class="hint">
+          💡 切换组件时，之前的组件会被销毁，状态丢失
+        </div>
+      </div>
+      
+      <h2>2. 动态组件 + KeepAlive（状态保留）</h2>
+      
+      <div class="card">
+        <div class="tab-nav">
+          <button
+            v-for="tab in tabs"
+            :key="tab.id"
+            :class="['tab-btn', { active: currentTab === tab.id }]"
+            @click="currentTab = tab.id"
+          >
+            <span class="tab-icon">{{ tab.icon }}</span>
+            {{ tab.label }}
+            <span v-if="tab.id === 'messages' && unreadCount > 0" class="badge">{{ unreadCount }}</span>
+          </button>
+        </div>
+        
+        <div class="tab-content">
+          <keep-alive>
+            <component :is="tabComponents[currentTab]" @message-read="onMessageRead" />
+          </keep-alive>
+        </div>
+        
+        <div class="hint">
+          💡 KeepAlive 会缓存组件状态，切换回来后数据保持不变
+        </div>
+      </div>
+      
+      <h2>3. 异步组件（按需加载）</h2>
+      
+      <div class="card">
+        <div style="margin-bottom: 15px;">
+          <button class="btn btn-primary" @click="showAsync = !showAsync">
+            {{ showAsync ? '隐藏' : '显示' }} 重型组件
+          </button>
+          <span style="color: #666; margin-left: 10px; font-size: 13px;">
+            组件加载模拟 2 秒延迟
+          </span>
+        </div>
+        
+        <async-heavy-component v-if="showAsync" />
+        <div v-else style="text-align: center; padding: 40px; color: #999;">
+          点击上方按钮加载异步组件
+        </div>
+      </div>
+      
+      <h2>4. 异步组件 + 加载状态</h2>
+      
+      <div class="card">
+        <div style="margin-bottom: 15px;">
+          <button class="btn btn-primary" @click="loadUserProfile">
+            加载用户详情
+          </button>
+          <button class="btn btn-default" @click="userProfile = null">
+            清除
+          </button>
+        </div>
+        
+        <async-user-profile v-if="userProfile" :user-id="userProfile" />
+        <div v-else style="text-align: center; padding: 40px; color: #999;">
+          点击加载查看带加载动画的异步组件
+        </div>
+      </div>
+      
+      <h2>5. KeepAlive 控制（include/exclude）</h2>
+      
+      <div class="card">
+        <div style="margin-bottom: 15px;">
+          <label style="margin-right: 15px;">
+            <input type="radio" v-model="cacheMode" value="all"> 缓存全部
+          </label>
+          <label style="margin-right: 15px;">
+            <input type="radio" v-model="cacheMode" value="include"> 只缓存 Counter
+          </label>
+          <label>
+            <input type="radio" v-model="cacheMode" value="exclude"> 不缓存 Form
+          </label>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+          <button 
+            v-for="comp in ['Counter', 'Form', 'List']" 
+            :key="comp"
+            :class="['btn', { active: cacheTestView === comp }]"
+            @click="cacheTestView = comp"
+          >
+            {{ comp }}
+          </button>
+        </div>
+        
+        <keep-alive :include="cacheInclude" :exclude="cacheExclude">
+          <component :is="cacheTestComponents[cacheTestView]" />
+        </keep-alive>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed, markRaw, onActivated, onDeactivated, defineAsyncComponent } = Vue;
+
+    // ===== 基础视图组件 =====
+    
+    const ViewA = {
+      template: `
+        <div>
+          <h3>视图 A</h3>
+          <p>计数器: {{ count }}</p>
+          <button @click="count++">增加</button>
+        </div>
+      `,
+      setup() {
+        const count = ref(0);
+        return { count };
+      }
+    };
+
+    const ViewB = {
+      template: `
+        <div>
+          <h3>视图 B</h3>
+          <p>输入的内容: {{ text }}</p>
+          <input v-model="text" placeholder="输入一些内容...">
+        </div>
+      `,
+      setup() {
+        const text = ref('');
+        return { text };
+      }
+    };
+
+    const ViewC = {
+      template: `
+        <div>
+          <h3>视图 C</h3>
+          <ul>
+            <li v-for="item in items" :key="item">{{ item }}</li>
+          </ul>
+          <button @click="items.push('新项目 ' + items.length)">添加</button>
+        </div>
+      `,
+      setup() {
+        const items = ref(['项目 1', '项目 2', '项目 3']);
+        return { items };
+      }
+    };
+
+    // ===== 带 KeepAlive 的标签页组件 =====
+    
+    const TabCounter = {
+      template: `
+        <div>
+          <div class="counter-display">{{ count }}</div>
+          <div class="counter-controls">
+            <button class="btn btn-primary" @click="count++">+1</button>
+            <button class="btn btn-default" @click="count--">-1</button>
+            <button class="btn btn-danger" @click="count = 0">重置</button>
+          </div>
+          <div class="hint">
+            🔄 激活次数: {{ activatedCount }} | 停用次数: {{ deactivatedCount }}
+          </div>
+        </div>
+      `,
+      setup() {
+        const count = ref(0);
+        const activatedCount = ref(0);
+        const deactivatedCount = ref(0);
+
+        onActivated(() => {
+          activatedCount.value++;
+          console.log('TabCounter 被激活');
+        });
+
+        onDeactivated(() => {
+          deactivatedCount.value++;
+          console.log('TabCounter 被停用');
+        });
+
+        return { count, activatedCount, deactivatedCount };
+      }
+    };
+
+    const TabMessages = {
+      emits: ['message-read'],
+      template: `
+        <div>
+          <h3>消息列表 <span class="badge" v-if="unreadCount > 0">{{ unreadCount }} 未读</span></h3>
+          <ul class="message-list">
+            <li 
+              v-for="msg in messages" 
+              :key="msg.id"
+              :class="['message-item', { unread: !msg.read }]"
+            >
+              <span>{{ msg.title }}</span>
+              <button v-if="!msg.read" class="btn btn-primary" style="padding: 4px 12px; font-size: 12px;" @click="markRead(msg)">
+                标记已读
+              </button>
+              <span v-else style="color: #999; font-size: 12px;">已读</span>
+            </li>
+          </ul>
+          <div class="hint">
+            📨 切换到其他标签再回来，已读状态会保留
+          </div>
+        </div>
+      `,
+      setup(props, { emit }) {
+        const messages = ref([
+          { id: 1, title: '系统通知：欢迎新用户', read: false },
+          { id: 2, title: '张三 回复了你的评论', read: false },
+          { id: 3, title: '李四 点赞了你的文章', read: false },
+          { id: 4, title: '王五 关注了你', read: true }
+        ]);
+
+        const unreadCount = computed(() => messages.value.filter(m => !m.read).length);
+
+        const markRead = (msg) => {
+          msg.read = true;
+          emit('message-read');
+        };
+
+        onActivated(() => {
+          console.log('TabMessages 被激活');
+        });
+
+        return { messages, unreadCount, markRead };
+      }
+    };
+
+    const TabSettings = {
+      template: `
+        <div>
+          <h3>用户设置</h3>
+          <div class="form-group">
+            <label>用户名</label>
+            <input v-model="form.username" placeholder="输入用户名">
+          </div>
+          <div class="form-group">
+            <label>邮箱</label>
+            <input v-model="form.email" placeholder="输入邮箱">
+          </div>
+          <div class="form-group">
+            <label>通知设置</label>
+            <label style="display: flex; align-items: center; gap: 8px; font-weight: normal;">
+              <input type="checkbox" v-model="form.notifications"> 接收邮件通知
+            </label>
+          </div>
+          <div class="hint">
+            ⚙️ 表单数据会被 KeepAlive 保留
+          </div>
+        </div>
+      `,
+      setup() {
+        const form = ref({
+          username: '',
+          email: '',
+          notifications: true
+        });
+        return { form };
+      }
+    };
+
+    // ===== 异步组件 =====
+    
+    // 加载动画组件
+    const LoadingComponent = {
+      template: `
+        <div class="loading-container">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">正在加载组件...</div>
+        </div>
+      `
+    };
+
+    // 错误组件
+    const ErrorComponent = {
+      template: `
+        <div class="error-container">
+          <div class="error-icon">⚠️</div>
+          <div>组件加载失败</div>
+        </div>
+      `
+    };
+
+    // 重型组件（模拟）
+    const HeavyContent = {
+      template: `
+        <div class="profile-card">
+          <div class="profile-header">
+            <div class="profile-avatar">👤</div>
+            <div>
+              <div class="profile-name">用户详情</div>
+              <div class="profile-role">异步加载的组件</div>
+            </div>
+          </div>
+          <p>这是一个模拟的"重型"组件，加载时显示加载动画。</p>
+          <div class="profile-stats">
+            <div class="stat-box">
+              <div class="stat-value">1,234</div>
+              <div class="stat-label">文章</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">567</div>
+              <div class="stat-label">粉丝</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">89</div>
+              <div class="stat-label">关注</div>
+            </div>
+          </div>
+        </div>
+      `
+    };
+
+    // 创建异步组件
+    const AsyncHeavyComponent = defineAsyncComponent({
+      loader: () => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve({ default: HeavyContent });
+          }, 2000);
+        });
+      },
+      loadingComponent: LoadingComponent,
+      errorComponent: ErrorComponent,
+      delay: 200,
+      timeout: 5000
+    });
+
+    // 异步用户资料组件
+    const AsyncUserProfileContent = {
+      props: ['userId'],
+      template: `
+        <div class="profile-card">
+          <div class="profile-header">
+            <div class="profile-avatar">{{ userData.name[0] }}</div>
+            <div>
+              <div class="profile-name">{{ userData.name }}</div>
+              <div class="profile-role">{{ userData.role }}</div>
+            </div>
+          </div>
+          <p>{{ userData.bio }}</p>
+          <div class="profile-stats">
+            <div class="stat-box">
+              <div class="stat-value">{{ userData.posts }}</div>
+              <div class="stat-label">文章</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">{{ userData.followers }}</div>
+              <div class="stat-label">粉丝</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">{{ userData.following }}</div>
+              <div class="stat-label">关注</div>
+            </div>
+          </div>
+        </div>
+      `,
+      setup(props) {
+        const userData = ref({});
+        
+        // 模拟数据加载
+        const users = {
+          1: { name: '张三', role: '高级工程师', bio: '热爱编程，专注于前端开发。', posts: 156, followers: 2340, following: 89 },
+          2: { name: '李四', role: '产品经理', bio: '致力于创造优秀的产品体验。', posts: 45, followers: 890, following: 123 },
+          3: { name: '王五', role: '设计师', bio: '追求极致的视觉设计。', posts: 78, followers: 1560, following: 67 }
+        };
+        
+        userData.value = users[props.userId] || users[1];
+        
+        return { userData };
+      }
+    };
+
+    const AsyncUserProfile = defineAsyncComponent({
+      loader: () => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve({ default: AsyncUserProfileContent });
+          }, 1500);
+        });
+      },
+      loadingComponent: LoadingComponent,
+      errorComponent: ErrorComponent,
+      delay: 200,
+      timeout: 5000
+    });
+
+    // ===== KeepAlive 测试组件 =====
+    
+    const CacheTestCounter = {
+      name: 'Counter',
+      template: `
+        <div>
+          <h4>Counter 组件</h4>
+          <p>计数: {{ count }}</p>
+          <button class="btn btn-primary" @click="count++">增加</button>
+          <span class="status-badge" :class="status">{{ statusText }}</span>
+        </div>
+      `,
+      setup() {
+        const count = ref(0);
+        const status = ref('status-active');
+        const statusText = ref('活跃中');
+        
+        onActivated(() => {
+          status.value = 'status-active';
+          statusText.value = '活跃中';
+        });
+        
+        onDeactivated(() => {
+          status.value = 'status-cached';
+          statusText.value = '已缓存';
+        });
+        
+        return { count, status, statusText };
+      }
+    };
+
+    const CacheTestForm = {
+      name: 'Form',
+      template: `
+        <div>
+          <h4>Form 组件</h4>
+          <input v-model="text" placeholder="输入内容..." style="padding: 8px; width: 200px;">
+          <span class="status-badge" :class="status">{{ statusText }}</span>
+        </div>
+      `,
+      setup() {
+        const text = ref('');
+        const status = ref('status-active');
+        const statusText = ref('活跃中');
+        
+        onActivated(() => {
+          status.value = 'status-active';
+          statusText.value = '活跃中';
+        });
+        
+        onDeactivated(() => {
+          status.value = 'status-cached';
+          statusText.value = '已缓存';
+        });
+        
+        return { text, status, statusText };
+      }
+    };
+
+    const CacheTestList = {
+      name: 'List',
+      template: `
+        <div>
+          <h4>List 组件</h4>
+          <ul>
+            <li v-for="item in items" :key="item">{{ item }}</li>
+          </ul>
+          <button class="btn btn-primary" @click="items.push('新项 ' + items.length)">添加</button>
+          <span class="status-badge" :class="status">{{ statusText }}</span>
+        </div>
+      `,
+      setup() {
+        const items = ref(['A', 'B', 'C']);
+        const status = ref('status-active');
+        const statusText = ref('活跃中');
+        
+        onActivated(() => {
+          status.value = 'status-active';
+          statusText.value = '活跃中';
+        });
+        
+        onDeactivated(() => {
+          status.value = 'status-cached';
+          statusText.value = '已缓存';
+        });
+        
+        return { items, status, statusText };
+      }
+    };
+
+    // 创建应用
+    createApp({
+      components: {
+        AsyncHeavyComponent,
+        AsyncUserProfile
+      },
+      setup() {
+        // 基础动态组件
+        const currentView = ref('a');
+        const views = [
+          { id: 'a', name: '视图 A', icon: '📊' },
+          { id: 'b', name: '视图 B', icon: '📝' },
+          { id: 'c', name: '视图 C', icon: '📋' }
+        ];
+        const viewComponents = {
+          a: ViewA,
+          b: ViewB,
+          c: ViewC
+        };
+
+        // 标签页组件
+        const currentTab = ref('counter');
+        const tabs = [
+          { id: 'counter', label: '计数器', icon: '🔢' },
+          { id: 'messages', label: '消息', icon: '✉️' },
+          { id: 'settings', label: '设置', icon: '⚙️' }
+        ];
+        const tabComponents = {
+          counter: TabCounter,
+          messages: TabMessages,
+          settings: TabSettings
+        };
+        const unreadCount = ref(3);
+        const onMessageRead = () => {
+          if (unreadCount.value > 0) unreadCount.value--;
+        };
+
+        // 异步组件
+        const showAsync = ref(false);
+        const userProfile = ref(null);
+        const loadUserProfile = () => {
+          userProfile.value = Math.floor(Math.random() * 3) + 1;
+        };
+
+        // KeepAlive 控制
+        const cacheMode = ref('all');
+        const cacheTestView = ref('Counter');
+        const cacheTestComponents = {
+          Counter: CacheTestCounter,
+          Form: CacheTestForm,
+          List: CacheTestList
+        };
+        
+        const cacheInclude = computed(() => {
+          if (cacheMode.value === 'include') return ['Counter'];
+          return undefined;
+        });
+        
+        const cacheExclude = computed(() => {
+          if (cacheMode.value === 'exclude') return ['Form'];
+          return undefined;
+        });
+
+        return {
+          currentView,
+          views,
+          viewComponents,
+          currentTab,
+          tabs,
+          tabComponents,
+          unreadCount,
+          onMessageRead,
+          showAsync,
+          userProfile,
+          loadUserProfile,
+          cacheMode,
+          cacheTestView,
+          cacheTestComponents,
+          cacheInclude,
+          cacheExclude
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

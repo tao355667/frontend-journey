@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>待办事项列表</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>待办事项列表</h1>
+        
+        <!-- 输入区域 -->
+        <div class="input-section">
+            <input type="text" id="todoInput" placeholder="添加新待办事项...">
+            <button id="addBtn">添加</button>
+        </div>
+        
+        <!-- 过滤按钮 -->
+        <div class="filter-section">
+            <button class="filter-btn active" data-filter="all">全部</button>
+            <button class="filter-btn" data-filter="active">进行中</button>
+            <button class="filter-btn" data-filter="completed">已完成</button>
+        </div>
+        
+        <!-- 待办事项列表 -->
+        <ul id="todoList"></ul>
+        
+        <!-- 统计信息 -->
+        <div class="stats">
+            <span id="activeCount">0</span> 个进行中的项目
+        </div>
+    </div>
+    
+    <script src="main.js"></script>
+</body>
+</html>

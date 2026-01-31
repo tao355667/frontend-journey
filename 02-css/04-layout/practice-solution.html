@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS 布局 - 基础练习答案</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f7fb;
+            color: #2c3e50;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            gap: 24px;
+        }
+
+        .card {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        /* 题目1：Flex 导航栏 */
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav__list {
+            display: flex;
+            list-style: none;
+            gap: 16px;
+        }
+
+        /* 题目2：Flex 居中 */
+        .center-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            border: 2px dashed #3498db;
+            border-radius: 10px;
+            background-color: #ecf5ff;
+        }
+
+        /* 题目3：Grid 网格 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .grid__item {
+            background-color: #3498db;
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <main class="container" aria-label="CSS 布局基础练习">
+        <header>
+            <h1>CSS 布局基础练习答案</h1>
+        </header>
+
+        <section class="card" aria-label="Flex 导航栏">
+            <h2>Flex 导航栏</h2>
+            <div class="nav">
+                <strong>MySite</strong>
+                <ul class="nav__list" aria-label="示例导航">
+                    <li>首页</li>
+                    <li>文章</li>
+                    <li>关于</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="card" aria-label="Flex 居中布局">
+            <h2>Flex 居中布局</h2>
+            <div class="center-box">
+                <p>我在容器中水平+垂直居中</p>
+            </div>
+        </section>
+
+        <section class="card" aria-label="Grid 网格">
+            <h2>Grid 基本网格</h2>
+            <div class="grid">
+                <div class="grid__item">网格 1</div>
+                <div class="grid__item">网格 2</div>
+                <div class="grid__item">网格 3</div>
+                <div class="grid__item">网格 4</div>
+                <div class="grid__item">网格 5</div>
+                <div class="grid__item">网格 6</div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

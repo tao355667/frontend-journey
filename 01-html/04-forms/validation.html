@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表单验证示例</title>
+</head>
+<body>
+    <h1>表单验证示例</h1>
+    <form action="#" method="post">
+        <p>
+            <label for="email">邮箱（必填，格式校验）：</label>
+            <input id="email" name="email" type="email" required placeholder="name@example.com">
+        </p>
+        <p>
+            <label for="age">年龄（18-65）：</label>
+            <input id="age" name="age" type="number" min="18" max="65" required>
+        </p>
+        <p>
+            <label for="password">密码（至少 6 位，包含数字与字母）：</label>
+            <input id="password" name="password" type="password" required pattern="(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}" placeholder="例如: abc123">
+        </p>
+        <p>
+            <label for="url">个人主页（可选，URL 校验）：</label>
+            <input id="url" name="url" type="url" placeholder="https://example.com">
+        </p>
+        <p>
+            <label for="date">日期（限制范围）：</label>
+            <input id="date" name="date" type="date" min="2026-01-01" max="2026-12-31">
+        </p>
+        <button type="submit">提交</button>
+    </form>
+</body>
+</html>

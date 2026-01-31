@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>表单输入绑定 - TypeScript 版本</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    
+    .container { max-width: 800px; margin: 0 auto; }
+    
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 36px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .demo-card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    
+    .demo-title {
+      color: #667eea;
+      font-size: 24px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 3px solid #667eea;
+    }
+    
+    .type-tag {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+      margin-left: 10px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .preview-box {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    
+    .preview-box h4 { color: #667eea; margin-bottom: 15px; }
+    
+    .preview-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    .preview-item:last-child { border-bottom: none; }
+    
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      background: #42b883;
+      color: white;
+    }
+    
+    button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(66, 184, 131, 0.4); }
+    
+    .code-block {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #d63384;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>📝 表单输入绑定演示（TypeScript）</h1>
+      
+      <!-- Demo 1: 类型安全的表单 -->
+      <div class="demo-card">
+        <h2 class="demo-title">
+          1. 类型安全的表单
+          <span class="type-tag">interface UserForm</span>
+        </h2>
+        
+        <div class="form-group">
+          <label>用户名 (string)</label>
+          <input v-model.trim="form.username" placeholder="输入用户名">
+        </div>
+        
+        <div class="form-group">
+          <label>年龄 (number | null)</label>
+          <input v-model.number="form.age" type="number" placeholder="自动转为数字">
+        </div>
+        
+        <div class="form-group">
+          <label>邮箱 (string)</label>
+          <input v-model.trim="form.email" type="email" placeholder="your@email.com">
+        </div>
+        
+        <div class="preview-box">
+          <h4>类型检查后的数据：</h4>
+          <div class="preview-item">
+            <span>用户名:</span>
+            <span style="color: #667eea;">"{{ form.username }}"</span>
+          </div>
+          <div class="preview-item">
+            <span>年龄:</span>
+            <span style="color: #667eea;">{{ form.age }} ({{ form.age === null ? 'null' : typeof form.age }})</span>
+          </div>
+          <div class="preview-item">
+            <span>邮箱:</span>
+            <span style="color: #667eea;">"{{ form.email }}"</span>
+          </div>
+        </div>
+        
+        <div class="code-block">
+interface UserForm {
+  username: string
+  age: number | null
+  email: string
+  hobbies: string[]
+  gender: 'male' | 'female' | 'other'
+  agreeTerms: boolean
+}
+        </div>
+      </div>
+      
+      <!-- Demo 2: 枚举类型选择 -->
+      <div class="demo-card">
+        <h2 class="demo-title">
+          2. 枚举类型选择
+          <span class="type-tag">type Gender = 'male' | 'female' | 'other'</span>
+        </h2>
+        
+        <div class="form-group">
+          <label>性别（限定为特定值）</label>
+          <select v-model="form.gender">
+            <option value="male">男</option>
+            <option value="female">女</option>
+            <option value="other">其他</option>
+          </select>
+          <p style="margin-top: 10px; color: #667eea;">已选: {{ form.gender }}</p>
+        </div>
+        
+        <div class="form-group">
+          <label>城市（使用枚举数组）</label>
+          <select v-model="form.city">
+            <option value="">请选择</option>
+            <option v-for="city in cityOptions" :key="city" :value="city">{{ city }}</option>
+          </select>
+        </div>
+        
+        <div class="code-block">
+const cityOptions: string[] = ['北京', '上海', '广州', '深圳']
+const genderOptions: Gender[] = ['male', 'female', 'other']
+        </div>
+      </div>
+      
+      <!-- Demo 3: 数组类型 -->
+      <div class="demo-card">
+        <h2 class="demo-title">
+          3. 数组类型表单
+          <span class="type-tag">hobbies: string[]</span>
+        </h2>
+        
+        <div class="form-group">
+          <label>兴趣爱好</label>
+          <div class="checkbox-group">
+            <div class="checkbox-item" v-for="hobby in hobbyOptions" :key="hobby">
+              <input type="checkbox" :value="hobby" v-model="form.hobbies" :id="hobby">
+              <label :for="hobby">{{ hobby }}</label>
+            </div>
+          </div>
+          <p style="margin-top: 10px; color: #667eea;">已选 ({{ form.hobbies.length }} 项): {{ form.hobbies.join(', ') }}</p>
+        </div>
+        
+        <div class="form-group">
+          <label>技能 (多选)</label>
+          <select v-model="form.skills" multiple style="height: 120px;">
+            <option v-for="skill in skillOptions" :key="skill" :value="skill">{{ skill }}</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Demo 4: 完整类型表单 -->
+      <div class="demo-card">
+        <h2 class="demo-title">4. 完整类型表单提交</h2>
+        
+        <form @submit.prevent="handleSubmit">
+          <div class="form-group">
+            <label>邮箱 *</label>
+            <input v-model.trim="form.email" type="email" required>
+          </div>
+          
+          <div class="form-group">
+            <label>密码 *</label>
+            <input v-model="form.password" type="password" required minlength="6">
+          </div>
+          
+          <div style="display: flex; gap: 10px;">
+            <button type="submit">提交</button>
+            <button type="button" style="background: #6c757d;" @click="resetForm">重置</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, reactive } = Vue
+
+    createApp({
+      setup() {
+        // 类型定义（在 HTML 中用 JSDoc 模拟）
+        
+        /**
+         * @typedef {Object} UserForm
+         * @property {string} username
+         * @property {number | null} age
+         * @property {string} email
+         * @property {string} password
+         * @property {string} bio
+         * @property {boolean} agreeTerms
+         * @property {string[]} hobbies
+         * @property {'male' | 'female' | 'other'} gender
+         * @property {string} city
+         * @property {string[]} skills
+         */
+        
+        /** @type {UserForm} */
+        const form = reactive({
+          username: '',
+          age: null,
+          email: '',
+          password: '',
+          bio: '',
+          agreeTerms: false,
+          hobbies: [],
+          gender: 'male',
+          city: '',
+          skills: []
+        })
+        
+        /** @type {string[]} */
+        const hobbyOptions = ['读书', '运动', '音乐', '旅行', '游戏', '摄影']
+        
+        /** @type {string[]} */
+        const skillOptions = ['JavaScript', 'Python', 'Java', 'Vue', 'React', 'Node.js']
+        
+        /** @type {string[]} */
+        const cityOptions = ['北京', '上海', '广州', '深圳', '杭州', '成都']
+        
+        const handleSubmit = () => {
+          // 类型安全的表单数据
+          const formData = {
+            username: form.username,
+            age: form.age,
+            email: form.email,
+            hobbies: [...form.hobbies], // 确保是数组
+            gender: form.gender,
+            city: form.city
+          }
+          
+          alert('提交的数据:\n' + JSON.stringify(formData, null, 2))
+        }
+        
+        const resetForm = () => {
+          form.username = ''
+          form.age = null
+          form.email = ''
+          form.password = ''
+          form.bio = ''
+          form.agreeTerms = false
+          form.hobbies = []
+          form.gender = 'male'
+          form.city = ''
+          form.skills = []
+        }
+        
+        return {
+          form,
+          hobbyOptions,
+          skillOptions,
+          cityOptions,
+          handleSubmit,
+          resetForm
+        }
+      }
+    }).mount('#app')
+  </script>
+</body>
+</html>

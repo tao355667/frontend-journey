@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基础选择器演示</title>
+    <style>
+        /* 标签选择器 */
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        
+        p {
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+        
+        /* 类选择器 */
+        .highlight {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+        
+        .text-blue {
+            color: #3498db;
+        }
+        
+        .text-red {
+            color: #e74c3c;
+        }
+        
+        /* ID选择器 */
+        #main-title {
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        #special-box {
+            background: linear-gradient(45deg, #3498db, #9b59b6);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        /* 通用选择器 */
+        * {
+            box-sizing: border-box;
+        }
+        
+        /* 组合选择器 */
+        .highlight.text-blue {
+            border-color: #3498db;
+            background-color: #e3f2fd;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 id="main-title">基础选择器演示</h1>
+    </header>
+    
+    <main class="container" aria-label="基础选择器演示内容">
+        <p>这是普通段落，使用标签选择器设置样式。</p>
+        
+        <section class="highlight" aria-label="类选择器示例">
+            <p class="text-blue">这个段落使用了类选择器 .highlight 和 .text-blue</p>
+        </section>
+        
+        <section class="highlight text-red" aria-label="组合类选择器示例">
+            <p>这个段落同时使用了 .highlight 和 .text-red 类</p>
+        </section>
+        
+        <section id="special-box" aria-label="ID 选择器示例">
+            <h2>ID选择器示例</h2>
+            <p>这个盒子使用ID选择器 #special-box 设置样式</p>
+        </section>
+        
+        <section class="demo-section" aria-label="选择器优先级">
+            <h3>选择器优先级</h3>
+            <p>ID选择器 > 类选择器 > 标签选择器</p>
+            <ul>
+                <li>ID选择器优先级最高（100）</li>
+                <li>类选择器优先级中等（10）</li>
+                <li>标签选择器优先级最低（1）</li>
+            </ul>
+        </section>
+    </main>
+</body>
+</html>

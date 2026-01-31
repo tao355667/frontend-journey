@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第16章：自定义指令 - JavaScript示例</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #f5f5f5; }
+    h1 { text-align: center; color: #333; margin-bottom: 30px; }
+    h2 { color: #42b883; margin: 30px 0 15px; border-bottom: 2px solid #42b883; padding-bottom: 10px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    .card { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin: 5px; transition: all 0.2s; }
+    .btn-primary { background: #42b883; color: white; }
+    .btn-default { background: #e0e0e0; color: #333; }
+    .btn:hover { opacity: 0.8; }
+    
+    input, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; width: 100%; max-width: 300px; }
+    
+    /* Tooltip 样式 */
+    .tooltip-container { position: relative; display: inline-block; }
+    .tooltip { position: absolute; background: #333; color: white; padding: 8px 12px; border-radius: 4px; font-size: 13px; white-space: nowrap; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s; }
+    .tooltip.show { opacity: 1; visibility: visible; }
+    .tooltip::before { content: ''; position: absolute; border: 6px solid transparent; }
+    .tooltip.top { bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 8px; }
+    .tooltip.top::before { top: 100%; left: 50%; transform: translateX(-50%); border-top-color: #333; }
+    .tooltip.bottom { top: 100%; left: 50%; transform: translateX(-50%); margin-top: 8px; }
+    .tooltip.bottom::before { bottom: 100%; left: 50%; transform: translateX(-50%); border-bottom-color: #333; }
+    .tooltip.left { right: 100%; top: 50%; transform: translateY(-50%); margin-right: 8px; }
+    .tooltip.left::before { left: 100%; top: 50%; transform: translateY(-50%); border-left-color: #333; }
+    .tooltip.right { left: 100%; top: 50%; transform: translateY(-50%); margin-left: 8px; }
+    .tooltip.right::before { right: 100%; top: 50%; transform: translateY(-50%); border-right-color: #333; }
+    
+    /* 模态框样式 */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 100; }
+    .modal-content { background: white; padding: 30px; border-radius: 8px; min-width: 300px; text-align: center; }
+    
+    /* Loading 样式 */
+    .loading-container { position: relative; }
+    .loading-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
+    .loading-spinner { width: 40px; height: 40px; border: 3px solid #e0e0e0; border-top-color: #42b883; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* 水印样式 */
+    .watermark-box { width: 100%; height: 200px; border: 2px dashed #ddd; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+    
+    /* 权限控制样式 */
+    .permission-denied { padding: 20px; background: #ffebee; color: #c62828; border-radius: 4px; text-align: center; }
+    
+    /* 尺寸监听 */
+    .resize-box { background: #f8f8f8; padding: 20px; border-radius: 4px; transition: all 0.3s; }
+    .resize-info { font-family: monospace; color: #42b883; margin-top: 10px; }
+    
+    /* 颜色演示 */
+    .color-box { padding: 20px; border-radius: 4px; margin: 10px 0; transition: color 0.3s; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>Vue 3 自定义指令示例</h1>
+      
+      <h2>1. v-focus - 自动聚焦</h2>
+      
+      <div class="card">
+        <input v-focus placeholder="页面加载后自动聚焦" />
+        <p style="color: #666; font-size: 13px; margin-top: 10px;">此输入框使用了 v-focus 指令，页面加载后自动获得焦点</p>
+      </div>
+      
+      <h2>2. v-color - 动态颜色</h2>
+      
+      <div class="card">
+        <div class="color-box" v-color="textColor">
+          这段文字的颜色是动态的
+        </div>
+        <input v-model="textColor" placeholder="输入颜色值（如 red, #42b883, rgb(0,0,255)）" style="margin-top: 10px;" />
+        <div style="margin-top: 10px;">
+          <button class="btn btn-default" @click="textColor = '#42b883'">绿色</button>
+          <button class="btn btn-default" @click="textColor = '#ff5252'">红色</button>
+          <button class="btn btn-default" @click="textColor = '#2196f3'">蓝色</button>
+          <button class="btn btn-default" @click="textColor = '#ff9800'">橙色</button>
+        </div>
+      </div>
+      
+      <h2>3. v-highlight - 高亮（局部指令）</h2>
+      
+      <div class="card">
+        <div v-highlight="highlightColor" style="padding: 15px; border-radius: 4px;">
+          这段文字使用了局部注册的 v-highlight 指令，点击按钮可以切换背景色
+        </div>
+        <div style="margin-top: 10px;">
+          <button class="btn btn-default" @click="highlightColor = '#fff9c4'">浅黄</button>
+          <button class="btn btn-default" @click="highlightColor = '#c8e6c9'">浅绿</button>
+          <button class="btn btn-default" @click="highlightColor = '#bbdefb'">浅蓝</button>
+        </div>
+      </div>
+      
+      <h2>4. v-tooltip - 提示框</h2>
+      
+      <div class="card">
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+          <button v-tooltip="'点击保存当前内容'" class="btn btn-primary">保存</button>
+          <button v-tooltip:top="'上侧提示'" class="btn btn-default">上侧</button>
+          <button v-tooltip:bottom="'下侧提示'" class="btn btn-default">下侧</button>
+          <button v-tooltip:left="'左侧提示'" class="btn btn-default">左侧</button>
+          <button v-tooltip:right="'右侧提示'" class="btn btn-default">右侧</button>
+        </div>
+        <p style="color: #666; font-size: 13px; margin-top: 15px;">鼠标悬停在按钮上查看不同位置的提示框</p>
+      </div>
+      
+      <h2>5. v-click-outside - 点击外部关闭</h2>
+      
+      <div class="card">
+        <button class="btn btn-primary" @click="showModal = true">打开模态框</button>
+        
+        <div v-if="showModal" class="modal-overlay" v-click-outside="closeModal">
+          <div class="modal-content">
+            <h3>模态框</h3>
+            <p>点击此区域外部即可关闭</p>
+            <button class="btn btn-default" @click="showModal = false">关闭</button>
+          </div>
+        </div>
+      </div>
+      
+      <h2>6. v-copy - 复制到剪贴板</h2>
+      
+      <div class="card">
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <input v-model="copyText" placeholder="输入要复制的文本" />
+          <button v-copy="copyText" class="btn btn-primary">复制文本</button>
+          <span v-copy style="color: #42b883; cursor: pointer; text-decoration: underline;">
+            点击复制这段内容
+          </span>
+        </div>
+        <p style="color: #666; font-size: 13px; margin-top: 10px;">点击复制后，可以粘贴到其他地方测试</p>
+      </div>
+      
+      <h2>7. v-debounce - 防抖</h2>
+      
+      <div class="card">
+        <input v-debounce:500="handleSearch" v-model="searchQuery" placeholder="输入搜索关键词（500ms 防抖）" />
+        <p style="margin-top: 10px;">
+          输入值: {{ searchQuery }}<br>
+          <span style="color: #666; font-size: 13px;">搜索次数: {{ searchCount }}（只有停止输入 500ms 后才会增加）</span>
+        </p>
+      </div>
+      
+      <h2>8. v-loading - 加载状态</h2>
+      
+      <div class="card">
+        <div class="loading-container" v-loading="isLoading" style="min-height: 150px; border: 1px solid #ddd; border-radius: 4px; padding: 20px;">
+          <h4>内容区域</h4>
+          <p>这是一个会被加载遮罩覆盖的区域</p>
+          <div v-if="!isLoading">
+            <p style="color: #42b883;">✓ 数据加载完成！</p>
+            <ul style="margin-top: 10px; padding-left: 20px;">
+              <li>数据项 1</li>
+              <li>数据项 2</li>
+              <li>数据项 3</li>
+            </ul>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="margin-top: 10px;" @click="toggleLoading">
+          {{ isLoading ? '停止加载' : '开始加载' }}
+        </button>
+      </div>
+      
+      <h2>9. v-watermark - 水印</h2>
+      
+      <div class="card">
+        <input v-model="watermarkText" placeholder="输入水印文字" style="margin-bottom: 15px;" />
+        <div v-watermark="watermarkText || '机密文档'" class="watermark-box">
+          <p>重要内容区域</p>
+        </div>
+      </div>
+      
+      <h2>10. v-resize - 尺寸监听</h2>
+      
+      <div class="card">
+        <div v-resize="onResize" class="resize-box">
+          <p>拖动浏览器窗口改变大小</p>
+          <div class="resize-info">{{ resizeInfo }}</div>
+        </div>
+      </div>
+      
+      <h2>11. v-permission - 权限控制</h2>
+      
+      <div class="card">
+        <div style="margin-bottom: 15px;">
+          <label style="margin-right: 15px;">
+            <input type="radio" v-model="currentRole" value="admin"> 管理员
+          </label>
+          <label style="margin-right: 15px;">
+            <input type="radio" v-model="currentRole" value="editor"> 编辑
+          </label>
+          <label>
+            <input type="radio" v-model="currentRole" value="viewer"> 访客
+          </label>
+        </div>
+        <p style="margin-bottom: 15px; color: #666;">当前角色: <strong>{{ currentRole }}</strong></p>
+        
+        <div v-permission="'admin'" class="btn btn-primary" style="margin: 5px;">
+          仅管理员可见 - 删除用户
+        </div>
+        <div v-permission="'editor'" class="btn btn-default" style="margin: 5px;">
+          编辑以上可见 - 编辑文章
+        </div>
+        <div v-permission="'viewer'" class="btn btn-default" style="margin: 5px;">
+          所有人可见 - 查看内容
+        </div>
+        
+        <p style="margin-top: 15px; color: #666; font-size: 13px;">
+          切换角色查看权限控制效果（无权限的元素会被隐藏）
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref } = Vue;
+
+    createApp({
+      setup() {
+        // 局部指令
+        const vHighlight = {
+          mounted(el, binding) {
+            el.style.backgroundColor = binding.value || 'yellow';
+            el.style.padding = '10px';
+            el.style.borderRadius = '4px';
+          },
+          updated(el, binding) {
+            el.style.backgroundColor = binding.value || 'yellow';
+          }
+        };
+
+        // 数据
+        const textColor = ref('#42b883');
+        const highlightColor = ref('#fff9c4');
+        const showModal = ref(false);
+        const copyText = ref('要复制的文本');
+        const searchQuery = ref('');
+        const searchCount = ref(0);
+        const isLoading = ref(false);
+        const watermarkText = ref('机密文档');
+        const resizeInfo = ref('宽度: 0px, 高度: 0px');
+        const currentRole = ref('viewer');
+
+        const closeModal = () => {
+          showModal.value = false;
+        };
+
+        const handleSearch = () => {
+          searchCount.value++;
+          console.log('搜索:', searchQuery.value);
+        };
+
+        const toggleLoading = () => {
+          if (isLoading.value) {
+            isLoading.value = false;
+          } else {
+            isLoading.value = true;
+            setTimeout(() => {
+              isLoading.value = false;
+            }, 3000);
+          }
+        };
+
+        const onResize = (size) => {
+          resizeInfo.value = `宽度: ${size.width}px, 高度: ${size.height}px`;
+        };
+
+        return {
+          vHighlight,
+          textColor,
+          highlightColor,
+          showModal,
+          closeModal,
+          copyText,
+          searchQuery,
+          searchCount,
+          handleSearch,
+          isLoading,
+          toggleLoading,
+          watermarkText,
+          resizeInfo,
+          onResize,
+          currentRole
+        };
+      }
+    })
+    // 全局注册指令
+    .directive('focus', {
+      mounted(el) {
+        el.focus();
+      }
+    })
+    .directive('color', {
+      mounted(el, binding) {
+        el.style.color = binding.value;
+      },
+      updated(el, binding) {
+        el.style.color = binding.value;
+      }
+    })
+    .directive('tooltip', {
+      mounted(el, binding) {
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip';
+        tooltip.textContent = binding.value;
+        
+        // 位置参数
+        const position = binding.arg || 'top';
+        tooltip.classList.add(position);
+        
+        el.style.position = 'relative';
+        el.appendChild(tooltip);
+        
+        const show = () => tooltip.classList.add('show');
+        const hide = () => tooltip.classList.remove('show');
+        
+        el.addEventListener('mouseenter', show);
+        el.addEventListener('mouseleave', hide);
+        
+        el._tooltip = tooltip;
+        el._showTooltip = show;
+        el._hideTooltip = hide;
+      },
+      updated(el, binding) {
+        if (el._tooltip) {
+          el._tooltip.textContent = binding.value;
+        }
+      },
+      unmounted(el) {
+        el.removeEventListener('mouseenter', el._showTooltip);
+        el.removeEventListener('mouseleave', el._hideTooltip);
+        el._tooltip?.remove();
+      }
+    })
+    .directive('click-outside', {
+      mounted(el, binding) {
+        el._clickOutside = (event) => {
+          if (!(el === event.target || el.contains(event.target))) {
+            binding.value();
+          }
+        };
+        document.addEventListener('click', el._clickOutside);
+      },
+      unmounted(el) {
+        document.removeEventListener('click', el._clickOutside);
+      }
+    })
+    .directive('copy', {
+      mounted(el, binding) {
+        el._copyHandler = async () => {
+          const text = binding.value || el.textContent;
+          try {
+            await navigator.clipboard.writeText(text);
+            // 显示复制成功提示
+            const originalBg = el.style.backgroundColor;
+            el.style.backgroundColor = '#e8f5e9';
+            setTimeout(() => {
+              el.style.backgroundColor = originalBg;
+            }, 300);
+            console.log('已复制:', text);
+          } catch (err) {
+            console.error('复制失败:', err);
+          }
+        };
+        el.addEventListener('click', el._copyHandler);
+        el.style.cursor = 'pointer';
+      },
+      unmounted(el) {
+        el.removeEventListener('click', el._copyHandler);
+      }
+    })
+    .directive('debounce', {
+      mounted(el, binding) {
+        let timer;
+        const delay = parseInt(binding.arg) || 300;
+        
+        el._debounceHandler = () => {
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            binding.value();
+          }, delay);
+        };
+        
+        el.addEventListener('input', el._debounceHandler);
+      },
+      unmounted(el) {
+        el.removeEventListener('input', el._debounceHandler);
+      }
+    })
+    .directive('loading', {
+      mounted(el, binding) {
+        const createLoading = () => {
+          const overlay = document.createElement('div');
+          overlay.className = 'loading-overlay';
+          overlay.innerHTML = `
+            <div class="loading-spinner"></div>
+            <div style="color: #666; margin-top: 10px;">加载中...</div>
+          `;
+          return overlay;
+        };
+        
+        el._loadingOverlay = createLoading();
+        
+        if (binding.value) {
+          el.appendChild(el._loadingOverlay);
+        }
+      },
+      updated(el, binding) {
+        if (binding.value && !el.contains(el._loadingOverlay)) {
+          el.appendChild(el._loadingOverlay);
+        } else if (!binding.value && el.contains(el._loadingOverlay)) {
+          el.removeChild(el._loadingOverlay);
+        }
+      },
+      unmounted(el) {
+        if (el._loadingOverlay && el.contains(el._loadingOverlay)) {
+          el.removeChild(el._loadingOverlay);
+        }
+      }
+    })
+    .directive('watermark', {
+      mounted(el, binding) {
+        const text = binding.value || '水印';
+        const canvas = document.createElement('canvas');
+        canvas.width = 200;
+        canvas.height = 200;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.rotate(-20 * Math.PI / 180);
+        ctx.font = '14px Arial';
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+        ctx.fillText(text, 20, 100);
+        
+        el.style.backgroundImage = `url(${canvas.toDataURL()})`;
+        el._watermarkText = text;
+      },
+      updated(el, binding) {
+        if (binding.value !== el._watermarkText) {
+          // 重新生成水印
+          const text = binding.value || '水印';
+          const canvas = document.createElement('canvas');
+          canvas.width = 200;
+          canvas.height = 200;
+          
+          const ctx = canvas.getContext('2d');
+          ctx.rotate(-20 * Math.PI / 180);
+          ctx.font = '14px Arial';
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+          ctx.fillText(text, 20, 100);
+          
+          el.style.backgroundImage = `url(${canvas.toDataURL()})`;
+          el._watermarkText = text;
+        }
+      }
+    })
+    .directive('resize', {
+      mounted(el, binding) {
+        const observer = new ResizeObserver((entries) => {
+          const entry = entries[0];
+          binding.value({
+            width: Math.round(entry.contentRect.width),
+            height: Math.round(entry.contentRect.height)
+          });
+        });
+        
+        observer.observe(el);
+        el._resizeObserver = observer;
+      },
+      unmounted(el) {
+        el._resizeObserver?.disconnect();
+      }
+    })
+    .directive('permission', {
+      mounted(el, binding) {
+        const requiredRole = binding.value;
+        const roleHierarchy = { viewer: 1, editor: 2, admin: 3 };
+        
+        const checkPermission = () => {
+          const currentRole = document.querySelector('[data-role]')?.dataset.role || 'viewer';
+          const currentLevel = roleHierarchy[currentRole] || 1;
+          const requiredLevel = roleHierarchy[requiredRole] || 1;
+          
+          if (currentLevel < requiredLevel) {
+            el.style.display = 'none';
+          } else {
+            el.style.display = '';
+          }
+        };
+        
+        // 初始检查
+        checkPermission();
+        
+        // 监听角色变化
+        const app = document.getElementById('app');
+        const observer = new MutationObserver(checkPermission);
+        observer.observe(app, { attributes: true, subtree: true });
+        
+        el._permissionObserver = observer;
+      },
+      unmounted(el) {
+        el._permissionObserver?.disconnect();
+      }
+    })
+    .mount('#app');
+    
+    // 将当前角色添加到 DOM 以便指令读取
+    document.getElementById('app').setAttribute('data-role', 'viewer');
+  </script>
+</body>
+</html>

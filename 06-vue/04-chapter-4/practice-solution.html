@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 4: 计算属性 - 练习题答案</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .level-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 10px;
+    }
+    .basic { background: #42b883; }
+    .advanced { background: #f39c12; }
+    .challenge { background: #e74c3c; }
+    .solution-card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .demo-area {
+      background: #f8f9fa;
+      border: 2px dashed #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 15px 0;
+    }
+    .score-board {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .score-card {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .score-card h4 {
+      margin: 0 0 10px 0;
+      color: #666;
+      font-size: 14px;
+    }
+    .score-card .value {
+      font-size: 28px;
+      font-weight: bold;
+      color: #42b883;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      color: white;
+    }
+    .grade-a { background: #42b883; }
+    .grade-b { background: #3498db; }
+    .grade-c { background: #f39c12; }
+    .grade-d { background: #e67e22; }
+    .grade-f { background: #e74c3c; }
+    .filter-panel {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .filter-group {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    .product-card {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 15px;
+      transition: all 0.3s;
+    }
+    .product-card:hover {
+      border-color: #42b883;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .product-card.in-stock { border-left: 4px solid #42b883; }
+    .product-card.low-stock { border-left: 4px solid #f39c12; }
+    .product-card.out-stock { border-left: 4px solid #e74c3c; opacity: 0.7; }
+    .cart-advanced {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 20px;
+    }
+    .cart-items-list {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+    }
+    .cart-item-row {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    .cart-item-row input[type="checkbox"] {
+      margin-right: 15px;
+      transform: scale(1.5);
+    }
+    .cart-summary-panel {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px dashed #ddd;
+    }
+    .summary-row.total {
+      border-top: 2px solid #42b883;
+      border-bottom: none;
+      font-size: 20px;
+      font-weight: bold;
+      color: #e74c3c;
+      margin-top: 10px;
+      padding-top: 15px;
+    }
+    .discount-tag {
+      background: #e74c3c;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    input[type="number"], select {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #42b883;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .code-explanation {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 15px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1 style="text-align: center; color: white; margin-bottom: 30px;">
+      📚 计算属性练习题答案
+    </h1>
+
+    <!-- 基础练习答案：成绩统计 -->
+    <div class="solution-card">
+      <span class="level-badge basic">基础练习</span>
+      <h2>成绩统计系统</h2>
+      <p>使用计算属性自动计算总分、平均分、最高/最低分和成绩等级。</p>
+      
+      <div class="demo-area">
+        <h4>输入成绩</h4>
+        <div style="margin-bottom: 20px;">
+          <label v-for="(score, index) in scores" :key="index" style="display: inline-block; margin: 10px;">
+            课程 {{ index + 1 }}: 
+            <input type="number" v-model.number="scores[index]" min="0" max="100" style="width: 70px;">
+            <span :class="getGradeClass(score)">{{ getGradeLevel(score) }}</span>
+          </label>
+        </div>
+        
+        <div class="score-board">
+          <div class="score-card">
+            <h4>总分</h4>
+            <div class="value">{{ totalScore }}</div>
+          </div>
+          <div class="score-card">
+            <h4>平均分</h4>
+            <div class="value">{{ averageScore }}</div>
+          </div>
+          <div class="score-card">
+            <h4>最高分</h4>
+            <div class="value">{{ maxScore }}</div>
+          </div>
+          <div class="score-card">
+            <h4>最低分</h4>
+            <div class="value">{{ minScore }}</div>
+          </div>
+        </div>
+        
+        <div style="text-align: center; padding: 20px;">
+          <h4>综合评定</h4>
+          <p style="font-size: 48px; margin: 10px 0;" :class="overallGradeClass">{{ overallGrade }}</p>
+          <p>
+            <span :class="allPassed ? 'grade-badge grade-a' : 'grade-badge grade-f'">
+              {{ allPassed ? '✓ 全部及格' : '✗ 有不及格科目' }}
+            </span>
+          </p>
+        </div>
+      </div>
+      
+      <div class="code-explanation">
+        <strong>核心计算属性：</strong><br><br>
+        computed: {
+          totalScore() {
+            return this.scores.reduce((sum, score) => sum + score, 0)
+          },
+          averageScore() {
+            return (this.totalScore / this.scores.length).toFixed(1)
+          },
+          maxScore() {
+            return Math.max(...this.scores)
+          },
+          minScore() {
+            return Math.min(...this.scores)
+          },
+          allPassed() {
+            return this.scores.every(score => score >= 60)
+          },
+          overallGrade() {
+            const avg = parseFloat(this.averageScore)
+            if (avg >= 90) return 'A'
+            if (avg >= 80) return 'B'
+            if (avg >= 70) return 'C'
+            if (avg >= 60) return 'D'
+            return 'F'
+          }
+        }
+      </div>
+    </div>
+
+    <!-- 进阶练习答案：商品筛选 -->
+    <div class="solution-card">
+      <span class="level-badge advanced">进阶练习</span>
+      <h2>商品筛选系统</h2>
+      <p>多条件筛选和排序，所有筛选逻辑使用计算属性实现。</p>
+      
+      <div class="demo-area">
+        <div class="filter-panel">
+          <h4>筛选条件</h4>
+          <div class="filter-group">
+            <label>
+              最低价格: ¥<input type="number" v-model.number="minPrice" style="width: 80px;">
+            </label>
+            <label>
+              最高价格: ¥<input type="number" v-model.number="maxPrice" style="width: 80px;">
+            </label>
+            <label>
+              商品类别:
+              <select v-model="selectedCategory">
+                <option value="">全部类别</option>
+                <option value="electronics">数码电子</option>
+                <option value="clothing">服装服饰</option>
+                <option value="food">食品生鲜</option>
+              </select>
+            </label>
+            <label>
+              排序方式:
+              <select v-model="sortBy">
+                <option value="price-asc">价格从低到高</option>
+                <option value="price-desc">价格从高到低</option>
+                <option value="stock">库存量</option>
+              </select>
+            </label>
+            <label>
+              <input type="checkbox" v-model="showInStockOnly"> 仅显示有货
+            </label>
+          </div>
+        </div>
+        
+        <div style="margin-bottom: 15px; color: #666;">
+          筛选结果: 共 {{ filteredProducts.length }} 件商品，
+          总库存: {{ totalFilteredStock }} 件
+        </div>
+        
+        <div class="product-grid">
+          <div 
+            v-for="product in filteredProducts" 
+            :key="product.id" 
+            class="product-card"
+            :class="getStockStatusClass(product.stock)"
+          >
+            <h5>{{ product.name }}</h5>
+            <p style="color: #e74c3c; font-size: 20px; margin: 5px 0;">¥{{ product.price }}</p>
+            <p style="color: #666; font-size: 12px;">
+              类别: {{ getCategoryLabel(product.category) }}
+            </p>
+            <p style="font-size: 12px;">
+              库存: 
+              <span :class="product.stock > 10 ? 'grade-badge grade-a' : (product.stock > 0 ? 'grade-badge grade-c' : 'grade-badge grade-f')">
+                {{ product.stock }} 件
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="code-explanation">
+        <strong>核心计算属性：</strong><br><br>
+        computed: {
+          filteredProducts() {
+            let result = this.products
+            
+            // 价格筛选
+            if (this.minPrice > 0) {
+              result = result.filter(p => p.price >= this.minPrice)
+            }
+            if (this.maxPrice > 0) {
+              result = result.filter(p => p.price <= this.maxPrice)
+            }
+            
+            // 类别筛选
+            if (this.selectedCategory) {
+              result = result.filter(p => p.category === this.selectedCategory)
+            }
+            
+            // 库存筛选
+            if (this.showInStockOnly) {
+              result = result.filter(p => p.stock > 0)
+            }
+            
+            // 排序
+            switch(this.sortBy) {
+              case 'price-asc':
+                result = result.sort((a, b) => a.price - b.price)
+                break
+              case 'price-desc':
+                result = result.sort((a, b) => b.price - a.price)
+                break
+              case 'stock':
+                result = result.sort((a, b) => b.stock - a.stock)
+                break
+            }
+            
+            return result
+          },
+          
+          totalFilteredStock() {
+            return this.filteredProducts.reduce((sum, p) => sum + p.stock, 0)
+          }
+        }
+      </div>
+    </div>
+
+    <!-- 挑战练习答案：购物车价格计算 -->
+    <div class="solution-card">
+      <span class="level-badge challenge">挑战练习</span>
+      <h2>完整购物车价格计算系统</h2>
+      <p>包含选中计算、满减优惠、VIP折扣、可写全选计算属性。</p>
+      
+      <div class="demo-area">
+        <div class="cart-advanced">
+          <!-- 商品列表 -->
+          <div class="cart-items-list">
+            <h4>
+              <input type="checkbox" v-model="selectAll"> 全选
+              <span style="float: right; font-size: 14px; color: #666;">
+                已选 {{ selectedItemCount }} 件
+              </span>
+            </h4>
+            
+            <div v-for="item in cartAdvanced" :key="item.productId" class="cart-item-row">
+              <input 
+                type="checkbox" 
+                v-model="item.selected"
+              >
+              <div style="flex: 1;">
+                <strong>{{ item.name }}</strong>
+                <br>
+                <small style="color: #666;">¥{{ item.price }} × {{ item.quantity }}</small>
+              </div>
+              <div style="text-align: right;">
+                <p style="margin: 0; font-weight: bold;">¥{{ item.price * item.quantity }}</p>
+                <button @click="removeCartItem(item.productId)" style="padding: 4px 8px; font-size: 12px; background: #e74c3c;">删除</button>
+              </div>
+            </div>
+            
+            <div v-if="cartAdvanced.length === 0" style="text-align: center; padding: 40px; color: #999;">
+              购物车是空的
+            </div>
+          </div>
+          
+          <!-- 结算面板 -->
+          <div class="cart-summary-panel">
+            <h4>结算明细</h4>
+            
+            <div class="summary-row">
+              <span>商品原价</span>
+              <span>¥{{ selectedSubtotal }}</span>
+            </div>
+            
+            <div class="summary-row" v-if="discountAmount > 0">
+              <span>
+                满减优惠
+                <span class="discount-tag">满{{ discountThreshold }}减{{ discountAmount }}</span>
+              </span>
+              <span style="color: #42b883;">-¥{{ discountAmount }}</span>
+            </div>
+            
+            <div class="summary-row" v-if="vipDiscountAmount > 0">
+              <span>
+                VIP专享9折
+                <span class="discount-tag">VIP</span>
+              </span>
+              <span style="color: #42b883;">-¥{{ vipDiscountAmount }}</span>
+            </div>
+            
+            <div class="summary-row total">
+              <span>应付总额</span>
+              <span>¥{{ finalAmount }}</span>
+            </div>
+            
+            <div style="margin: 15px 0; padding: 10px; background: white; border-radius: 4px;">
+              <label>
+                <input type="checkbox" v-model="isVip"> 我是VIP会员
+              </label>
+            </div>
+            
+            <div style="margin: 15px 0; font-size: 12px; color: #666;">
+              <p v-if="selectedSubtotal < 200">再购 ¥{{ (200 - selectedSubtotal).toFixed(2) }} 可享满200减30</p>
+              <p v-else-if="selectedSubtotal < 500">再购 ¥{{ (500 - selectedSubtotal).toFixed(2) }} 可享满500减100</p>
+              <p v-else style="color: #42b883;">✓ 已享最大满减优惠</p>
+            </div>
+            
+            <button @click="checkoutAdvanced" :disabled="selectedItemCount === 0" style="width: 100%; padding: 15px; font-size: 16px;">
+              提交订单
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="code-explanation">
+        <strong>核心计算属性：</strong><br><br>
+        computed: {
+          // 选中的商品
+          selectedItems() {
+            return this.cartAdvanced.filter(item => item.selected)
+          },
+          
+          // 选中商品小计
+          selectedSubtotal() {
+            return this.selectedItems.reduce((sum, item) => {
+              return sum + item.price * item.quantity
+            }, 0)
+          },
+          
+          // 满减优惠计算
+          discountAmount() {
+            if (this.selectedSubtotal >= 500) return 100
+            if (this.selectedSubtotal >= 200) return 30
+            return 0
+          },
+          
+          discountThreshold() {
+            if (this.selectedSubtotal >= 500) return 500
+            if (this.selectedSubtotal >= 200) return 200
+            return 200
+          },
+          
+          // 满减后价格
+          afterDiscount() {
+            return this.selectedSubtotal - this.discountAmount
+          },
+          
+          // VIP折扣金额
+          vipDiscountAmount() {
+            return this.isVip ? (this.afterDiscount * 0.1).toFixed(2) : 0
+          },
+          
+          // 最终金额
+          finalAmount() {
+            let amount = this.afterDiscount
+            if (this.isVip) {
+              amount = amount * 0.9
+            }
+            return amount.toFixed(2)
+          },
+          
+          // 选中商品数量
+          selectedItemCount() {
+            return this.selectedItems.reduce((count, item) => count + item.quantity, 0)
+          },
+          
+          // 可写计算属性：全选
+          selectAll: {
+            get() {
+              return this.cartAdvanced.length > 0 && this.cartAdvanced.every(item => item.selected)
+            },
+            set(value) {
+              this.cartAdvanced.forEach(item => item.selected = value)
+            }
+          }
+        }
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          // ===== 基础练习数据 =====
+          scores: [85, 92, 78, 88, 95],
+          
+          // ===== 进阶练习数据 =====
+          minPrice: 0,
+          maxPrice: 0,
+          selectedCategory: '',
+          sortBy: 'price-asc',
+          showInStockOnly: false,
+          products: [
+            { id: 1, name: 'iPhone 15', price: 5999, category: 'electronics', stock: 15 },
+            { id: 2, name: 'MacBook Pro', price: 12999, category: 'electronics', stock: 8 },
+            { id: 3, name: '纯棉T恤', price: 99, category: 'clothing', stock: 50 },
+            { id: 4, name: '牛仔裤', price: 299, category: 'clothing', stock: 30 },
+            { id: 5, name: '有机苹果', price: 15, category: 'food', stock: 100 },
+            { id: 6, name: '进口牛奶', price: 25, category: 'food', stock: 5 },
+            { id: 7, name: '无线耳机', price: 299, category: 'electronics', stock: 20 },
+            { id: 8, name: '运动鞋', price: 599, category: 'clothing', stock: 12 },
+          ],
+          
+          // ===== 挑战练习数据 =====
+          isVip: false,
+          cartAdvanced: [
+            { productId: 1, name: 'iPhone 15', price: 5999, quantity: 1, selected: true },
+            { productId: 3, name: '纯棉T恤', price: 99, quantity: 2, selected: true },
+            { productId: 5, name: '有机苹果', price: 15, quantity: 5, selected: false },
+            { productId: 7, name: '无线耳机', price: 299, quantity: 1, selected: true },
+          ]
+        };
+      },
+
+      computed: {
+        // ===== 基础练习计算属性 =====
+        totalScore() {
+          return this.scores.reduce((sum, score) => sum + score, 0);
+        },
+        
+        averageScore() {
+          return (this.totalScore / this.scores.length).toFixed(1);
+        },
+        
+        maxScore() {
+          return Math.max(...this.scores);
+        },
+        
+        minScore() {
+          return Math.min(...this.scores);
+        },
+        
+        allPassed() {
+          return this.scores.every(score => score >= 60);
+        },
+        
+        overallGrade() {
+          const avg = parseFloat(this.averageScore);
+          if (avg >= 90) return 'A';
+          if (avg >= 80) return 'B';
+          if (avg >= 70) return 'C';
+          if (avg >= 60) return 'D';
+          return 'F';
+        },
+        
+        overallGradeClass() {
+          const grade = this.overallGrade;
+          return {
+            'grade-a': grade === 'A',
+            'grade-b': grade === 'B',
+            'grade-c': grade === 'C',
+            'grade-d': grade === 'D',
+            'grade-f': grade === 'F'
+          };
+        },
+
+        // ===== 进阶练习计算属性 =====
+        filteredProducts() {
+          let result = [...this.products];
+          
+          // 价格筛选
+          if (this.minPrice > 0) {
+            result = result.filter(p => p.price >= this.minPrice);
+          }
+          if (this.maxPrice > 0) {
+            result = result.filter(p => p.price <= this.maxPrice);
+          }
+          
+          // 类别筛选
+          if (this.selectedCategory) {
+            result = result.filter(p => p.category === this.selectedCategory);
+          }
+          
+          // 库存筛选
+          if (this.showInStockOnly) {
+            result = result.filter(p => p.stock > 0);
+          }
+          
+          // 排序
+          switch(this.sortBy) {
+            case 'price-asc':
+              result.sort((a, b) => a.price - b.price);
+              break;
+            case 'price-desc':
+              result.sort((a, b) => b.price - a.price);
+              break;
+            case 'stock':
+              result.sort((a, b) => b.stock - a.stock);
+              break;
+          }
+          
+          return result;
+        },
+        
+        totalFilteredStock() {
+          return this.filteredProducts.reduce((sum, p) => sum + p.stock, 0);
+        },
+
+        // ===== 挑战练习计算属性 =====
+        selectedItems() {
+          return this.cartAdvanced.filter(item => item.selected);
+        },
+        
+        selectedSubtotal() {
+          return this.selectedItems.reduce((sum, item) => {
+            return sum + item.price * item.quantity;
+          }, 0);
+        },
+        
+        discountAmount() {
+          if (this.selectedSubtotal >= 500) return 100;
+          if (this.selectedSubtotal >= 200) return 30;
+          return 0;
+        },
+        
+        discountThreshold() {
+          if (this.selectedSubtotal >= 500) return 500;
+          if (this.selectedSubtotal >= 200) return 200;
+          return 200;
+        },
+        
+        afterDiscount() {
+          return this.selectedSubtotal - this.discountAmount;
+        },
+        
+        vipDiscountAmount() {
+          return this.isVip ? (this.afterDiscount * 0.1).toFixed(2) : 0;
+        },
+        
+        finalAmount() {
+          let amount = this.afterDiscount;
+          if (this.isVip) {
+            amount = amount * 0.9;
+          }
+          return amount.toFixed(2);
+        },
+        
+        selectedItemCount() {
+          return this.selectedItems.reduce((count, item) => count + item.quantity, 0);
+        },
+        
+        // 可写计算属性：全选
+        selectAll: {
+          get() {
+            return this.cartAdvanced.length > 0 && this.cartAdvanced.every(item => item.selected);
+          },
+          set(value) {
+            this.cartAdvanced.forEach(item => item.selected = value);
+          }
+        }
+      },
+
+      methods: {
+        // ===== 基础练习方法 =====
+        getGradeLevel(score) {
+          if (score >= 90) return 'A';
+          if (score >= 80) return 'B';
+          if (score >= 70) return 'C';
+          if (score >= 60) return 'D';
+          return 'F';
+        },
+        
+        getGradeClass(score) {
+          const level = this.getGradeLevel(score);
+          return `grade-badge grade-${level.toLowerCase()}`;
+        },
+
+        // ===== 进阶练习方法 =====
+        getCategoryLabel(category) {
+          const labels = {
+            'electronics': '数码电子',
+            'clothing': '服装服饰',
+            'food': '食品生鲜'
+          };
+          return labels[category] || category;
+        },
+        
+        getStockStatusClass(stock) {
+          if (stock === 0) return 'out-stock';
+          if (stock <= 10) return 'low-stock';
+          return 'in-stock';
+        },
+
+        // ===== 挑战练习方法 =====
+        removeCartItem(productId) {
+          this.cartAdvanced = this.cartAdvanced.filter(item => item.productId !== productId);
+        },
+        
+        checkoutAdvanced() {
+          if (this.selectedItemCount === 0) {
+            alert('请至少选择一件商品');
+            return;
+          }
+          
+          let message = '🎉 订单提交成功！\n\n';
+          message += `商品总数: ${this.selectedItemCount} 件\n`;
+          message += `商品原价: ¥${this.selectedSubtotal.toFixed(2)}\n`;
+          
+          if (this.discountAmount > 0) {
+            message += `满减优惠: -¥${this.discountAmount}\n`;
+          }
+          
+          if (this.isVip) {
+            message += `VIP折扣: -¥${this.vipDiscountAmount}\n`;
+          }
+          
+          message += `\n应付总额: ¥${this.finalAmount}`;
+          
+          alert(message);
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
