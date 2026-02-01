@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>语义化标签-基础练习</title>
+    <!-- 标签的位置通过布局样式控制 -->
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; line-height: 1.6; max-width: 900px; margin: 0 auto; padding: 16px; }
+      header, footer { background: #f5f5f5; padding: 12px; }
+      main { display: grid; grid-template-columns: 1fr 260px; gap: 16px; }
+      article { background: #fff; padding: 12px; border: 1px solid #eee; }
+      aside { background: #fafafa; padding: 12px; border: 1px solid #eee; }
+      nav a { margin-right: 8px; }
+      section { margin: 12px 0; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>我的技术博客</h1>
+    <nav aria-label="主导航">
+        <a href="#home">首页</a>
+        <a href="#articles">文章</a>
+        <a href="#about">关于</a>
+    </nav>
+</header>
+<main aria-label="主要内容">
+    <article aria-label="文章内容">
+        <header>
+            <h2>HTML 语义化的重要性</h2>
+            <p><time datetime="2026-01-30">发布于 2026-01-30</time></p>
+        </header>
+
+        <section>
+            <h3>为什么使用语义化标签</h3>
+            <p>语义化标签让代码更有意义，提升可读性和可维护性。</p>
+        </section>
+
+        <section>
+            <h3>常用标签介绍</h3>
+            <p>header、nav、main、section、article、aside、footer 等标签让页面结构更清晰。</p>
+        </section>
+
+        <section>
+            <h3>FAQ</h3>
+            <details>
+                <summary>语义化标签会影响页面样式吗？</summary>
+                <p>默认不会直接影响样式，但能提升结构清晰度与可维护性。</p>
+                <p>不过，某些标签可能有默认样式，需要通过 CSS 调整。</p>
+            </details>
+            <details>
+                <summary>是否必须全部使用语义化标签？</summary>
+                <p>不必全部使用，按内容语义选择合适标签即可。</p>
+            </details>
+        </section>
+    </article>
+    <aside aria-label="侧边栏">
+        <h2>侧边栏</h2>
+        <p>这里是一些额外的信息，比如热门文章或广告。</p>
+        <h2>相关推荐</h2>
+        <ul>
+            <li><a href="#related1">相关内容 1</a></li>
+            <li><a href="#related2">相关内容 2</a></li>
+            <li><a href="#related3">相关内容 3</a></li>
+        </ul>
+        <h2>作者信息</h2>
+        <p>作者：张三，前端开发工程师，热爱分享技术知识。</p>
+    </aside>
+</main>
+<footer>
+    <p>&copy; 2026 我的技术博客</p>
+</footer>
+</body>
+</html>
