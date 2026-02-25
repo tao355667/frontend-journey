@@ -1,20 +1,20 @@
-# 侦听器（Watch）：数据的"哨兵"
+# 侦听器 watch
 
 ## 本章目的
 
-理解侦听器（watch）的概念和使用场景，掌握如何使用 watch 来响应数据的变化，学会区分计算属性和侦听器的适用场景。
+掌握 `watch` 的使用方法，理解何时使用侦听器而不是计算属性，学会在 `<script setup>` 中监听数据变化并执行副作用操作。
 
 ---
 
 ## 内容概述
 
-- watch 选项的基本用法
-- 侦听器 vs 计算属性：何时使用哪个
-- 侦听器的配置选项（immediate, deep）
-- 侦听数组和对象的变化
+- watch 的基本用法
+- 侦听器 vs 计算属性
+- 监听多个数据源
+- 深度监听（deep）
+- 立即执行（immediate）
 - 停止侦听器
-- 异步操作与侦听器
-- 实战案例：搜索防抖
+- 实战案例
 
 ---
 
@@ -22,7 +22,7 @@
 
 ### 什么是侦听器？
 
-侦听器是一种观察数据变化的机制。当数据发生变化时，侦听器会执行指定的回调函数，常用于执行副作用操作（如发送请求、操作 DOM、记录日志等）。
+侦听器用于监听响应式数据的变化，当数据变化时执行回调函数。常用于执行副作用操作（如发送请求、操作 DOM、记录日志等）。
 
 #### 类比理解
 
@@ -34,289 +34,460 @@
 
 ---
 
-### 1. 侦听器的基本用法
+### 1. 基本用法
 
-```javascript
-createApp({
-  data() {
-    return {
-      searchText: '',
-      userInfo: { name: '张三', age: 25 }
-    }
-  },
-  watch: {
-    // 监听 searchText 的变化
-    searchText(newValue, oldValue) {
-      console.log('搜索文本从', oldValue, '变为', newValue)
-      this.performSearch(newValue)
-    }
-  },
-  methods: {
-    performSearch(keyword) {
-      // 发送搜索请求
-      console.log('正在搜索:', keyword)
-    }
-  }
+```vue
+<script setup lang="ts">
+import { ref, watch } from 'vue'
+
+const count = ref(0)
+
+// 监听单个 ref
+watch(count, (newValue, oldValue) => {
+  console.log(`count 从 ${oldValue} 变为 ${newValue}`)
 })
-```
 
-```html
-<input v-model="searchText" placeholder="输入搜索关键词">
-```
-
----
-
-### 2. watch vs computed：何时使用哪个？
-
-| 场景 | 使用 computed | 使用 watch |
-|------|--------------|-----------|
-| **派生数据** | ✅ 根据现有数据计算新值 | ❌ |
-| **副作用操作** | ❌ | ✅ 发送请求、操作 DOM、日志记录 |
-| **异步操作** | ❌ | ✅ 数据变化后发起异步请求 |
-| **昂贵操作** | ✅ 利用缓存 | ⚠️ 需要配合防抖 |
-| **多个数据影响一个值** | ✅ 声明式 | ⚠️ 需要手动追踪 |
-| **一个数据影响多个操作** | ❌ | ✅ 在 handler 中处理多个逻辑 |
-
-#### 简单判断方法
-
-```
-问自己：是否需要响应数据变化执行操作？
-- 只需要得到一个新值 → computed
-- 需要执行某些操作（请求、DOM操作等）→ watch
-```
-
----
-
-### 3. 侦听器的配置选项
-
-#### immediate：立即执行
-
-```javascript
-watch: {
-  searchText: {
-    handler(newValue, oldValue) {
-      console.log('搜索:', newValue)
-    },
-    immediate: true  // 初始化时立即执行一次
-  }
+const increment = () => {
+  count.value++
 }
-```
+</script>
 
-#### deep：深度侦听
-
-```javascript
-data() {
-  return {
-    user: { name: '张三', address: { city: '北京' } }
-  }
-},
-watch: {
-  // 浅层侦听 - 只监听 user 对象的引用变化
-  user(newVal, oldVal) {
-    console.log('user 引用变化')
-  },
-  
-  // 深度侦听 - 监听 user 对象内部任何属性的变化
-  user: {
-    handler(newVal, oldVal) {
-      console.log('user 内部属性变化:', newVal)
-    },
-    deep: true
-  }
-}
-```
-
-⚠️ **注意**：深度侦听会递归遍历对象的所有属性，性能开销较大，请谨慎使用。
-
----
-
-### 4. 侦听特定对象的属性
-
-```javascript
-data() {
-  return {
-    user: { name: '张三', age: 25 }
-  }
-},
-watch: {
-  // 只侦听 user.name 的变化
-  'user.name'(newName, oldName) {
-    console.log('用户名从', oldName, '变为', newName)
-  }
-}
+<template>
+  <div>
+    <p>Count: {{ count }}</p>
+    <button @click="increment">+1</button>
+  </div>
+</template>
 ```
 
 ---
 
-### 5. 侦听器中的异步操作
+### 2. 侦听器 vs 计算属性
 
-```javascript
-createApp({
-  data() {
-    return {
-      searchText: '',
-      searchResults: [],
-      isSearching: false
-    }
-  },
-  watch: {
-    searchText: {
-      async handler(newValue) {
-        if (!newValue.trim()) {
-          this.searchResults = []
-          return
-        }
-        
-        this.isSearching = true
-        
-        try {
-          // 模拟异步搜索请求
-          const results = await this.searchAPI(newValue)
-          this.searchResults = results
-        } catch (error) {
-          console.error('搜索失败:', error)
-        } finally {
-          this.isSearching = false
-        }
-      },
-      debounce: 300  // 防抖 300ms（需要自行实现或使用库）
-    }
-  },
-  methods: {
-    async searchAPI(keyword) {
-      // 模拟 API 请求
-      return new Promise(resolve => {
-        setTimeout(() => {
-          resolve([
-            { id: 1, title: `关于 "${keyword}" 的结果 1` },
-            { id: 2, title: `关于 "${keyword}" 的结果 2` }
-          ])
-        }, 500)
-      })
-    }
-  }
+| 特性 | computed | watch |
+|------|----------|-------|
+| **目的** | 基于数据计算新值 | 响应数据变化执行副作用 |
+| **返回值** | 必须有返回值 | 不需要返回值 |
+| **缓存** | ✅ 有缓存 | ❌ 无缓存 |
+| **异步** | ❌ 不能执行异步 | ✅ 可以执行异步 |
+| **适用场景** | 数据转换 | 副作用操作 |
+
+#### 何时使用 computed？
+
+当需要根据现有数据派生出新数据时使用：
+
+```vue
+<script setup>
+import { ref, computed } from 'vue'
+
+const firstName = ref('张')
+const lastName = ref('三')
+
+// ✅ 使用 computed - 派生新数据
+const fullName = computed(() => {
+  return firstName.value + lastName.value
 })
+</script>
+```
+
+#### 何时使用 watch？
+
+当需要在数据变化时执行副作用时使用：
+
+```vue
+<script setup>
+import { ref, watch } from 'vue'
+
+const userId = ref(1)
+
+// ✅ 使用 watch - 执行副作用（发送请求）
+watch(userId, async (newId) => {
+  const response = await fetch(`/api/users/${newId}`)
+  const userData = await response.json()
+  console.log(userData)
+})
+</script>
+```
+
+---
+
+### 3. 监听多个数据源
+
+```vue
+<script setup lang="ts">
+import { ref, watch } from 'vue'
+
+const firstName = ref('张')
+const lastName = ref('三')
+
+// 监听多个 ref
+watch([firstName, lastName], ([newFirst, newLast], [oldFirst, oldLast]) => {
+  console.log('姓名发生变化:', oldFirst, oldLast, '->', newFirst, newLast)
+})
+</script>
+```
+
+---
+
+### 4. 立即执行（immediate）
+
+默认情况下，侦听器只在数据变化时触发。使用 `immediate: true` 可以在创建时立即执行一次：
+
+```vue
+<script setup lang="ts">
+import { ref, watch } from 'vue'
+
+const count = ref(0)
+
+watch(count, (newValue, oldValue) => {
+  console.log('值:', newValue)
+}, {
+  immediate: true  // 立即执行一次
+})
+// 输出: 值: 0（创建时立即执行）
+</script>
+```
+
+---
+
+### 5. 深度监听（deep）
+
+当监听对象时，默认只监听对象的引用变化。使用 `deep: true` 可以监听对象内部属性的变化：
+
+```vue
+<script setup lang="ts">
+import { ref, watch } from 'vue'
+
+const user = ref({
+  name: '张三',
+  age: 25
+})
+
+// ❌ 默认情况下，这种监听不会触发
+watch(user, (newValue, oldValue) => {
+  console.log('user 变化:', newValue)
+})
+
+// ✅ 使用 deep 监听对象内部变化
+watch(user, (newValue, oldValue) => {
+  console.log('user 变化:', newValue)
+}, {
+  deep: true
+})
+
+// 更好的方式：直接监听具体属性
+watch(() => user.value.age, (newAge, oldAge) => {
+  console.log(`年龄从 ${oldAge} 变为 ${newAge}`)
+})
+</script>
 ```
 
 ---
 
 ### 6. 停止侦听器
 
-在组件卸载时，Vue 会自动清理侦听器。但有时需要手动控制：
+手动创建的侦听器可以停止：
 
-```javascript
-import { watch } from 'vue'
+```vue
+<script setup lang="ts">
+import { ref, watch } from 'vue'
 
-export default {
-  data() {
-    return {
-      count: 0
-    }
-  },
-  mounted() {
-    // 创建侦听器并保存引用
-    this.unwatch = this.$watch('count', (newVal, oldVal) => {
-      console.log('count 变化:', oldVal, '→', newVal)
-    })
-  },
-  beforeUnmount() {
-    // 手动停止侦听
-    this.unwatch()
-  }
-}
-```
+const count = ref(0)
 
----
-
-### 7. 实战案例：搜索防抖
-
-防抖（debounce）是指在事件触发后等待一段时间，如果这段时间内没有再次触发，才执行操作。
-
-```javascript
-createApp({
-  data() {
-    return {
-      searchText: '',
-      results: [],
-      debounceTimer: null
-    }
-  },
-  watch: {
-    searchText(newValue) {
-      // 清除之前的定时器
-      clearTimeout(this.debounceTimer)
-      
-      // 设置新的定时器
-      this.debounceTimer = setTimeout(() => {
-        this.doSearch(newValue)
-      }, 300)  // 300ms 防抖
-    }
-  },
-  methods: {
-    doSearch(keyword) {
-      console.log('执行搜索:', keyword)
-      // 实际搜索逻辑...
-    }
+// 创建侦听器并保存停止函数
+const stop = watch(count, (newValue) => {
+  console.log('count:', newValue)
+  
+  // 当 count 达到 5 时停止监听
+  if (newValue >= 5) {
+    stop()
+    console.log('停止监听')
   }
 })
-```
 
-**生活类比**：就像电梯门 - 你按了按钮，门开始关闭，但如果又有人按了按钮，门会重新等待。
+const increment = () => {
+  count.value++
+}
+</script>
+```
 
 ---
 
-## JavaScript vs TypeScript 对比
+## 完整示例
 
-| 特性 | JavaScript | TypeScript |
-|------|-----------|------------|
-| 参数类型 | 无类型 | 可定义 newValue, oldValue 类型 |
-| 代码提示 | 有限 | 完整的类型推断和提示 |
+### 搜索防抖示例
 
-#### TypeScript 示例
+```vue
+<script setup lang="ts">
+import { ref, watch } from 'vue'
 
-```typescript
-interface User {
-  name: string
-  age: number
-}
+const searchQuery = ref('')
+const searchResults = ref([])
+const isLoading = ref(false)
 
-export default {
-  data() {
-    return {
-      user: {
-        name: '张三',
-        age: 25
-      } as User
-    }
-  },
-  watch: {
-    // 定义参数类型
-    'user.name'(newName: string, oldName: string) {
-      console.log(`用户名从 ${oldName} 变为 ${newName}`)
-    },
-    
-    // 完整配置对象写法
-    user: {
-      handler(newUser: User, oldUser: User) {
-        console.log('用户信息变化:', newUser)
-      },
-      deep: true
-    }
+let timeoutId: ReturnType<typeof setTimeout> | null = null
+
+// 使用 watch 实现搜索防抖
+watch(searchQuery, (newQuery) => {
+  // 清除之前的定时器
+  if (timeoutId) {
+    clearTimeout(timeoutId)
   }
+  
+  // 如果搜索词为空，清空结果
+  if (!newQuery.trim()) {
+    searchResults.value = []
+    return
+  }
+  
+  // 设置新的定时器（防抖）
+  timeoutId = setTimeout(async () => {
+    isLoading.value = true
+    
+    // 模拟 API 请求
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
+    // 模拟搜索结果
+    searchResults.value = [
+      { id: 1, title: `${newQuery} 的结果 1` },
+      { id: 2, title: `${newQuery} 的结果 2` },
+      { id: 3, title: `${newQuery} 的结果 3` }
+    ]
+    
+    isLoading.value = false
+  }, 300)  // 300ms 防抖
+})
+</script>
+
+<template>
+  <div class="search">
+    <h2>搜索示例（带防抖）</h2>
+    
+    <input 
+      v-model="searchQuery" 
+      placeholder="输入搜索关键词..."
+      class="search-input"
+    >
+    
+    <p v-if="isLoading" class="loading">搜索中...</p>
+    
+    <ul v-else-if="searchResults.length > 0" class="results">
+      <li v-for="item in searchResults" :key="item.id">
+        {{ item.title }}
+      </li>
+    </ul>
+    
+    <p v-else-if="searchQuery" class="no-results">暂无结果</p>
+  </div>
+</template>
+
+<style scoped>
+.search {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
 }
+
+.search-input {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+}
+
+.loading {
+  color: #42b883;
+  margin-top: 10px;
+}
+
+.results {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.results li {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.no-results {
+  color: #999;
+  margin-top: 10px;
+}
+</style>
+```
+
+### 表单验证示例
+
+```vue
+<script setup lang="ts">
+import { ref, watch, reactive } from 'vue'
+
+const form = reactive({
+  username: '',
+  email: '',
+  password: ''
+})
+
+const errors = reactive({
+  username: '',
+  email: '',
+  password: ''
+})
+
+// 监听表单变化并验证
+watch(() => form.username, (newVal) => {
+  if (newVal.length < 3) {
+    errors.username = '用户名至少3个字符'
+  } else {
+    errors.username = ''
+  }
+})
+
+watch(() => form.email, (newVal) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(newVal)) {
+    errors.email = '请输入有效的邮箱地址'
+  } else {
+    errors.email = ''
+  }
+})
+
+watch(() => form.password, (newVal) => {
+  if (newVal.length < 6) {
+    errors.password = '密码至少6个字符'
+  } else {
+    errors.password = ''
+  }
+})
+
+const isValid = ref(false)
+
+// 监听所有错误，判断表单是否有效
+watch(errors, () => {
+  isValid.value = !errors.username && !errors.email && !errors.password
+}, { deep: true })
+</script>
+
+<template>
+  <form class="form">
+    <h2>表单验证</h2>
+    
+    <div class="field">
+      <label>用户名</label>
+      <input v-model="form.username" type="text">
+      <span class="error" v-if="errors.username">{{ errors.username }}</span>
+    </div>
+    
+    <div class="field">
+      <label>邮箱</label>
+      <input v-model="form.email" type="email">
+      <span class="error" v-if="errors.email">{{ errors.email }}</span>
+    </div>
+    
+    <div class="field">
+      <label>密码</label>
+      <input v-model="form.password" type="password">
+      <span class="error" v-if="errors.password">{{ errors.password }}</span>
+    </div>
+    
+    <button type="submit" :disabled="!isValid">提交</button>
+  </form>
+</template>
+
+<style scoped>
+.form {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.field {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.error {
+  color: #ff4444;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background: #42b883;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+</style>
 ```
 
 ---
 
-## 完整示例代码
+## 最佳实践
 
-### JavaScript 版本
+### ✅ 推荐做法
 
-详见 `src/js/example.html`
+1. **优先使用 computed**：只有需要副作用时才使用 watch
+2. **避免滥用 deep**：尽量监听具体属性而不是整个对象
+3. **记得清理副作用**：如果 watch 中创建了定时器、事件监听等，记得在组件卸载前清理
+4. **使用 immediate 进行初始化**：当需要基于初始数据执行操作时
 
-### TypeScript 版本
+### ❌ 应避免的做法
 
-详见 `src/ts/example.html`
+1. **在 watch 中修改被监听的数据**（可能导致无限循环）
+
+```vue
+<script setup>
+import { ref, watch } from 'vue'
+
+const count = ref(0)
+
+// ❌ 错误 - 会导致无限循环
+watch(count, () => {
+  count.value++  // 不要这样做！
+})
+</script>
+```
+
+2. **监听过于频繁变化的数据**
+
+```vue
+<script setup>
+import { ref, watch } from 'vue'
+
+const mouseX = ref(0)
+
+// ❌ 不建议 - 鼠标移动太频繁
+watch(mouseX, () => {
+  // 执行耗时操作
+})
+
+// ✅ 更好的做法：使用防抖或节流
+</script>
+```
 
 ---
 
@@ -324,56 +495,53 @@ export default {
 
 ### 基础练习
 
-创建一个表单验证器：
-1. 使用 `data` 定义 username、email、password 字段
-2. 使用侦听器验证每个字段：
-   - username: 长度3-20，只能包含字母数字
-   - email: 必须符合邮箱格式
-   - password: 长度至少6位
-3. 实时显示验证结果（有效/无效）
-4. 所有字段有效时，启用提交按钮
+创建一个计数器应用，要求：
+1. 使用 `ref` 定义计数器
+2. 使用 `watch` 监听计数器变化
+3. 当计数器达到 10 时显示提示信息
+4. 当计数器达到 20 时自动重置为 0
 
 ### 进阶练习
 
-创建一个实时汇率转换器：
-1. 使用 `data` 定义金额和源货币/目标货币
-2. 使用侦听器监听金额或货币变化
-3. 模拟异步获取汇率（使用 setTimeout）
-4. 使用防抖避免频繁请求
-5. 显示加载状态和转换结果
+创建一个本地存储同步器：
+1. 使用 `ref` 定义一个待办事项列表
+2. 使用 `watch` 监听列表变化，自动保存到 localStorage
+3. 页面加载时从 localStorage 读取数据
+4. 添加深度监听确保对象属性变化也能触发保存
 
 ### 挑战练习
 
-创建一个完整的用户资料编辑器：
-1. 定义包含多个字段的用户对象（姓名、年龄、地址、联系方式等）
-2. 使用深度侦听监听整个用户对象的变化
-3. 实现自动保存功能（数据变化后3秒自动保存到 localStorage）
-4. 如果有未保存的更改，离开页面时提示用户
-5. 添加撤销/重做功能（保存历史记录）
-
----
-
-## 练习题答案
-
-详见 `practice-solution.html`
+创建一个实时数据监控面板：
+1. 模拟实时数据流（使用 setInterval 每2秒生成新数据）
+2. 使用 `watch` 监听数据变化
+3. 计算以下指标：
+   - 最新值、最大值、最小值、平均值
+   - 数据变化趋势（上升/下降/稳定）
+   - 异常值检测（超过阈值报警）
+4. 当检测到异常时显示警告
+5. 使用 `watch` 的停止功能，提供暂停监控的按钮
 
 ---
 
 ## 学习目标检查清单
 
-- [ ] 理解侦听器（watch）的基本概念
-- [ ] 掌握 watch 的基本语法
-- [ ] 理解 watch 和 computed 的区别和使用场景
-- [ ] 掌握 immediate 和 deep 配置选项
-- [ ] 知道如何侦听对象的特定属性
-- [ ] 能够在侦听器中执行异步操作
-- [ ] 理解并能够实现防抖（debounce）
-- [ ] 知道如何手动停止侦听器
+- [ ] 理解 watch 的作用和使用场景
+- [ ] 掌握 watch 的基本用法
+- [ ] 理解 watch 与 computed 的区别
+- [ ] 掌握监听多个数据源的方法
+- [ ] 理解 immediate 和 deep 选项
+- [ ] 掌握如何停止侦听器
+- [ ] 能够在实际项目中正确使用 watch
 
 ---
 
 ## 延伸阅读
 
 - [Vue 官方文档 - 侦听器](https://cn.vuejs.org/guide/essentials/watchers.html)
-- [Vue 计算属性 vs 侦听器](https://cn.vuejs.org/guide/essentials/computed.html#computed-vs-watch)
-- [JavaScript 防抖和节流](https://lodash.com/docs/4.17.15#debounce)
+- [Vue 官方文档 - watch](https://cn.vuejs.org/api/reactivity-core.html#watch)
+
+---
+
+## 下一步
+
+完成本章学习后，进入 [第 6 章：ref 与 reactive](../06-chapter-6/README.md)，深入学习响应式系统的核心概念。

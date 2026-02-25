@@ -1,8 +1,8 @@
-# Vue 简介与安装
+# Vue 3 简介与安装
 
 ## 本章目的
 
-了解 Vue.js 是什么，为什么需要它，并掌握 Vue 3 的安装方法。
+了解 Vue.js 是什么，为什么需要它，并掌握 Vue 3 + `<script setup>` 的安装和使用方法。
 
 ---
 
@@ -11,8 +11,9 @@
 - Vue.js 是什么？
 - Vue 的核心特性
 - Vue 2 vs Vue 3
-- 如何安装 Vue
-- 第一个 Vue 应用
+- 为什么选择 `<script setup>`？
+- 如何安装 Vue 3
+- 第一个 Vue 3 应用
 
 ---
 
@@ -34,18 +35,25 @@ Vue.js（读音 /vjuː/，类似 "view"）是一个用于构建用户界面的�
 
 Vue 基于标准 HTML 拓展了一套模板语法，使我们能声明式地描述 HTML 输出与 JavaScript 状态之间的关系。
 
-```html
+```vue
 <!-- 声明式：告诉 Vue "我希望这里显示 count 的值" -->
-<p>Count: {{ count }}</p>
+<template>
+  <p>Count: {{ count }}</p>
+</template>
 ```
 
 #### 2. 响应性
 
 Vue 会自动跟踪 JavaScript 状态并在其发生变化时响应式地更新 DOM。
 
-```javascript
+```vue
+<script setup>
+import { ref } from 'vue'
+
+const count = ref(0)
 // 修改这个值，页面会自动更新
-this.count = 5  // 页面上的显示会立即变成 5
+count.value = 5  // 页面上的显示会立即变成 5
+</script>
 ```
 
 #### 3. 组件化
@@ -65,17 +73,87 @@ App (根组件)
 
 | 特性 | Vue 2 | Vue 3 |
 |------|-------|-------|
-| API 风格 | 主要使用选项式 API | 组合式 API + 选项式 API |
+| API 风格 | 主要使用选项式 API | **组合式 API + `<script setup>`** |
 | 响应式原理 | Object.defineProperty | Proxy (性能更好) |
-| TypeScript 支持 | 支持但不够完美 | 原生支持，更好 |
-| 性能 | 优秀 | 更快，体积更小 |
-| 组合式 API | 需要 @vue/composition-api 插件 | 内置支持 |
+| TypeScript 支持 | 支持但不够完美 | **原生支持，更好** |
+| 性能 | 优秀 | **更快，体积更小** |
+| `<script setup>` | 不支持 | **Vue 3.2+ 原生支持** |
 
-### Vue 的安装方式
+### 为什么选择 `<script setup>`？
 
-Vue 有多种安装方式，从简单到复杂：
+`<script setup>` 是 Vue 3.2 引入的编译时语法糖，用于简化组合式 API 的使用。
 
-#### 方式 1：CDN 引入（最简单，适合学习）
+#### 对比示例
+
+**传统写法（Options API）：**
+
+```vue
+<script>
+export default {
+  data() {
+    return {
+      count: 0
+    }
+  },
+  methods: {
+    increment() {
+      this.count++
+    }
+  }
+}
+</script>
+```
+
+**`<script setup>` 写法：**
+
+```vue
+<script setup>
+import { ref } from 'vue'
+
+const count = ref(0)
+const increment = () => count.value++
+</script>
+```
+
+#### `<script setup>` 的优势
+
+1. **代码更简洁**：减少约 40% 的样板代码
+2. **更好的 TypeScript 支持**：类型推断更友好
+3. **自动暴露**：顶层变量自动暴露给模板，无需 return
+4. **自动导入组件**：无需 components 选项，直接导入即可使用
+5. **更符合现代开发习惯**：类似 React Hooks 的写法
+
+---
+
+## Vue 的安装方式
+
+### 方式 1：Vite 项目（推荐，适合实际开发）
+
+```bash
+# 创建 Vue 3 + TypeScript 项目
+npm create vue@latest my-vue-app
+
+# 按照提示选择：
+# ✔ TypeScript? … Yes
+# ✔ JSX Support? … No
+# ✔ Vue Router? … Yes (可选)
+# ✔ Pinia? … Yes (可选)
+# ✔ Vitest? … No
+# ✔ Cypress? … No
+# ✔ ESLint? … Yes
+# ✔ Prettier? … Yes
+
+# 进入目录
+cd my-vue-app
+
+# 安装依赖
+npm install
+
+# 启动开发服务器
+npm run dev
+```
+
+### 方式 2：CDN 引入（最简单，适合学习）
 
 ```html
 <!DOCTYPE html>
@@ -83,8 +161,7 @@ Vue 有多种安装方式，从简单到复杂：
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vue CDN 示例</title>
-  <!-- 引入 Vue -->
+  <title>Vue 3 CDN 示例</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
@@ -98,7 +175,7 @@ Vue 有多种安装方式，从简单到复杂：
 
     createApp({
       setup() {
-        const message = ref('Hello Vue!')
+        const message = ref('Hello Vue 3!')
         const count = ref(0)
         return { message, count }
       }
@@ -108,268 +185,222 @@ Vue 有多种安装方式，从简单到复杂：
 </html>
 ```
 
-#### 方式 2：Vite 项目（推荐，适合实际开发）
-
-```bash
-# 创建 Vue 3 项目
-npm create vue@latest my-vue-app
-
-# 或创建 Vite + Vue 项目
-npm create vite@latest my-vue-app -- --template vue
-
-# 进入目录
-cd my-vue-app
-
-# 安装依赖
-npm install
-
-# 启动开发服务器
-npm run dev
-```
-
-#### 方式 3：Vue CLI（Vue 2 时代的方式）
-
-```bash
-# 全局安装 Vue CLI
-npm install -g @vue/cli
-
-# 创建项目
-vue create my-vue-app
-
-# 启动项目
-npm run serve
-```
-
 ---
 
-## 代码示例说明
+## 第一个 Vue 3 + `<script setup>` 应用
 
-### JavaScript 版本
+### 项目结构
 
-文件：`js/first-app.html`
+```
+my-vue-app/
+├── src/
+│   ├── components/       # 组件目录
+│   ├── App.vue          # 根组件
+│   └── main.ts          # 入口文件
+├── index.html
+├── package.json
+├── tsconfig.json
+└── vite.config.ts
+```
 
-```html
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>第一个 Vue 应用 - JS 版本</title>
-  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 50px auto;
-      padding: 20px;
-    }
-    .counter {
-      background: #f0f0f0;
-      padding: 20px;
-      border-radius: 8px;
-      text-align: center;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      background: #42b883;
-      color: white;
-      border: none;
-      border-radius: 4px;
-    }
-    button:hover {
-      background: #35495e;
-    }
-  </style>
-</head>
-<body>
-  <div id="app">
-    <!-- 模板语法：双大括号插值 -->
-    <h1>{{ title }}</h1>
+### 根组件示例（App.vue）
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import HelloWorld from './components/HelloWorld.vue'
+
+// 响应式数据
+const count = ref(0)
+
+// 方法
+const increment = () => {
+  count.value++
+}
+
+const decrement = () => {
+  count.value--
+}
+
+const reset = () => {
+  count.value = 0
+}
+</script>
+
+<template>
+  <div class="container">
+    <h1>欢迎使用 Vue 3 + &lt;script setup&gt;！</h1>
     
     <div class="counter">
-      <!-- 显示计数 -->
-      <p>当前计数: {{ count }}</p>
+      <h2>计数器示例</h2>
+      <p class="count">当前计数: {{ count }}</p>
       
-      <!-- 事件绑定：@click 是 v-on:click 的简写 -->
-      <button @click="increment">增加</button>
-      <button @click="decrement">减少</button>
-      <button @click="reset">重置</button>
+      <div class="buttons">
+        <button @click="decrement">-1</button>
+        <button @click="reset">重置</button>
+        <button @click="increment">+1</button>
+      </div>
     </div>
-
-    <!-- 条件渲染 -->
-    <p v-if="count > 5">计数超过 5 了！</p>
-    <p v-else-if="count < 0">计数小于 0 了！</p>
-    <p v-else>计数在正常范围内</p>
+    
+    <!-- 使用子组件 -->
+    <HelloWorld msg="Hello Vue 3" />
   </div>
+</template>
 
-  <script>
-    // 从 Vue 中提取 createApp 和 ref
-    const { createApp, ref } = Vue
+<style scoped>
+.container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
 
-    // 创建 Vue 应用
-    createApp({
-      // setup 函数是 Vue 3 组合式 API 的入口点
-      setup() {
-        // ref 用于创建响应式数据
-        // 在模板中直接使用 count，在 JavaScript 中需要使用 count.value
-        const title = ref('欢迎使用 Vue 3！')
-        const count = ref(0)
+.counter {
+  background: #f0f0f0;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  margin: 20px 0;
+}
 
-        // 定义方法
-        const increment = () => {
-          count.value++  // 修改 ref 的值需要使用 .value
-        }
+.count {
+  font-size: 24px;
+  font-weight: bold;
+  color: #42b883;
+}
 
-        const decrement = () => {
-          count.value--
-        }
+.buttons {
+  margin-top: 15px;
+}
 
-        const reset = () => {
-          count.value = 0
-        }
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  background: #42b883;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  margin: 0 5px;
+}
 
-        // 返回的数据和方法可以在模板中使用
-        return {
-          title,
-          count,
-          increment,
-          decrement,
-          reset
-        }
-      }
-    }).mount('#app')  // 挂载到 id 为 app 的元素上
-  </script>
-</body>
-</html>
+button:hover {
+  background: #35495e;
+}
+</style>
 ```
 
-### TypeScript 版本
+### 子组件示例（HelloWorld.vue）
 
-文件：`ts/first-app.html`
+```vue
+<script setup lang="ts">
+// 定义 props
+interface Props {
+  msg: string
+}
 
-```html
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>第一个 Vue 应用 - TS 版本</title>
-  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 50px auto;
-      padding: 20px;
-    }
-    .counter {
-      background: #f0f0f0;
-      padding: 20px;
-      border-radius: 8px;
-      text-align: center;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      background: #42b883;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      margin: 0 5px;
-    }
-    button:hover {
-      background: #35495e;
-    }
-  </style>
-</head>
-<body>
-  <div id="app">
-    <h1>{{ title }}</h1>
-    
-    <div class="counter">
-      <p>当前计数: {{ count }}</p>
-      <button @click="increment">增加</button>
-      <button @click="decrement">减少</button>
-      <button @click="reset">重置</button>
-    </div>
+defineProps<Props>()
+</script>
 
-    <p v-if="count > 5">计数超过 5 了！</p>
-    <p v-else-if="count < 0">计数小于 0 了！</p>
-    <p v-else>计数在正常范围内</p>
+<template>
+  <div class="hello">
+    <h2>{{ msg }}</h2>
+    <p>这是一个使用 &lt;script setup&gt; 的组件示例</p>
   </div>
+</template>
 
-  <script type="module">
-    // TypeScript 版本（实际在 HTML 中我们用类型注释来模拟）
-    const { createApp, ref } = Vue
+<style scoped>
+.hello {
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
 
-    // 在真实的 TS 项目中，你会这样写：
-    // import { createApp, ref } from 'vue'
-    // import type { Ref } from 'vue'
-
-    createApp({
-      setup() {
-        // TypeScript 中需要明确类型
-        // const title: Ref<string> = ref('欢迎使用 Vue 3！')
-        // const count: Ref<number> = ref(0)
-        
-        const title = ref('欢迎使用 Vue 3！')  // 类型推断为 string
-        const count = ref(0)                   // 类型推断为 number
-
-        const increment = (): void => {
-          count.value++
-        }
-
-        const decrement = (): void => {
-          count.value--
-        }
-
-        const reset = (): void => {
-          count.value = 0
-        }
-
-        return {
-          title,
-          count,
-          increment,
-          decrement,
-          reset
-        }
-      }
-    }).mount('#app')
-  </script>
-</body>
-</html>
+h2 {
+  color: #35495e;
+}
+</style>
 ```
 
 ---
 
-## JS 与 TS 对比
+## 代码解析
 
-| 方面 | JavaScript | TypeScript |
-|------|-----------|------------|
-| **类型检查** | 运行时才能发现类型错误 | 编译时就能发现类型错误 |
-| **代码提示** | 有限的智能提示 | 更好的代码补全和提示 |
-| **ref 声明** | `const count = ref(0)` | `const count: Ref<number> = ref(0)` 或自动推断 |
-| **方法返回类型** | 无需声明 | `(): void => {...}` |
-| **重构支持** | 较困难 | 更安全、更容易 |
-| **学习曲线** | 平缓 | 需要学习类型系统 |
+### `<script setup>` 的基本结构
 
-### 什么时候用 JS？什么时候用 TS？
+```vue
+<script setup lang="ts">
+// 1. 导入 Vue 函数
+import { ref, computed, watch } from 'vue'
 
-- **用 JavaScript**：
-  - 学习 Vue 基础知识时
-  - 小型项目或个人项目
-  - 快速原型开发
-  - 团队成员对 TS 不熟悉
+// 2. 定义响应式数据
+const count = ref(0)
+const message = ref('Hello')
 
-- **用 TypeScript**：
-  - 中大型项目
-  - 团队协作开发
-  - 需要长期维护的项目
-  - 追求代码质量和可维护性
+// 3. 定义计算属性
+const doubleCount = computed(() => count.value * 2)
+
+// 4. 定义方法
+const increment = () => {
+  count.value++
+}
+
+// 5. 使用生命周期钩子
+import { onMounted } from 'vue'
+onMounted(() => {
+  console.log('组件已挂载')
+})
+</script>
+```
+
+### 关键概念
+
+#### 1. ref - 响应式数据
+
+```vue
+<script setup>
+import { ref } from 'vue'
+
+// 创建一个响应式的值
+const count = ref(0)
+
+// 在 script 中访问需要使用 .value
+console.log(count.value)  // 0
+
+// 在 template 中直接使用，不需要 .value
+// <p>{{ count }}</p>
+</script>
+```
+
+#### 2. 自动暴露给模板
+
+```vue
+<script setup>
+// 在 <script setup> 中定义的变量、函数会自动暴露给模板
+const message = 'Hello Vue!'  // 模板中可以直接使用 {{ message }}
+
+const handleClick = () => {   // 模板中可以直接使用 @click="handleClick"
+  console.log('clicked')
+}
+</script>
+```
+
+#### 3. 组件自动导入
+
+```vue
+<script setup>
+// 直接导入组件，无需在 components 选项中注册
+import MyComponent from './MyComponent.vue'
+import AnotherComponent from './AnotherComponent.vue'
+</script>
+
+<template>
+  <!-- 直接使用导入的组件 -->
+  <MyComponent />
+  <AnotherComponent />
+</template>
+```
 
 ---
 
@@ -377,16 +408,16 @@ npm run serve
 
 ### ✅ 推荐做法
 
-1. **使用 Vite 创建项目**：现代、快速、配置简单
-2. **从 CDN 开始学习**：不需要配置环境，专注学习 Vue 本身
-3. **使用 Vue Devtools 浏览器插件**：方便调试 Vue 应用
-4. **遵循官方风格指南**：保持代码一致性
+1. **始终使用 `<script setup>`**：这是 Vue 3 官方推荐的现代写法
+2. **使用 TypeScript**：提供更好的类型安全和代码提示
+3. **使用 Vite**：现代、快速、配置简单的构建工具
+4. **使用 Vue Devtools 浏览器插件**：方便调试 Vue 应用
 
 ### ❌ 应避免的做法
 
-1. **不要混用 Vue 2 和 Vue 3 的语法**：Vue 3 虽然支持选项式 API，但某些特性有变化
+1. **不要混用 Options API 和 `<script setup>`**：选择一个风格并保持一致
 2. **不要直接修改 DOM**：让 Vue 管理 DOM，不要手动操作
-3. **不要忽略响应式原理的理解**：理解 ref 和 reactive 的区别很重要
+3. **不要忘记 `.value`**：在 script 中访问 ref 需要使用 `.value`
 
 ---
 
@@ -420,20 +451,23 @@ npm run serve
 
 - [ ] 理解什么是 Vue.js 和它的核心特性
 - [ ] 了解 Vue 2 和 Vue 3 的主要区别
+- [ ] 理解为什么选择 `<script setup>`
 - [ ] 掌握至少一种 Vue 的安装方式
-- [ ] 能够创建并运行第一个 Vue 应用
+- [ ] 能够创建并运行第一个 Vue 3 + `<script setup>` 应用
 - [ ] 理解响应式数据的概念（ref）
 - [ ] 理解模板语法（插值、事件绑定）
-- [ ] 了解 JS 和 TS 在 Vue 开发中的区别
-
----
-
-## 练习题答案
-
-详见 `practice-solution.html` 文件。
+- [ ] 了解 `<script setup>` 的基本结构
 
 ---
 
 ## 下一步
 
 完成本章学习后，进入 [第 2 章：模板语法](../02-chapter-2/README.md)，学习 Vue 模板的各种语法特性。
+
+---
+
+## 参考代码
+
+本章示例代码详见 `examples/` 目录：
+- `first-app/` - 第一个 Vue 3 + `<script setup>` 应用
+- `counter/` - 计数器示例

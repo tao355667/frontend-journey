@@ -3,475 +3,411 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>表单输入绑定 - JavaScript 版本</title>
+  <title>第二十四章：Teleport 与 Suspense - JavaScript 示例</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 40px 20px;
-    }
-    
-    .container { max-width: 800px; margin: 0 auto; }
-    
-    h1 {
-      color: white;
-      text-align: center;
-      margin-bottom: 40px;
-      font-size: 36px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    }
-    
-    .demo-card {
-      background: white;
-      border-radius: 16px;
-      padding: 30px;
-      margin-bottom: 30px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    }
-    
-    .demo-title {
-      color: #667eea;
-      font-size: 24px;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 3px solid #667eea;
-    }
-    
-    .form-group {
-      margin-bottom: 20px;
-    }
-    
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #333;
-    }
-    
-    .form-group input[type="text"],
-    .form-group input[type="email"],
-    .form-group input[type="number"],
-    .form-group textarea,
-    .form-group select {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #dee2e6;
-      border-radius: 8px;
-      font-size: 16px;
-      transition: border-color 0.3s;
-    }
-    
-    .form-group input:focus,
-    .form-group textarea:focus,
-    .form-group select:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-    
-    .form-group textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-    
-    .checkbox-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-    
-    .checkbox-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .checkbox-item input[type="checkbox"] {
-      width: 20px;
-      height: 20px;
-      cursor: pointer;
-    }
-    
-    .radio-group {
-      display: flex;
-      gap: 20px;
-    }
-    
-    .radio-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .radio-item input[type="radio"] {
-      width: 20px;
-      height: 20px;
-      cursor: pointer;
-    }
-    
-    .preview-box {
-      background: #f8f9fa;
-      border-radius: 8px;
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
       padding: 20px;
-      margin-top: 20px;
     }
-    
-    .preview-box h4 {
-      color: #667eea;
-      margin-bottom: 15px;
+    .demo-section {
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
     }
-    
-    .preview-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px solid #dee2e6;
+    .demo-title {
+      color: #42b983;
+      margin-top: 0;
     }
-    
-    .preview-item:last-child {
-      border-bottom: none;
-    }
-    
-    .preview-label {
-      font-weight: 600;
-      color: #333;
-    }
-    
-    .preview-value {
-      color: #667eea;
-    }
-    
     button {
-      padding: 12px 24px;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      font-weight: 600;
-      background: #42b883;
+      padding: 8px 16px;
+      margin: 5px;
+      background: #42b983;
       color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
     }
-    
     button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(66, 184, 131, 0.4);
+      background: #369870;
     }
-    
-    button.secondary {
-      background: #6c757d;
-    }
-    
-    .code-block {
-      background: #f8f9fa;
+    .info-box {
+      background: #f0f8ff;
       padding: 15px;
+      border-left: 4px solid #42b983;
+      margin: 10px 0;
+    }
+    /* Teleport 目标容器样式 */
+    #modals-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: auto;
+    }
+    .modal-content {
+      background: white;
+      padding: 30px;
       border-radius: 8px;
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-      color: #d63384;
-      margin-top: 15px;
-      overflow-x: auto;
+      max-width: 500px;
+      width: 90%;
+    }
+    #notifications-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1001;
+    }
+    .notification {
+      background: #42b983;
+      color: white;
+      padding: 15px 20px;
+      margin: 10px 0;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    .loading-box {
+      background: #f5f5f5;
+      padding: 40px;
+      text-align: center;
+      border-radius: 8px;
+    }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #42b983;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .overflow-hidden {
+      overflow: hidden;
+      height: 200px;
+      border: 2px solid #ff6b6b;
+      padding: 10px;
     }
   </style>
 </head>
 <body>
+  <h1>第二十四章：Teleport 与 Suspense</h1>
+  <p>本章演示 Teleport 传送门组件和 Suspense 异步组件处理。</p>
+
+  <!-- Teleport 目标容器 -->
+  <div id="modals-container"></div>
+  <div id="notifications-container"></div>
+
   <div id="app">
-    <div class="container">
-      <h1>📝 表单输入绑定演示</h1>
-      
-      <!-- Demo 1: 文本输入 -->
-      <div class="demo-card">
-        <h2 class="demo-title">1. 文本输入 (v-model)</h2>
-        
-        <div class="form-group">
-          <label>用户名 (基础绑定)</label>
-          <input v-model="form.username" placeholder="输入用户名">
-        </div>
-        
-        <div class="form-group">
-          <label>用户名带修饰符 (v-model.trim)</label>
-          <input v-model.trim="form.usernameTrim" placeholder="自动去除首尾空格">
-        </div>
-        
-        <div class="form-group">
-          <label>年龄 (v-model.number)</label>
-          <input v-model.number="form.age" type="number" placeholder="自动转为数字">
-        </div>
-        
-        <div class="form-group">
-          <label>个人简介 (v-model.lazy)</label>
-          <textarea v-model.lazy="form.bio" placeholder="失去焦点后更新"></textarea>
-        </div>
-        
-        <div class="preview-box">
-          <h4>当前数据：</h4>
-          <div class="preview-item">
-            <span class="preview-label">用户名:</span>
-            <span class="preview-value">"{{ form.username }}"</span>
-          </div>
-          <div class="preview-item">
-            <span class="preview-label">用户名(trim):</span>
-            <span class="preview-value">"{{ form.usernameTrim }}"</span>
-          </div>
-          <div class="preview-item">
-            <span class="preview-label">年龄:</span>
-            <span class="preview-value">{{ form.age }} (类型: {{ typeof form.age }})</span>
-          </div>
-          <div class="preview-item">
-            <span class="preview-label">简介:</span>
-            <span class="preview-value">"{{ form.bio }}"</span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Demo 2: 复选框 -->
-      <div class="demo-card">
-        <h2 class="demo-title">2. 复选框 (Checkbox)</h2>
-        
-        <div class="form-group">
-          <label>单个复选框 (布尔值)</label>
-          <div class="checkbox-item">
-            <input type="checkbox" v-model="form.agree" id="agree">
-            <label for="agree">我同意条款和条件</label>
-          </div>
-          <p style="margin-top: 10px; color: #667eea;">状态: {{ form.agree ? '✅ 已同意' : '❌ 未同意' }}</p>
-        </div>
-        
-        <div class="form-group">
-          <label>多个复选框 (数组)</label>
-          <div class="checkbox-group">
-            <div class="checkbox-item" v-for="hobby in hobbyOptions" :key="hobby">
-              <input 
-                type="checkbox" 
-                :value="hobby" 
-                v-model="form.hobbies"
-                :id="hobby"
-              >
-              <label :for="hobby">{{ hobby }}</label>
-            </div>
-          </div>
-          <p style="margin-top: 10px; color: #667eea;">已选: {{ form.hobbies.join(', ') || '无' }}</p>
-        </div>
-      </div>
-      
-      <!-- Demo 3: 单选按钮 -->
-      <div class="demo-card">
-        <h2 class="demo-title">3. 单选按钮 (Radio)</h2>
-        
-        <div class="form-group">
-          <label>性别</label>
-          <div class="radio-group">
-            <div class="radio-item" v-for="gender in genderOptions" :key="gender.value">
-              <input 
-                type="radio" 
-                :value="gender.value" 
-                v-model="form.gender"
-                :id="gender.value"
-              >
-              <label :for="gender.value">{{ gender.label }}</label>
-            </div>
-          </div>
-          <p style="margin-top: 10px; color: #667eea;">已选: {{ form.gender }}</p>
-        </div>
-      </div>
-      
-      <!-- Demo 4: 选择器 -->
-      <div class="demo-card">
-        <h2 class="demo-title">4. 选择器 (Select)</h2>
-        
-        <div class="form-group">
-          <label>城市 (单选)</label>
-          <select v-model="form.city">
-            <option value="">请选择城市</option>
-            <option v-for="city in cityOptions" :key="city" :value="city">
-              {{ city }}
-            </option>
-          </select>
-          <p style="margin-top: 10px; color: #667eea;">已选: {{ form.city || '未选择' }}</p>
-        </div>
-        
-        <div class="form-group">
-          <label>技能 (多选 - 按住 Ctrl/Cmd 多选)</label>
-          <select v-model="form.skills" multiple style="height: 120px;">
-            <option v-for="skill in skillOptions" :key="skill" :value="skill">
-              {{ skill }}
-            </option>
-          </select>
-          <p style="margin-top: 10px; color: #667eea;">已选: {{ form.skills.join(', ') || '无' }}</p>
-        </div>
-      </div>
-      
-      <!-- Demo 5: 完整表单 -->
-      <div class="demo-card">
-        <h2 class="demo-title">5. 完整用户注册表单</h2>
-        
-        <form @submit.prevent="handleSubmit">
-          <div class="form-group">
-            <label>邮箱 *</label>
-            <input v-model.trim="userForm.email" type="email" required placeholder="your@email.com">
-          </div>
-          
-          <div class="form-group">
-            <label>密码 *</label>
-            <input v-model="userForm.password" type="password" required placeholder="至少6位">
-          </div>
-          
-          <div class="form-group">
-            <label>确认密码 *</label>
-            <input v-model="userForm.confirmPassword" type="password" required placeholder="再次输入密码">
-          </div>
-          
-          <div class="form-group">
-            <label>用户名</label>
-            <input v-model.trim="userForm.username" placeholder="显示名称">
-          </div>
-          
-          <div class="form-group">
-            <label>年龄</label>
-            <input v-model.number="userForm.age" type="number" min="18" max="100" placeholder="18-100">
-          </div>
-          
-          <div class="form-group">
-            <label>性别</label>
-            <div class="radio-group">
-              <div class="radio-item">
-                <input type="radio" value="male" v-model="userForm.gender" id="reg-male">
-                <label for="reg-male">男</label>
-              </div>
-              <div class="radio-item">
-                <input type="radio" value="female" v-model="userForm.gender" id="reg-female">
-                <label for="reg-female">女</label>
-              </div>
-              <div class="radio-item">
-                <input type="radio" value="other" v-model="userForm.gender" id="reg-other">
-                <label for="reg-other">其他</label>
-              </div>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label>兴趣爱好</label>
-            <div class="checkbox-group">
-              <div class="checkbox-item" v-for="hobby in hobbyOptions" :key="hobby">
-                <input type="checkbox" :value="hobby" v-model="userForm.hobbies" :id="'reg-' + hobby">
-                <label :for="'reg-' + hobby">{{ hobby }}</label>
-              </div>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label>城市</label>
-            <select v-model="userForm.city">
-              <option value="">请选择</option>
-              <option v-for="city in cityOptions" :key="city" :value="city">{{ city }}</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label>个人简介</label>
-            <textarea v-model="userForm.bio" rows="3" placeholder="介绍一下你自己..."></textarea>
-          </div>
-          
-          <div class="checkbox-item" style="margin-bottom: 20px;">
-            <input type="checkbox" v-model="userForm.agreeTerms" id="agree-terms" required>
-            <label for="agree-terms">我同意用户协议和隐私政策 *</label>
-          </div>
-          
-          <div style="display: flex; gap: 10px;">
-            <button type="submit">提交注册</button>
-            <button type="button" class="secondary" @click="resetForm">重置</button>
-          </div>
-        </form>
-      </div>
+    <!-- 示例 1：Teleport 基础 -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 1：Teleport 模态框</h2>
+      <teleport-modal-demo></teleport-modal-demo>
+    </div>
+
+    <!-- 示例 2：Teleport 通知系统 -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 2：Teleport 通知系统</h2>
+      <teleport-notification-demo></teleport-notification-demo>
+    </div>
+
+    <!-- 示例 3：Suspense 基础 -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 3：Suspense 异步组件</h2>
+      <suspense-demo></suspense-demo>
+    </div>
+
+    <!-- 示例 4：Teleport + Suspense 综合 -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 4：Teleport + Suspense 综合应用</h2>
+      <combined-demo></combined-demo>
     </div>
   </div>
 
   <script>
-    const { createApp, ref, reactive } = Vue
+    const { createApp, ref, Teleport, Suspense, defineAsyncComponent } = Vue;
 
-    createApp({
+    // 示例 1：Teleport 模态框
+    const Modal = {
+      props: ['title'],
+      emits: ['close'],
+      template: `
+        <div class="modal-overlay" @click.self="$emit('close')">
+          <div class="modal-content">
+            <h3>{{ title }}</h3>
+            <slot></slot>
+            <button @click="$emit('close')" style="margin-top: 20px;">关闭</button>
+          </div>
+        </div>
+      `
+    };
+
+    const TeleportModalDemo = {
+      components: { Modal },
       setup() {
-        // Demo 1-4: 基础表单
-        const form = reactive({
-          username: '',
-          usernameTrim: '',
-          age: null,
-          bio: '',
-          agree: false,
-          hobbies: [],
-          gender: '',
-          city: '',
-          skills: []
-        })
+        const showModal = ref(false);
         
-        const hobbyOptions = ['读书', '运动', '音乐', '旅行', '游戏', '摄影']
-        const genderOptions = [
-          { value: 'male', label: '男' },
-          { value: 'female', label: '女' },
-          { value: 'other', label: '其他' }
-        ]
-        const cityOptions = ['北京', '上海', '广州', '深圳', '杭州', '成都']
-        const skillOptions = ['JavaScript', 'Python', 'Java', 'Vue', 'React', 'Node.js', 'SQL']
+        return { showModal };
+      },
+      template: `
+        <div>
+          <div class="overflow-hidden">
+            <p>这个容器设置了 overflow: hidden，如果模态框在这里渲染会被裁剪。</p>
+            <button @click="showModal = true">打开模态框</button>
+            
+            <!-- 传送到 body 下的 #modals-container -->
+            <Teleport to="#modals-container">
+              <modal 
+                v-if="showModal" 
+                title="Teleport 模态框"
+                @close="showModal = false"
+              >
+                <p>这个模态框被传送到 body 下的 #modals-container</p>
+                <p>所以不会被父容器的 overflow: hidden 影响</p>
+              </modal>
+            </Teleport>
+          </div>
+          <div class="info-box">
+            <strong>说明：</strong>打开模态框后检查元素，可以看到它被渲染在 body 下的 #modals-container 中，
+            而不是在 overflow-hidden 容器内。
+          </div>
+        </div>
+      `
+    };
+
+    // 示例 2：Teleport 通知系统
+    const TeleportNotificationDemo = {
+      setup() {
+        const notifications = ref([]);
+        let idCounter = 0;
         
-        // Demo 5: 完整表单
-        const userForm = reactive({
-          email: '',
-          password: '',
-          confirmPassword: '',
-          username: '',
-          age: null,
-          gender: 'male',
-          hobbies: [],
-          city: '',
-          bio: '',
-          agreeTerms: false
-        })
-        
-        const handleSubmit = () => {
-          if (userForm.password !== userForm.confirmPassword) {
-            alert('两次输入的密码不一致！')
-            return
-          }
+        const addNotification = (type = 'info') => {
+          const id = ++idCounter;
+          const messages = {
+            info: '这是一条信息通知',
+            success: '操作成功！',
+            warning: '请注意警告信息',
+            error: '发生错误！'
+          };
           
-          alert('注册成功！\n\n' + JSON.stringify({
-            邮箱: userForm.email,
-            用户名: userForm.username,
-            性别: userForm.gender,
-            城市: userForm.city,
-            兴趣: userForm.hobbies.join(', ') || '无'
-          }, null, 2))
-        }
+          notifications.value.push({
+            id,
+            message: messages[type],
+            type
+          });
+          
+          // 3秒后自动移除
+          setTimeout(() => {
+            removeNotification(id);
+          }, 3000);
+        };
         
-        const resetForm = () => {
-          Object.keys(userForm).forEach(key => {
-            if (Array.isArray(userForm[key])) {
-              userForm[key] = []
-            } else if (typeof userForm[key] === 'boolean') {
-              userForm[key] = false
-            } else if (typeof userForm[key] === 'number') {
-              userForm[key] = null
-            } else {
-              userForm[key] = ''
-            }
-          })
-          userForm.gender = 'male'
-        }
+        const removeNotification = (id) => {
+          notifications.value = notifications.value.filter(n => n.id !== id);
+        };
         
         return {
-          form,
-          hobbyOptions,
-          genderOptions,
-          cityOptions,
-          skillOptions,
-          userForm,
-          handleSubmit,
-          resetForm
-        }
+          notifications,
+          addNotification,
+          removeNotification
+        };
+      },
+      template: `
+        <div>
+          <button @click="addNotification('info')">信息通知</button>
+          <button @click="addNotification('success')">成功通知</button>
+          <button @click="addNotification('warning')">警告通知</button>
+          <button @click="addNotification('error')">错误通知</button>
+          
+          <!-- 所有通知传送到固定位置 -->
+          <Teleport to="#notifications-container">
+            <div 
+              v-for="notification in notifications" 
+              :key="notification.id"
+              class="notification"
+              @click="removeNotification(notification.id)"
+            >
+              {{ notification.message }}
+            </div>
+          </Teleport>
+          
+          <div class="info-box" style="margin-top: 20px;">
+            <strong>说明：</strong>通知会自动显示在右上角，3秒后自动消失，点击也可以关闭。
+          </div>
+        </div>
+      `
+    };
+
+    // 示例 3：Suspense 异步组件
+    const AsyncUserList = {
+      async setup() {
+        const users = ref([]);
+        
+        // 模拟异步数据获取
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        users.value = [
+          { id: 1, name: '张三', email: 'zhangsan@example.com' },
+          { id: 2, name: '李四', email: 'lisi@example.com' },
+          { id: 3, name: '王五', email: 'wangwu@example.com' },
+        ];
+        
+        return { users };
+      },
+      template: `
+        <div>
+          <h3>用户列表</h3>
+          <ul>
+            <li v-for="user in users" :key="user.id">
+              {{ user.name }} - {{ user.email }}
+            </li>
+          </ul>
+        </div>
+      `
+    };
+
+    const SuspenseDemo = {
+      components: { Suspense },
+      setup() {
+        const showComponent = ref(false);
+        
+        return { showComponent };
+      },
+      template: `
+        <div>
+          <button @click="showComponent = !showComponent">
+            {{ showComponent ? '卸载' : '加载' }}组件
+          </button>
+          
+          <Suspense v-if="showComponent">
+            <template #default>
+              <async-user-list />
+            </template>
+            <template #fallback>
+              <div class="loading-box">
+                <div class="spinner"></div>
+                <p>正在加载用户数据...</p>
+              </div>
+            </template>
+          </Suspense>
+        </div>
+      `
+    };
+
+    // 示例 4：综合应用
+    const AsyncDashboard = {
+      async setup() {
+        const stats = ref({});
+        
+        // 模拟异步加载仪表板数据
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        stats.value = {
+          users: 1234,
+          orders: 567,
+          revenue: 89000
+        };
+        
+        return { stats };
+      },
+      template: `
+        <div>
+          <h3>仪表板</h3>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0;">
+            <div style="background: #42b983; color: white; padding: 20px; border-radius: 8px;">
+              <h4>用户</h4>
+              <p style="font-size: 24px; margin: 0;">{{ stats.users }}</p>
+            </div>
+            <div style="background: #409eff; color: white; padding: 20px; border-radius: 8px;">
+              <h4>订单</h4>
+              <p style="font-size: 24px; margin: 0;">{{ stats.orders }}</p>
+            </div>
+            <div style="background: #e6a23c; color: white; padding: 20px; border-radius: 8px;">
+              <h4>收入</h4>
+              <p style="font-size: 24px; margin: 0;">¥{{ stats.revenue }}</p>
+            </div>
+          </div>
+        </div>
+      `
+    };
+
+    const CombinedDemo = {
+      components: { Suspense, Modal },
+      setup() {
+        const showDashboard = ref(false);
+        
+        return { showDashboard };
+      },
+      template: `
+        <div>
+          <button @click="showDashboard = true">打开异步仪表板</button>
+          
+          <Teleport to="#modals-container">
+            <div v-if="showDashboard" class="modal-overlay" @click.self="showDashboard = false">
+              <div class="modal-content" style="max-width: 700px;">
+                <Suspense>
+                  <template #default>
+                    <async-dashboard />
+                  </template>
+                  <template #fallback>
+                    <div class="loading-box">
+                      <div class="spinner"></div>
+                      <p>加载仪表板数据...</p>
+                    </div>
+                  </template>
+                </Suspense>
+                <button @click="showDashboard = false" style="margin-top: 20px;">关闭</button>
+              </div>
+            </div>
+          </Teleport>
+          
+          <div class="info-box" style="margin-top: 20px;">
+            <strong>综合应用：</strong>使用 Teleport 将模态框传送到 body，
+            内部使用 Suspense 处理异步组件加载，显示加载状态。
+          </div>
+        </div>
+      `
+    };
+
+    createApp({
+      components: {
+        TeleportModalDemo,
+        TeleportNotificationDemo,
+        SuspenseDemo,
+        CombinedDemo
       }
-    }).mount('#app')
+    }).mount('#app');
   </script>
 </body>
 </html>

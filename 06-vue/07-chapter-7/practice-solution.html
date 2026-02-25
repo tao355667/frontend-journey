@@ -3,668 +3,184 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>第 7 章练习题答案</title>
+  <title>第二十一章练习题答案 - computed 与 watch</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 40px 20px;
-    }
-    
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-    
-    h1 {
-      color: white;
-      text-align: center;
-      margin-bottom: 40px;
-      font-size: 36px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    }
-    
-    .exercise-card {
-      background: white;
-      border-radius: 16px;
-      padding: 30px;
-      margin-bottom: 30px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    }
-    
-    .exercise-title {
-      color: #667eea;
-      font-size: 24px;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 3px solid #667eea;
-    }
-    
-    /* 基础练习：用户资料卡片 */
-    .profile-card {
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      border-radius: 16px;
-      padding: 30px;
-      text-align: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    
-    .avatar {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: #667eea;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 20px;
-      font-size: 48px;
-      color: white;
-    }
-    
-    .welcome-message {
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    
-    .welcome-admin { color: #dc3545; }
-    .welcome-user { color: #28a745; }
-    .welcome-guest { color: #6c757d; }
-    
-    .controls {
-      display: flex;
-      gap: 10px;
-      margin: 20px 0;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      font-weight: 600;
-      background: #42b883;
-      color: white;
-    }
-    
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(66, 184, 131, 0.4);
-    }
-    
-    button.secondary { background: #6c757d; }
-    button.warning { background: #ffc107; color: #212529; }
-    
-    .details-section {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      margin-top: 20px;
-      text-align: left;
-    }
-    
-    .detail-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid #eee;
-    }
-    
-    .detail-row:last-child {
-      border-bottom: none;
-    }
-    
-    /* 进阶练习：权限管理系统 */
-    .admin-panel, .user-panel, .guest-panel {
-      padding: 30px;
-      border-radius: 12px;
-      margin-top: 20px;
-    }
-    
-    .admin-panel {
-      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
-      color: white;
-    }
-    
-    .user-panel {
-      background: linear-gradient(135deg, #42b883 0%, #369870 100%);
-      color: white;
-    }
-    
-    .guest-panel {
-      background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-      color: white;
-    }
-    
-    .view-toggle {
-      display: flex;
-      gap: 10px;
-      margin: 20px 0;
-    }
-    
-    .view-toggle button {
-      background: white;
-      color: #667eea;
-    }
-    
-    .view-toggle button.active {
-      background: #667eea;
-      color: white;
-    }
-    
-    .user-list {
-      display: grid;
-      gap: 15px;
-    }
-    
-    .user-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 15px;
-    }
-    
-    .user-list-item, .user-grid-item {
-      background: rgba(255,255,255,0.9);
-      padding: 15px;
-      border-radius: 8px;
-      color: #333;
-    }
-    
-    /* 挑战练习：多步骤表单 */
-    .wizard-container {
-      background: #f8f9fa;
-      border-radius: 16px;
-      padding: 30px;
-    }
-    
-    .step-indicator {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 30px;
-      position: relative;
-    }
-    
-    .step-indicator::before {
-      content: '';
-      position: absolute;
-      top: 20px;
-      left: 10%;
-      right: 10%;
-      height: 4px;
-      background: #dee2e6;
-      z-index: 0;
-    }
-    
-    .step {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-      z-index: 1;
-    }
-    
-    .step-number {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: #dee2e6;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      margin-bottom: 8px;
-      transition: all 0.3s ease;
-    }
-    
-    .step.active .step-number {
-      background: #667eea;
-      color: white;
-    }
-    
-    .step.completed .step-number {
-      background: #42b883;
-      color: white;
-    }
-    
-    .step-label {
-      font-size: 14px;
-      color: #6c757d;
-    }
-    
-    .step-content {
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      margin: 20px 0;
-      min-height: 200px;
-    }
-    
-    .form-group {
-      margin-bottom: 20px;
-    }
-    
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #333;
-    }
-    
-    .form-group input,
-    .form-group select {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #dee2e6;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-    
-    .form-group input:focus,
-    .form-group select:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-    
-    .wizard-nav {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
-    }
-    
-    .preference-options {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-    }
-    
-    .preference-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 15px;
-      background: #f8f9fa;
-      border-radius: 8px;
-    }
-    
-    .confirmation-box {
-      background: #e7f3ff;
-      border: 2px solid #667eea;
-      border-radius: 12px;
-      padding: 20px;
-    }
-    
-    .confirmation-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid #dee2e6;
-    }
-    
-    .success-message {
-      text-align: center;
-      padding: 40px;
-    }
-    
-    .success-icon {
-      font-size: 64px;
-      margin-bottom: 20px;
-    }
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
+    .exercise { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .exercise-title { color: #42b983; border-bottom: 2px solid #42b983; padding-bottom: 10px; }
+    button { padding: 10px 20px; margin: 5px; background: #42b983; color: white; border: none; border-radius: 4px; }
+    input { padding: 8px; margin: 5px; width: 80px; }
+    .grade { font-size: 24px; font-weight: bold; color: #42b983; }
+    .warning { background: #fff3cd; padding: 10px; border-radius: 4px; margin: 10px 0; }
   </style>
 </head>
 <body>
+  <h1>第二十一章练习题答案</h1>
   <div id="app">
-    <div class="container">
-      <h1>🎯 第 7 章练习题答案</h1>
-      
-      <!-- 基础练习 -->
-      <div class="exercise-card">
-        <h2 class="exercise-title">基础练习：用户资料卡片</h2>
-        
-        <div class="profile-card">
-          <div class="avatar">
-            {{ isLoggedIn ? '👤' : '👋' }}
-          </div>
-          
-          <div v-if="isLoggedIn" :class="['welcome-message', `welcome-${userRole}`]">
-            <span v-if="userRole === 'admin'">👑 欢迎管理员回来！</span>
-            <span v-else-if="userRole === 'user'">👤 欢迎回来，亲爱的用户！</span>
-            <span v-else>🚪 欢迎访客！</span>
-          </div>
-          <div v-else class="welcome-message welcome-guest">
-            🚪 请先登录
-          </div>
-          
-          <div class="controls">
-            <button @click="toggleLogin">
-              {{ isLoggedIn ? '退出登录' : '点击登录' }}
-            </button>
-          </div>
-          
-          <div v-if="isLoggedIn" class="controls">
-            <button @click="setRole('admin')">设为管理员</button>
-            <button @click="setRole('user')" class="secondary">设为用户</button>
-            <button @click="setRole('guest')" class="warning">设为访客</button>
-          </div>
-          
-          <!-- v-show 控制详细信息 -->
-          <button @click="showDetails = !showDetails" class="secondary" style="margin-top: 20px;">
-            {{ showDetails ? '隐藏' : '显示' }}详细信息
-          </button>
-          
-          <div v-show="showDetails && isLoggedIn" class="details-section">
-            <div class="detail-row">
-              <span>用户角色：</span>
-              <span>{{ userRole === 'admin' ? '管理员' : userRole === 'user' ? '普通用户' : '访客' }}</span>
-            </div>
-            <div class="detail-row">
-              <span>用户ID：</span>
-              <span>user_{{ Math.floor(Math.random() * 10000) }}</span>
-            </div>
-            <div class="detail-row">
-              <span>注册时间：</span>
-              <span>2024-01-01</span>
-            </div>
-            <div class="detail-row">
-              <span>最后登录：</span>
-              <span>{{ new Date().toLocaleString() }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- 进阶练习 -->
-      <div class="exercise-card">
-        <h2 class="exercise-title">进阶练习：权限管理系统</h2>
-        
-        <div class="controls">
-          <button @click="setSystemRole('admin')">管理员视图</button>
-          <button @click="setSystemRole('user')" class="secondary">用户视图</button>
-          <button @click="setSystemRole('guest')" class="warning">访客视图</button>
-          <button @click="toggleLoginStatus" style="margin-left: auto;">
-            {{ systemLoggedIn ? '退出' : '登录' }}
-          </button>
-        </div>
-        
-        <!-- 三级权限显示 -->
-        <div v-if="!systemLoggedIn" class="guest-panel">
-          <h3>🔒 请先登录</h3>
-          <p>您当前处于未登录状态，只能查看公开信息</p>
-        </div>
-        
-        <div v-else-if="systemRole === 'admin'" class="admin-panel">
-          <h3>👑 管理员控制面板</h3>
-          <p>您拥有最高权限，可以管理所有用户和系统设置</p>
-          <div style="margin-top: 20px;">
-            <button class="secondary" style="margin-right: 10px;">用户管理</button>
-            <button class="secondary" style="margin-right: 10px;">系统设置</button>
-            <button class="secondary">数据报表</button>
-          </div>
-        </div>
-        
-        <div v-else-if="systemRole === 'user'" class="user-panel">
-          <h3>👤 用户中心</h3>
-          <p>欢迎使用系统！您可以查看和编辑自己的信息</p>
-          <div style="margin-top: 20px;">
-            <button class="secondary" style="margin-right: 10px;">个人资料</button>
-            <button class="secondary">我的订单</button>
-          </div>
-        </div>
-        
-        <div v-else class="guest-panel">
-          <h3>🚪 访客模式</h3>
-          <p>您只能浏览公开内容，如需更多功能请注册用户</p>
-        </div>
-        
-        <!-- 视图模式切换 -->
-        <div class="view-toggle" v-if="systemLoggedIn">
-          <button 
-            :class="{ active: viewMode === 'list' }" 
-            @click="viewMode = 'list'"
-          >
-            📋 列表视图
-          </button>
-          <button 
-            :class="{ active: viewMode === 'grid' }" 
-            @click="viewMode = 'grid'"
-          >
-            🔲 网格视图
-          </button>
-        </div>
-        
-        <!-- 列表视图 -->
-        <div v-show="viewMode === 'list' && systemLoggedIn" class="user-list">
-          <div class="user-list-item" v-for="i in 3" :key="i">
-            <strong>用户 {{ i }}</strong> - 角色: {{ systemRole }}
-          </div>
-        </div>
-        
-        <!-- 网格视图 -->
-        <div v-show="viewMode === 'grid' && systemLoggedIn" class="user-grid">
-          <div class="user-grid-item" v-for="i in 6" :key="i">
-            <div style="font-size: 32px; margin-bottom: 10px;">👤</div>
-            <div>用户 {{ i }}</div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- 挑战练习 -->
-      <div class="exercise-card">
-        <h2 class="exercise-title">挑战练习：多步骤表单向导</h2>
-        
-        <div class="wizard-container">
-          <!-- 步骤指示器 -->
-          <div class="step-indicator">
-            <div 
-              v-for="step in steps" 
-              :key="step.number"
-              :class="['step', { 
-                active: currentStep === step.number,
-                completed: currentStep > step.number 
-              }]"
-            >
-              <div class="step-number">
-                {{ currentStep > step.number ? '✓' : step.number }}
-              </div>
-              <div class="step-label">{{ step.label }}</div>
-            </div>
-          </div>
-          
-          <!-- 步骤内容 -->
-          <div class="step-content">
-            <!-- 步骤 1：用户信息 -->
-            <div v-if="currentStep === 1">
-              <h3>👤 步骤 1：用户信息</h3>
-              <div class="form-group">
-                <label>姓名 *</label>
-                <input v-model="formData.name" placeholder="请输入您的姓名">
-              </div>
-              <div class="form-group">
-                <label>邮箱 *</label>
-                <input v-model="formData.email" type="email" placeholder="请输入您的邮箱">
-              </div>
-            </div>
-            
-            <!-- 步骤 2：偏好设置 -->
-            <div v-else-if="currentStep === 2">
-              <h3>⚙️ 步骤 2：偏好设置</h3>
-              <div class="preference-options">
-                <div class="preference-item">
-                  <label>主题：</label>
-                  <select v-model="formData.theme">
-                    <option value="light">浅色</option>
-                    <option value="dark">深色</option>
-                    <option value="auto">自动</option>
-                  </select>
-                </div>
-                <div class="preference-item">
-                  <label>通知：</label>
-                  <input type="checkbox" v-model="formData.notifications"> 启用通知
-                </div>
-              </div>
-            </div>
-            
-            <!-- 步骤 3：确认页面 -->
-            <div v-else-if="currentStep === 3">
-              <h3>✅ 步骤 3：确认信息</h3>
-              <div class="confirmation-box">
-                <div class="confirmation-item">
-                  <span>姓名：</span>
-                  <span>{{ formData.name || '未填写' }}</span>
-                </div>
-                <div class="confirmation-item">
-                  <span>邮箱：</span>
-                  <span>{{ formData.email || '未填写' }}</span>
-                </div>
-                <div class="confirmation-item">
-                  <span>主题：</span>
-                  <span>{{ formData.theme === 'light' ? '浅色' : formData.theme === 'dark' ? '深色' : '自动' }}</span>
-                </div>
-                <div class="confirmation-item">
-                  <span>通知：</span>
-                  <span>{{ formData.notifications ? '已启用' : '未启用' }}</span>
-                </div>
-              </div>
-            </div>
-            
-            <!-- 完成页面 -->
-            <div v-else class="success-message">
-              <div class="success-icon">🎉</div>
-              <h3>注册成功！</h3>
-              <p>欢迎加入我们，{{ formData.name }}！</p>
-              <button @click="resetWizard" class="secondary" style="margin-top: 20px;">
-                重新开始
-              </button>
-            </div>
-          </div>
-          
-          <!-- 导航按钮 -->
-          <div class="wizard-nav" v-if="currentStep <= 3">
-            <button 
-              @click="prevStep" 
-              :disabled="currentStep === 1"
-              class="secondary"
-            >
-              上一步
-            </button>
-            <button @click="nextStep">
-              {{ currentStep === 3 ? '完成' : '下一步' }}
-            </button>
-          </div>
-        </div>
-      </div>
+    <div class="exercise">
+      <h2 class="exercise-title">练习 1：成绩计算器</h2>
+      <grade-calculator></grade-calculator>
+    </div>
+    <div class="exercise">
+      <h2 class="exercise-title">练习 2：实时汇率转换器</h2>
+      <currency-converter></currency-converter>
+    </div>
+    <div class="exercise">
+      <h2 class="exercise-title">练习 3：用户资料管理器</h2>
+      <user-profile-manager></user-profile-manager>
     </div>
   </div>
 
   <script>
-    const { createApp, ref } = Vue
+    const { createApp, ref, reactive, computed, watch, watchEffect } = Vue;
 
-    createApp({
+    // 练习 1：成绩计算器
+    const GradeCalculator = {
       setup() {
-        // 基础练习
-        const isLoggedIn = ref(false)
-        const userRole = ref('guest')
-        const showDetails = ref(false)
+        const scores = ref([85, 90, 78]);
         
-        const toggleLogin = () => {
-          isLoggedIn.value = !isLoggedIn.value
-          if (!isLoggedIn.value) {
-            userRole.value = 'guest'
+        const total = computed(() => scores.value.reduce((a, b) => a + b, 0));
+        const average = computed(() => (total.value / scores.value.length).toFixed(1));
+        const grade = computed(() => {
+          const avg = parseFloat(average.value);
+          if (avg >= 90) return 'A';
+          if (avg >= 80) return 'B';
+          if (avg >= 70) return 'C';
+          if (avg >= 60) return 'D';
+          return 'F';
+        });
+        
+        watch(scores, (newVal) => {
+          newVal.forEach((score, index) => {
+            if (score < 0) scores.value[index] = 0;
+            if (score > 100) scores.value[index] = 100;
+          });
+        }, { deep: true });
+        
+        return { scores, total, average, grade };
+      },
+      template: `
+        <div>
+          <div v-for="(score, index) in scores" :key="index">
+            科目 {{ index + 1 }}: <input v-model.number="scores[index]" type="number" min="0" max="100">
+          </div>
+          <p>总分：{{ total }}</p>
+          <p>平均分：{{ average }}</p>
+          <p class="grade">等级：{{ grade }}</p>
+        </div>
+      `
+    };
+
+    // 练习 2：汇率转换器
+    const CurrencyConverter = {
+      setup() {
+        const rmb = ref(100);
+        const warning = ref('');
+        
+        const rates = {
+          usd: 0.14,
+          eur: 0.13,
+          jpy: 20.5
+        };
+        
+        const usd = computed(() => (rmb.value * rates.usd).toFixed(2));
+        const eur = computed(() => (rmb.value * rates.eur).toFixed(2));
+        const jpy = computed(() => (rmb.value * rates.jpy).toFixed(2));
+        
+        watchEffect(() => {
+          console.log(`转换日志：${rmb.value} RMB`);
+          if (rmb.value > 10000) {
+            warning.value = '警告：金额超过 10000！';
+          } else {
+            warning.value = '';
           }
-        }
+        });
         
-        const setRole = (role) => {
-          userRole.value = role
-        }
-        
-        // 进阶练习
-        const systemLoggedIn = ref(true)
-        const systemRole = ref('admin')
-        const viewMode = ref('list')
-        
-        const setSystemRole = (role) => {
-          systemRole.value = role
-          if (role !== 'guest') {
-            systemLoggedIn.value = true
-          }
-        }
-        
-        const toggleLoginStatus = () => {
-          systemLoggedIn.value = !systemLoggedIn.value
-        }
-        
-        // 挑战练习
-        const currentStep = ref(1)
-        const steps = [
-          { number: 1, label: '用户信息' },
-          { number: 2, label: '偏好设置' },
-          { number: 3, label: '确认' }
-        ]
-        
-        const formData = ref({
+        return { rmb, usd, eur, jpy, warning };
+      },
+      template: `
+        <div>
+          <p>人民币：<input v-model.number="rmb" type="number"></p>
+          <p>美元：${{ usd }}</p>
+          <p>欧元：€{{ eur }}</p>
+          <p>日元：¥{{ jpy }}</p>
+          <div v-if="warning" class="warning">{{ warning }}</div>
+        </div>
+      `
+    };
+
+    // 练习 3：用户资料管理器
+    const UserProfileManager = {
+      setup() {
+        const user = reactive({
           name: '',
           email: '',
-          theme: 'light',
-          notifications: true
-        })
+          phone: '',
+          age: ''
+        });
         
-        const nextStep = () => {
-          if (currentStep.value < 4) {
-            currentStep.value++
+        const emailError = ref('');
+        const savedData = ref(null);
+        
+        const completion = computed(() => {
+          const fields = ['name', 'email', 'phone', 'age'];
+          const filled = fields.filter(f => user[f]).length;
+          return (filled / fields.length * 100).toFixed(0);
+        });
+        
+        const isValid = computed(() => {
+          return completion.value === '100' && !emailError.value;
+        });
+        
+        const card = computed(() => {
+          return `${user.name || '未命名'} | ${user.email || '无邮箱'} | ${user.phone || '无电话'} | ${user.age || '无年龄'}岁`;
+        });
+        
+        watch(() => user.email, (newVal) => {
+          if (newVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newVal)) {
+            emailError.value = '邮箱格式不正确';
+          } else {
+            emailError.value = '';
           }
-        }
+        });
         
-        const prevStep = () => {
-          if (currentStep.value > 1) {
-            currentStep.value--
+        watchEffect(() => {
+          localStorage.setItem('userProfile', JSON.stringify(user));
+        });
+        
+        const loadFromStorage = () => {
+          const saved = localStorage.getItem('userProfile');
+          if (saved) {
+            savedData.value = JSON.parse(saved);
+            Object.assign(user, savedData.value);
           }
-        }
+        };
         
-        const resetWizard = () => {
-          currentStep.value = 1
-          formData.value = {
-            name: '',
-            email: '',
-            theme: 'light',
-            notifications: true
-          }
-        }
-        
-        return {
-          // 基础练习
-          isLoggedIn,
-          userRole,
-          showDetails,
-          toggleLogin,
-          setRole,
-          // 进阶练习
-          systemLoggedIn,
-          systemRole,
-          viewMode,
-          setSystemRole,
-          toggleLoginStatus,
-          // 挑战练习
-          currentStep,
-          steps,
-          formData,
-          nextStep,
-          prevStep,
-          resetWizard
-        }
-      }
-    }).mount('#app')
+        return { user, completion, isValid, card, emailError, loadFromStorage };
+      },
+      template: `
+        <div>
+          <p>资料完成度：{{ completion }}%</p>
+          <div class="form-group">
+            <input v-model="user.name" placeholder="姓名">
+            <input v-model="user.email" placeholder="邮箱">
+            <span v-if="emailError" style="color: red;">{{ emailError }}</span>
+          </div>
+          <div class="form-group">
+            <input v-model="user.phone" placeholder="手机">
+            <input v-model="user.age" placeholder="年龄" type="number">
+          </div>
+          <p>资料卡片：{{ card }}</p>
+          <p>是否有效：{{ isValid ? '是' : '否' }}</p>
+          <button @click="loadFromStorage">从 localStorage 恢复</button>
+        </div>
+      `
+    };
+
+    createApp({
+      components: { GradeCalculator, CurrencyConverter, UserProfileManager }
+    }).mount('#app');
   </script>
 </body>
 </html>

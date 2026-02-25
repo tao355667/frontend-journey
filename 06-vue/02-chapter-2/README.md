@@ -2,7 +2,7 @@
 
 ## 本章目的
 
-掌握 Vue 模板语法的核心概念，包括插值表达式、指令系统和修饰符，能够使用模板语法将数据渲染到页面上。
+掌握 Vue 模板语法的核心概念，包括插值表达式、指令系统和修饰符，能够在 `<script setup>` 中使用模板语法将数据渲染到页面上。
 
 ---
 
@@ -39,52 +39,54 @@
 
 最基本的数据绑定形式，使用双大括号 `{{ }}`：
 
-```html
-<span>Message: {{ msg }}</span>
+```vue
+<template>
+  <span>Message: {{ msg }}</span>
+</template>
+
+<script setup>
+const msg = 'Hello Vue!'
+</script>
 ```
 
 **生活类比**：就像填空题，双大括号是下划线，Vue 会帮你把答案填进去。
 
 #### 示例
 
-```html
-<div id="app">
-  <!-- 简单文本插值 -->
-  <p>用户名: {{ username }}</p>
-  
-  <!-- 支持表达式 -->
-  <p>价格: ¥{{ price }}</p>
-  <p>折扣价: ¥{{ price * 0.8 }}</p>
-  <p>全名: {{ firstName + ' ' + lastName }}</p>
-</div>
-
-<script>
-const { createApp } = Vue
-
-createApp({
-  data() {
-    return {
-      username: '张三',
-      price: 100,
-      firstName: '张',
-      lastName: '三'
-    }
-  }
-}).mount('#app')
+```vue
+<script setup>
+const username = '张三'
+const price = 100
+const firstName = '张'
+const lastName = '三'
 </script>
+
+<template>
+  <div>
+    <!-- 简单文本插值 -->
+    <p>用户名: {{ username }}</p>
+    
+    <!-- 支持表达式 -->
+    <p>价格: ¥{{ price }}</p>
+    <p>折扣价: ¥{{ price * 0.8 }}</p>
+    <p>全名: {{ firstName + ' ' + lastName }}</p>
+  </div>
+</template>
 ```
 
 #### 注意：只能写表达式，不能写语句
 
-```html
-<!-- ✓ 正确：这是表达式 -->
-{{ number + 1 }}
-{{ ok ? 'YES' : 'NO' }}
-{{ message.split('').reverse().join('') }}
+```vue
+<template>
+  <!-- ✓ 正确：这是表达式 -->
+  <p>{{ number + 1 }}</p>
+  <p>{{ ok ? 'YES' : 'NO' }}</p>
+  <p>{{ message.split('').reverse().join('') }}</p>
 
-<!-- ✗ 错误：这些是语句 -->
-{{ var a = 1 }}
-{{ if (ok) { return message } }}
+  <!-- ✗ 错误：这些是语句 -->
+  <!-- {{ var a = 1 }} -->
+  <!-- {{ if (ok) { return message } }} -->
+</template>
 ```
 
 ---
@@ -93,17 +95,15 @@ createApp({
 
 双大括号会将数据解析为纯文本，如果内容是 HTML 字符串，需要使用 `v-html` 指令：
 
-```html
-<p>纯文本: {{ rawHtml }}</p>
-<p>HTML渲染: <span v-html="rawHtml"></span></p>
-```
+```vue
+<script setup>
+const rawHtml = '<span style="color: red">这段文字应该是红色的</span>'
+</script>
 
-```javascript
-data() {
-  return {
-    rawHtml: '<span style="color: red">这段文字应该是红色的</span>'
-  }
-}
+<template>
+  <p>纯文本: {{ rawHtml }}</p>
+  <p>HTML渲染: <span v-html="rawHtml"></span></p>
+</template>
 ```
 
 ⚠️ **安全警告**：在网站上动态渲染任意 HTML 是非常危险的，容易导致 XSS 攻击。请确保内容可信。
@@ -116,32 +116,30 @@ data() {
 
 HTML 属性不能使用双大括号，需要使用 `v-bind` 指令：
 
-```html
-<!-- 完整写法 -->
-<div v-bind:id="dynamicId"></div>
-
-<!-- 简写（强烈推荐） -->
-<div :id="dynamicId"></div>
-
-<!-- 布尔属性 -->
-<button :disabled="isDisabled">按钮</button>
-
-<!-- 动态绑定多个属性 -->
-<div v-bind="objectOfAttrs"></div>
-```
-
-```javascript
-data() {
-  return {
-    dynamicId: 'user-' + 123,
-    isDisabled: true,
-    objectOfAttrs: {
-      id: 'container',
-      class: 'wrapper',
-      style: 'background-color: red'
-    }
-  }
+```vue
+<script setup>
+const dynamicId = 'user-' + 123
+const isDisabled = true
+const objectOfAttrs = {
+  id: 'container',
+  class: 'wrapper',
+  style: 'background-color: red'
 }
+</script>
+
+<template>
+  <!-- 完整写法 -->
+  <div v-bind:id="dynamicId"></div>
+
+  <!-- 简写（强烈推荐） -->
+  <div :id="dynamicId"></div>
+
+  <!-- 布尔属性 -->
+  <button :disabled="isDisabled">按钮</button>
+
+  <!-- 动态绑定多个属性 -->
+  <div v-bind="objectOfAttrs"></div>
+</template>
 ```
 
 #### 布尔属性
@@ -150,9 +148,11 @@ data() {
 - 值为真值（truthy）：属性存在
 - 值为假值（falsy）：属性移除
 
-```html
-<!-- 当 isDisabled 为 false 时，disabled 属性会被移除 -->
-<button :disabled="isDisabled">点击</button>
+```vue
+<template>
+  <!-- 当 isDisabled 为 false 时，disabled 属性会被移除 -->
+  <button :disabled="isDisabled">点击</button>
+</template>
 ```
 
 **生活类比**：属性绑定就像给物品贴标签，`:id` 就是"请在这个位置贴上 id 标签"。
@@ -178,40 +178,44 @@ data() {
 
 有些指令需要一个参数，在指令名后通过一个冒号指明：
 
-```html
-<!-- v-bind 绑定 href 属性 -->
-<a v-bind:href="url">...</a>
-<a :href="url">...</a>
+```vue
+<template>
+  <!-- v-bind 绑定 href 属性 -->
+  <a v-bind:href="url">...</a>
+  <a :href="url">...</a>
 
-<!-- v-on 监听 click 事件 -->
-<button v-on:click="doSomething">...</button>
-<button @click="doSomething">...</button>
+  <!-- v-on 监听 click 事件 -->
+  <button v-on:click="doSomething">...</button>
+  <button @click="doSomething">...</button>
+</template>
 ```
 
 #### 动态参数
 
 可以用方括号括起来的 JavaScript 表达式作为参数：
 
-```html
-<!-- attributeName 可以是 'href'、'src'、'title' 等 -->
-<a v-bind:[attributeName]="url">...</a>
+```vue
+<script setup>
+const attributeName = 'href'
+const eventName = 'click'
+const url = 'https://vuejs.org'
 
-<!-- 简写 -->
-<a :[attributeName]="url">...</a>
-
-<!-- 同样适用于事件 -->
-<button v-on:[eventName]="doSomething">...</button>
-<button @[eventName]="doSomething">...</button>
-```
-
-```javascript
-data() {
-  return {
-    attributeName: 'href',
-    eventName: 'click',
-    url: 'https://vuejs.org'
-  }
+const doSomething = () => {
+  console.log('clicked')
 }
+</script>
+
+<template>
+  <!-- attributeName 可以是 'href'、'src'、'title' 等 -->
+  <a v-bind:[attributeName]="url">...</a>
+
+  <!-- 简写 -->
+  <a :[attributeName]="url">...</a>
+
+  <!-- 同样适用于事件 -->
+  <button v-on:[eventName]="doSomething">...</button>
+  <button @[eventName]="doSomething">...</button>
+</template>
 ```
 
 **生活类比**：静态参数是"请绑定 href"，动态参数是"请绑定 attributeName 变量所指的属性"。
@@ -222,80 +226,140 @@ data() {
 
 修饰符是以点开头的特殊后缀，用于指出指令应以特殊方式绑定：
 
-```html
-<!-- .prevent 修饰符：阻止默认行为 -->
-<form @submit.prevent="onSubmit">...</form>
+```vue
+<template>
+  <!-- .prevent 修饰符：阻止默认行为 -->
+  <form @submit.prevent="onSubmit">...</form>
 
-<!-- .stop 修饰符：阻止事件冒泡 -->
-<button @click.stop="doSomething">...</button>
+  <!-- .stop 修饰符：阻止事件冒泡 -->
+  <button @click.stop="doSomething">...</button>
 
-<!-- .lazy 修饰符：失去焦点后更新 -->
-<input v-model.lazy="msg" />
+  <!-- .lazy 修饰符：失去焦点后更新 -->
+  <input v-model.lazy="msg" />
 
-<!-- .number 修饰符：自动转换为数字 -->
-<input v-model.number="age" />
+  <!-- .number 修饰符：自动转换为数字 -->
+  <input v-model.number="age" />
 
-<!-- .trim 修饰符：自动过滤首尾空格 -->
-<input v-model.trim="msg" />
+  <!-- .trim 修饰符：自动过滤首尾空格 -->
+  <input v-model.trim="msg" />
+</template>
 ```
 
 #### 修饰符可以串联
 
-```html
-<!-- 同时阻止冒泡和默认行为 -->
-<a @click.stop.prevent="doSomething">...</a>
+```vue
+<template>
+  <!-- 同时阻止冒泡和默认行为 -->
+  <a @click.stop.prevent="doSomething">...</a>
 
-<!-- 顺序不重要 -->
-<a @click.prevent.stop="doSomething">...</a>
+  <!-- 顺序不重要 -->
+  <a @click.prevent.stop="doSomething">...</a>
+</template>
 ```
 
 **生活类比**：修饰符就像给指令加"配件"，`.prevent` 是"加个防误触保护"，`.lazy` 是"加个延迟触发器"。
 
 ---
 
-## JavaScript vs TypeScript 对比
-
-| 特性 | JavaScript | TypeScript |
-|------|-----------|------------|
-| 属性绑定 | `:id="dynamicId"` | `:id="dynamicId"` |
-| 类型检查 | 运行时错误 | 编译时检查 |
-| 智能提示 | 有限 | 完整的属性和指令提示 |
-| 复杂度 | 低 | 中 |
-
-#### TypeScript 优势示例
-
-```typescript
-// TypeScript 可以定义数据类型
-interface UserData {
-  username: string
-  price: number
-  isDisabled: boolean
-}
-
-export default {
-  data(): { user: UserData } {
-    return {
-      user: {
-        username: '张三',
-        price: 100,
-        isDisabled: false
-      }
-    }
-  }
-}
-```
-
----
-
 ## 完整示例代码
 
-### JavaScript 版本
+### 基础模板语法示例
 
-详见 `src/js/example.html`
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
 
-### TypeScript 版本
+// 基本数据
+const username = ref('张三')
+const price = ref(100)
+const firstName = ref('张')
+const lastName = ref('三')
+const rawHtml = ref('<span style="color: red">红色文字</span>')
 
-详见 `src/ts/example.html`
+// 属性绑定
+const dynamicId = ref('user-123')
+const isDisabled = ref(false)
+const url = ref('https://vuejs.org')
+
+// 方法
+const toggleDisabled = () => {
+  isDisabled.value = !isDisabled.value
+}
+
+const doSomething = () => {
+  alert('点击了链接！')
+}
+</script>
+
+<template>
+  <div class="container">
+    <h1>模板语法示例</h1>
+    
+    <!-- 文本插值 -->
+    <section>
+      <h2>1. 文本插值</h2>
+      <p>用户名: {{ username }}</p>
+      <p>原价: ¥{{ price }}</p>
+      <p>折扣价: ¥{{ price * 0.8 }}</p>
+      <p>全名: {{ firstName + lastName }}</p>
+    </section>
+
+    <!-- 原始 HTML -->
+    <section>
+      <h2>2. 原始 HTML</h2>
+      <p>纯文本: {{ rawHtml }}</p>
+      <p>HTML渲染: <span v-html="rawHtml"></span></p>
+    </section>
+
+    <!-- 属性绑定 -->
+    <section>
+      <h2>3. 属性绑定</h2>
+      <div :id="dynamicId">这个 div 有动态 id: {{ dynamicId }}</div>
+      <button :disabled="isDisabled" @click="toggleDisabled">
+        {{ isDisabled ? '已禁用' : '点击禁用' }}
+      </button>
+      <p>
+        <a :href="url" @click.prevent="doSomething">阻止默认行为的链接</a>
+      </p>
+    </section>
+  </div>
+</template>
+
+<style scoped>
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+section {
+  margin-bottom: 30px;
+  padding: 15px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+h2 {
+  color: #35495e;
+  border-bottom: 2px solid #42b883;
+  padding-bottom: 10px;
+}
+
+button {
+  padding: 8px 16px;
+  background: #42b883;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+</style>
+```
 
 ---
 
@@ -320,13 +384,7 @@ export default {
 创建一个动态组件渲染器：
 1. 使用动态属性绑定（`:[attrName]="value"`）
 2. 实现一个可以根据配置动态渲染不同 HTML 元素的组件
-3. 支持动态事件绑定（`:@[eventName]="handler"`）
-
----
-
-## 练习题答案
-
-详见 `practice-solution.html`
+3. 支持动态事件绑定（`@[eventName]="handler"`）
 
 ---
 
@@ -347,3 +405,9 @@ export default {
 
 - [Vue 官方文档 - 模板语法](https://cn.vuejs.org/guide/essentials/template-syntax.html)
 - [Vue 官方文档 - 指令](https://cn.vuejs.org/guide/essentials/template-syntax.html#directives)
+
+---
+
+## 下一步
+
+完成本章学习后，进入 [第 3 章：`<script setup>` 基础](../03-chapter-3/README.md)，学习如何在 `<script setup>` 中定义响应式数据和方法。

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户注册</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 24px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76,175,80,0.3);
+        }
+        .radio-group, .checkbox-group {
+            margin-bottom: 20px;
+        }
+        .radio-group label, .checkbox-group label {
+            display: inline-block;
+            margin-right: 20px;
+            font-weight: normal;
+            margin-bottom: 0;
+        }
+        input[type="radio"],
+        input[type="checkbox"] {
+            margin-right: 5px;
+            cursor: pointer;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        button:hover:not(:disabled) {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .error-message {
+            color: #d32f2f;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>用户注册</h1>
+        <form id="registerForm">
+            <!-- 用户名 -->
+            <div class="form-group">
+                <label for="username">用户名：</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <!-- 邮箱 -->
+            <div class="form-group">
+                <label for="email">邮箱：</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <!-- 密码 -->
+            <div class="form-group">
+                <label for="password">密码：</label>
+                <input type="password" id="password" name="password" minlength="8" required>
+                <div class="error-message" id="passwordError"></div>
+            </div>
+
+            <!-- 确认密码 -->
+            <div class="form-group">
+                <label for="confirmPassword">确认密码：</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" minlength="8" required>
+                <div class="error-message" id="confirmPasswordError"></div>
+            </div>
+
+            <!-- 性别 -->
+            <div class="form-group radio-group">
+                <label>性别：</label>
+                <label>
+                    <input type="radio" name="gender" value="male" required> 男
+                </label>
+                <label>
+                    <input type="radio" name="gender" value="female"> 女
+                </label>
+                <label>
+                    <input type="radio" name="gender" value="other"> 其他
+                </label>
+            </div>
+
+            <!-- 同意条款 -->
+            <div class="form-group checkbox-group">
+                <label>
+                    <input type="checkbox" id="agreeTerms" name="agreeTerms" required>
+                    我同意用户条款和隐私政策
+                </label>
+            </div>
+
+            <!-- 提交按钮 -->
+            <button type="submit" id="submitBtn">注册</button>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('registerForm');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const agreeTermsCheckbox = document.getElementById('agreeTerms');
+        const submitBtn = document.getElementById('submitBtn');
+        const passwordError = document.getElementById('passwordError');
+        const confirmPasswordError = document.getElementById('confirmPasswordError');
+
+        // 实时验证密码匹配
+        function validatePasswordMatch() {
+            if (confirmPasswordInput.value && passwordInput.value !== confirmPasswordInput.value) {
+                confirmPasswordError.textContent = '密码不匹配';
+                return false;
+            } else {
+                confirmPasswordError.textContent = '';
+                return true;
+            }
+        }
+
+        // 监听密码变化
+        passwordInput.addEventListener('input', validatePasswordMatch);
+        confirmPasswordInput.addEventListener('input', validatePasswordMatch);
+
+        // 监听复选框，控制提交按钮
+        agreeTermsCheckbox.addEventListener('change', () => {
+            submitBtn.disabled = !agreeTermsCheckbox.checked;
+        });
+
+        // 初始化按钮状态
+        submitBtn.disabled = !agreeTermsCheckbox.checked;
+
+        // 表单提交
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            if (!validatePasswordMatch()) {
+                alert('请确保两次输入的密码一致');
+                return;
+            }
+
+            if (!agreeTermsCheckbox.checked) {
+                alert('请同意用户条款');
+                return;
+            }
+
+            alert('注册成功！');
+            // 实际应用中这里会发送数据到服务器
+            // form.submit();
+        });
+    </script>
+</body>
+</html>

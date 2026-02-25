@@ -3,565 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>列表渲染 - TypeScript 版本</title>
+  <title>第二十二章：生命周期钩子 - TypeScript 示例</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 40px 20px;
-    }
-    
-    .container { max-width: 1000px; margin: 0 auto; }
-    
-    h1 {
-      color: white;
-      text-align: center;
-      margin-bottom: 40px;
-      font-size: 36px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    }
-    
-    .demo-card {
-      background: white;
-      border-radius: 16px;
-      padding: 30px;
-      margin-bottom: 30px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    }
-    
-    .demo-title {
-      color: #667eea;
-      font-size: 24px;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 3px solid #667eea;
-    }
-    
-    .type-tag {
-      display: inline-block;
-      background: #667eea;
-      color: white;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-family: 'Courier New', monospace;
-      margin-left: 10px;
-    }
-    
-    .controls {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-    
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      font-weight: 600;
-      background: #42b883;
-      color: white;
-    }
-    
-    button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(66, 184, 131, 0.4); }
-    button.secondary { background: #6c757d; }
-    button.danger { background: #dc3545; }
-    button.warning { background: #ffc107; color: #212529; }
-    
-    .todo-list { list-style: none; }
-    
-    .todo-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 15px;
-      background: #f8f9fa;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      transition: all 0.3s ease;
-    }
-    
-    .todo-item:hover { background: #e9ecef; transform: translateX(5px); }
-    .todo-item.completed { opacity: 0.6; }
-    .todo-item.completed .todo-text { text-decoration: line-through; color: #6c757d; }
-    
-    .todo-checkbox { width: 20px; height: 20px; cursor: pointer; }
-    .todo-text { flex: 1; }
-    .todo-delete { padding: 6px 12px; font-size: 14px; background: #dc3545; }
-    
-    .todo-input {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    
-    .todo-input input {
-      flex: 1;
-      padding: 12px;
-      border: 2px solid #dee2e6;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-    
-    .todo-input input:focus { outline: none; border-color: #667eea; }
-    
-    .filter-tabs {
-      display: flex;
-      gap: 5px;
-      margin-bottom: 20px;
-    }
-    
-    .filter-tabs button {
-      padding: 8px 16px;
-      font-size: 14px;
-    }
-    
-    .filter-tabs button.active { background: #667eea; }
-    
-    .stats {
-      display: flex;
-      gap: 20px;
-      padding: 15px;
-      background: #e9ecef;
-      border-radius: 8px;
-      margin-top: 20px;
-    }
-    
-    .stat-item { text-align: center; }
-    .stat-value { font-size: 24px; font-weight: bold; color: #667eea; }
-    .stat-label { font-size: 14px; color: #6c757d; }
-    
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 15px;
-    }
-    
-    .product-card {
-      background: #f8f9fa;
-      border-radius: 12px;
-      padding: 20px;
-      text-align: center;
-      transition: all 0.3s ease;
-    }
-    
-    .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-    .product-card.out-of-stock { opacity: 0.5; }
-    .product-icon { font-size: 48px; margin-bottom: 10px; }
-    .product-name { font-weight: bold; margin-bottom: 5px; }
-    .product-price { color: #667eea; font-size: 18px; font-weight: bold; }
-    
-    .product-stock {
-      font-size: 14px;
-      color: #6c757d;
-      margin-top: 5px;
-    }
-    
-    .product-stock.out { color: #dc3545; font-weight: bold; }
-    
-    .object-list {
-      background: #f8f9fa;
-      border-radius: 8px;
-      padding: 20px;
-    }
-    
-    .object-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid #dee2e6;
-    }
-    
-    .object-item:last-child { border-bottom: none; }
-    .object-key { font-weight: bold; color: #667eea; }
-    .object-value { color: #666; }
-    
-    .range-demo {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    
-    .range-item {
-      width: 40px;
-      height: 40px;
-      background: #667eea;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      font-weight: bold;
-    }
-    
-    .sortable-list { list-style: none; }
-    
-    .sortable-item {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 12px;
-      background: #f8f9fa;
-      border-radius: 8px;
-      margin-bottom: 8px;
-    }
-    
-    .code-block {
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 8px;
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-      color: #d63384;
-      margin-top: 15px;
-      overflow-x: auto;
-    }
-    
-    .info-section {
-      background: #e7f3ff;
-      border-left: 4px solid #667eea;
-      padding: 15px;
-      margin-top: 20px;
-      border-radius: 0 8px 8px 0;
-    }
-    
-    .info-section h4 { color: #667eea; margin-bottom: 10px; }
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; }
+    .demo-section { border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 8px; }
+    button { padding: 8px 16px; margin: 5px; background: #42b983; color: white; border: none; border-radius: 4px; cursor: pointer; }
   </style>
 </head>
 <body>
+  <h1>第二十二章：生命周期钩子（TypeScript）</h1>
   <div id="app">
-    <div class="container">
-      <h1>📋 列表渲染演示（TypeScript）</h1>
-      
-      <!-- Demo 1: 带类型的待办事项 -->
-      <div class="demo-card">
-        <h2 class="demo-title">
-          1. 带类型的数组渲染
-          <span class="type-tag">interface Todo { id: number; text: string; completed: boolean; }</span>
-        </h2>
-        
-        <div class="todo-input">
-          <input v-model="newTodo" @keyup.enter="addTodo" placeholder="输入待办事项...">
-          <button @click="addTodo">添加</button>
-        </div>
-        
-        <div class="filter-tabs">
-          <button 
-            v-for="filter in filters" 
-            :key="filter"
-            :class="{ active: currentFilter === filter }"
-            @click="currentFilter = filter"
-          >
-            {{ filter === 'all' ? '全部' : filter === 'active' ? '进行中' : '已完成' }}
-          </button>
-        </div>
-        
-        <ul class="todo-list">
-          <li 
-            v-for="(todo, index) in filteredTodos" 
-            :key="todo.id"
-            class="todo-item"
-            :class="{ completed: todo.completed }"
-          >
-            <span style="color: #6c757d; min-width: 30px;">{{ index + 1 }}.</span>
-            <input type="checkbox" class="todo-checkbox" v-model="todo.completed">
-            <span class="todo-text">{{ todo.text }}</span>
-            <button class="todo-delete" @click="removeTodo(todo.id)">删除</button>
-          </li>
-        </ul>
-        
-        <div class="stats">
-          <div class="stat-item">
-            <div class="stat-value">{{ todos.length }}</div>
-            <div class="stat-label">总计</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value">{{ activeCount }}</div>
-            <div class="stat-label">进行中</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value">{{ completedCount }}</div>
-            <div class="stat-label">已完成</div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Demo 2: 商品列表 -->
-      <div class="demo-card">
-        <h2 class="demo-title">
-          2. 带过滤和排序的商品列表
-          <span class="type-tag">interface Product { id: number; name: string; price: number; stock: number; icon: string; }</span>
-        </h2>
-        
-        <div class="controls">
-          <button @click="sortProducts('price')">按价格排序</button>
-          <button @click="sortProducts('name')" class="secondary">按名称排序</button>
-          <button @click="toggleOutOfStock" class="warning">
-            {{ showOutOfStock ? '隐藏缺货' : '显示缺货' }}
-          </button>
-        </div>
-        
-        <div class="product-grid">
-          <div 
-            v-for="product in displayedProducts" 
-            :key="product.id"
-            class="product-card"
-            :class="{ 'out-of-stock': product.stock === 0 }"
-          >
-            <div class="product-icon">{{ product.icon }}</div>
-            <div class="product-name">{{ product.name }}</div>
-            <div class="product-price">¥{{ product.price }}</div>
-            <div class="product-stock" :class="{ out: product.stock === 0 }">
-              {{ product.stock === 0 ? '缺货' : `库存: ${product.stock}` }}
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Demo 3: 对象遍历 -->
-      <div class="demo-card">
-        <h2 class="demo-title">
-          3. 对象遍历
-          <span class="type-tag">interface UserInfo { name: string; age: number; email: string; }</span>
-        </h2>
-        
-        <div class="object-list">
-          <div 
-            v-for="(value, key, index) in userInfo" 
-            :key="key"
-            class="object-item"
-          >
-            <span style="color: #6c757d; min-width: 30px;">{{ index + 1 }}.</span>
-            <span class="object-key">{{ key }}:</span>
-            <span class="object-value">{{ value }}</span>
-          </div>
-        </div>
-        
-        <div class="code-block">
-          // 完整的类型定义
-          interface UserInfo {
-            name: string
-            age: number
-            email: string
-            city: string
-            job: string
-          }
-        </div>
-      </div>
-      
-      <!-- Demo 4: 范围渲染 -->
-      <div class="demo-card">
-        <h2 class="demo-title">4. 范围渲染</h2>
-        
-        <div class="range-demo">
-          <div v-for="n in 10" :key="n" class="range-item">{{ n }}</div>
-        </div>
-      </div>
-      
-      <!-- Demo 5: 数组方法 -->
-      <div class="demo-card">
-        <h2 class="demo-title">5. 数组变更检测</h2>
-        
-        <div class="controls">
-          <button @click="pushItem">push()</button>
-          <button @click="popItem" class="secondary">pop()</button>
-          <button @click="shiftItem" class="secondary">shift()</button>
-          <button @click="unshiftItem">unshift()</button>
-          <button @click="reverseItems" class="warning">reverse()</button>
-          <button @click="sortItems" class="warning">sort()</button>
-        </div>
-        
-        <ul class="sortable-list">
-          <li v-for="(item, index) in arrayMethodsDemo" :key="item.id" class="sortable-item">
-            <span>{{ index + 1 }}. {{ item.name }}</span>
-          </li>
-        </ul>
-        
-        <div class="info-section">
-          <h4>💡 类型安全的数组操作</h4>
-          <p>TypeScript 确保数组方法操作的每一项都符合类型定义，防止类型错误。</p>
-        </div>
-      </div>
+    <div class="demo-section">
+      <button @click="show = !show">{{ show ? '卸载' : '挂载' }}组件</button>
+      <ts-lifecycle v-if="show"></ts-lifecycle>
     </div>
   </div>
 
   <script>
-    const { createApp, ref, computed } = Vue
+    const { createApp, ref, onMounted, onUnmounted } = Vue;
+
+    const TsLifecycle = {
+      setup() {
+        /**
+         * @typedef {Object} User
+         * @property {number} id
+         * @property {string} name
+         */
+        
+        /** @type {import('vue').Ref<User[]>} */
+        const users = ref([]);
+        
+        /** @type {import('vue').Ref<boolean>} */
+        const loading = ref(false);
+        
+        /**
+         * @returns {Promise<User[]>}
+         */
+        const fetchUsers = async () => {
+          loading.value = true;
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          loading.value = false;
+          return [
+            { id: 1, name: '张三' },
+            { id: 2, name: '李四' }
+          ];
+        };
+        
+        onMounted(async () => {
+          users.value = await fetchUsers();
+        });
+        
+        return { users, loading };
+      },
+      template: `
+        <div>
+          <p v-if="loading">加载中...</p>
+          <ul v-else>
+            <li v-for="user in users" :key="user.id">{{ user.name }}</li>
+          </ul>
+        </div>
+      `
+    };
 
     createApp({
+      components: { TsLifecycle },
       setup() {
-        // 类型定义（在 HTML 中用 JSDoc 注释）
-        
-        /**
-         * @typedef {Object} Todo
-         * @property {number} id
-         * @property {string} text
-         * @property {boolean} completed
-         */
-        
-        /**
-         * @typedef {Object} Product
-         * @property {number} id
-         * @property {string} name
-         * @property {number} price
-         * @property {number} stock
-         * @property {string} icon
-         */
-        
-        /**
-         * @typedef {Object} ArrayDemoItem
-         * @property {number} id
-         * @property {string} name
-         */
-
-        // Demo 1: 带类型的待办事项
-        /** @type {import('vue').Ref<string>} */
-        const newTodo = ref('')
-        
-        /** @type {import('vue').Ref<Todo[]>} */
-        const todos = ref([
-          { id: 1, text: '学习 Vue 基础', completed: true },
-          { id: 2, text: '完成练习项目', completed: false },
-          { id: 3, text: '阅读官方文档', completed: false }
-        ])
-        
-        const nextTodoId = ref(4)
-        
-        /** @type {import('vue').Ref<'all' | 'active' | 'completed'>} */
-        const currentFilter = ref('all')
-        const filters = ['all', 'active', 'completed']
-        
-        const addTodo = () => {
-          if (newTodo.value.trim() === '') return
-          todos.value.push({
-            id: nextTodoId.value++,
-            text: newTodo.value.trim(),
-            completed: false
-          })
-          newTodo.value = ''
-        }
-        
-        const removeTodo = (/** @type {number} */ id) => {
-          const index = todos.value.findIndex(todo => todo.id === id)
-          if (index > -1) {
-            todos.value.splice(index, 1)
-          }
-        }
-        
-        const filteredTodos = computed(() => {
-          switch (currentFilter.value) {
-            case 'active':
-              return todos.value.filter(t => !t.completed)
-            case 'completed':
-              return todos.value.filter(t => t.completed)
-            default:
-              return todos.value
-          }
-        })
-        
-        const activeCount = computed(() => todos.value.filter(t => !t.completed).length)
-        const completedCount = computed(() => todos.value.filter(t => t.completed).length)
-        
-        // Demo 2: 商品列表
-        /** @type {import('vue').Ref<Product[]>} */
-        const products = ref([
-          { id: 1, name: '苹果手机', price: 5999, stock: 10, icon: '📱' },
-          { id: 2, name: '蓝牙耳机', price: 299, stock: 50, icon: '🎧' },
-          { id: 3, name: '笔记本电脑', price: 8999, stock: 0, icon: '💻' },
-          { id: 4, name: '智能手表', price: 1299, stock: 20, icon: '⌚' },
-          { id: 5, name: '平板电脑', price: 3299, stock: 15, icon: '📲' },
-          { id: 6, name: '机械键盘', price: 499, stock: 0, icon: '⌨️' }
-        ])
-        
-        const showOutOfStock = ref(true)
-        
-        /** @type {import('vue').Ref<'' | 'price' | 'name'>} */
-        const sortBy = ref('')
-        
-        const displayedProducts = computed(() => {
-          let result = showOutOfStock.value 
-            ? products.value 
-            : products.value.filter(p => p.stock > 0)
-          
-          if (sortBy.value === 'price') {
-            result = [...result].sort((a, b) => a.price - b.price)
-          } else if (sortBy.value === 'name') {
-            result = [...result].sort((a, b) => a.name.localeCompare(b.name))
-          }
-          
-          return result
-        })
-        
-        const sortProducts = (/** @type {'price' | 'name'} */ type) => {
-          sortBy.value = sortBy.value === type ? '' : type
-        }
-        
-        const toggleOutOfStock = () => {
-          showOutOfStock.value = !showOutOfStock.value
-        }
-        
-        // Demo 3: 对象遍历
-        /** @type {{name: string, age: number, email: string, city: string, job: string}} */
-        const userInfo = {
-          name: '张三',
-          age: 28,
-          email: 'zhangsan@example.com',
-          city: '北京',
-          job: '前端工程师'
-        }
-        
-        // Demo 5: 数组方法演示
-        /** @type {import('vue').Ref<ArrayDemoItem[]>} */
-        const arrayMethodsDemo = ref([
-          { id: 1, name: '项目 A' },
-          { id: 2, name: '项目 B' },
-          { id: 3, name: '项目 C' },
-          { id: 4, name: '项目 D' }
-        ])
-        let nextArrayId = 5
-        
-        const pushItem = () => {
-          arrayMethodsDemo.value.push({
-            id: nextArrayId++,
-            name: `新项目 ${String.fromCharCode(64 + nextArrayId - 1)}`
-          })
-        }
-        
-        const popItem = () => { arrayMethodsDemo.value.pop() }
-        const shiftItem = () => { arrayMethodsDemo.value.shift() }
-        
-        const unshiftItem = () => {
-          arrayMethodsDemo.value.unshift({
-            id: nextArrayId++,
-            name: `新项目(前) ${String.fromCharCode(64 + nextArrayId - 1)}`
-          })
-        }
-        
-        const reverseItems = () => { arrayMethodsDemo.value.reverse() }
-        const sortItems = () => {
-          arrayMethodsDemo.value.sort((a, b) => a.name.localeCompare(b.name))
-        }
-        
-        return {
-          newTodo, todos, currentFilter, filters,
-          addTodo, removeTodo, filteredTodos,
-          activeCount, completedCount,
-          displayedProducts, sortProducts, toggleOutOfStock, showOutOfStock,
-          userInfo,
-          arrayMethodsDemo,
-          pushItem, popItem, shiftItem, unshiftItem, reverseItems, sortItems
-        }
+        const show = ref(true);
+        return { show };
       }
-    }).mount('#app')
+    }).mount('#app');
   </script>
 </body>
 </html>

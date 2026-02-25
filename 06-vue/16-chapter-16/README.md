@@ -1,502 +1,465 @@
-# 第16章：自定义指令 (Custom Directives)
+# 第 26 章：综合实践项目 - 创建一个完整的 Todo List 应用
 
-## 概念
+## 本章目的
 
-自定义指令是 Vue 提供的一种机制，让你可以直接操作 DOM 元素。除了内置指令（如 `v-if`、`v-for`、`v-model`）外，你还可以创建自己的指令。
+通过构建一个完整的待办事项（Todo List）应用，综合运用前面章节学到的 Vue 知识，掌握从需求分析到功能实现的完整开发流程。
 
-### 什么时候使用自定义指令？
+---
 
-- 需要直接操作 DOM 的底层逻辑
-- 通用的 DOM 操作需要复用
-- 集成第三方 DOM 库
+## 内容概述
 
-### 指令的钩子函数
+- 项目需求分析与功能规划
+- 应用架构设计与数据建模
+- 核心功能实现（增删改查）
+- 高级功能实现（筛选、排序、本地存储）
+- 性能优化与最佳实践
+- 代码重构与模块化
+
+---
+
+## 核心概念讲解
+
+### 什么是 Todo List 应用？
+
+Todo List（待办事项列表）是最经典的前端练手项目。它能帮助我们掌握：
+- **状态管理**：如何管理列表数据
+- **用户交互**：如何处理用户的添加、删除、修改操作
+- **数据持久化**：如何让数据在页面刷新后不丢失
+- **条件渲染**：如何根据不同的条件显示不同的内容
+
+#### 类比理解
+
+想象你在管理一个购物清单：
+- **添加待办** = 在清单上写下要买的东西
+- **标记完成** = 买完东西后打勾
+- **删除待办** = 划掉不需要买的东西
+- **筛选查看** = 只看还没买的东西
+- **本地存储** = 把清单拍照保存，即使丢了纸条也能找回
+
+### 应用架构设计
+
+```
+Todo List 应用
+├── 数据层 (State)
+│   ├── todos[] - 待办事项数组
+│   ├── newTodo - 输入框内容
+│   └── filter - 当前筛选条件
+├── 计算层 (Computed)
+│   ├── filteredTodos - 过滤后的列表
+│   ├── totalCount - 总数量
+│   ├── completedCount - 已完成数量
+│   └── pendingCount - 待完成数量
+├── 方法层 (Methods)
+│   ├── addTodo() - 添加待办
+│   ├── removeTodo() - 删除待办
+│   └── clearCompleted() - 清除已完成
+└── 持久层 (Storage)
+    └── localStorage - 本地存储
+```
+
+### 数据模型设计
 
 ```javascript
-const myDirective = {
-  // 绑定元素前调用
-  created(el, binding, vnode, prevVnode) {
-    // 指令首次绑定到元素
-  },
-  
-  // 元素挂载前调用
-  beforeMount(el, binding, vnode, prevVnode) {},
-  
-  // 元素挂载后调用（★最常用）
-  mounted(el, binding, vnode, prevVnode) {
-    // DOM 已插入父节点
-  },
-  
-  // 更新前调用
-  beforeUpdate(el, binding, vnode, prevVnode) {},
-  
-  // 更新后调用
-  updated(el, binding, vnode, prevVnode) {},
-  
-  // 卸载前调用
-  beforeUnmount(el, binding, vnode, prevVnode) {},
-  
-  // 卸载后调用（清理工作）
-  unmounted(el, binding, vnode, prevVnode) {}
+// Todo 事项的数据结构
+{
+  id: 1,           // 唯一标识符
+  text: '学习 Vue', // 待办内容
+  completed: false  // 完成状态
 }
 ```
 
-### 钩子参数
+### 功能模块划分
 
-| 参数 | 说明 |
-|------|------|
-| `el` | 指令绑定的 DOM 元素 |
-| `binding` | 包含指令信息的对象 |
-| `vnode` | Vue 编译生成的虚拟节点 |
-| `prevVnode` | 更新前的虚拟节点 |
-
-`binding` 对象包含：
-- `value`：指令的值（如 `v-my-directive="1+1"` 的值是 `2`）
-- `oldValue`：更新前的值
-- `arg`：参数（如 `v-my-directive:foo` 的 `arg` 是 `'foo'`）
-- `modifiers`：修饰符对象（如 `v-my-directive.foo.bar`）
-- `instance`：使用指令的组件实例
-- `dir`：指令定义对象
+| 模块 | 功能 | 涉及知识点 |
+|------|------|-----------|
+| 输入模块 | 添加待办 | v-model, @keyup.enter |
+| 列表模块 | 显示待办 | v-for, :key |
+| 操作模块 | 完成/删除 | v-model, @click |
+| 筛选模块 | 过滤显示 | computed, 条件判断 |
+| 统计模块 | 数量统计 | computed, filter |
+| 存储模块 | 数据持久化 | watch, localStorage |
 
 ---
 
-## 1. 全局注册指令
+## 代码示例说明
 
-### 基本方式
+### JavaScript 版本
+
+文件：`src/js/todolist-app.html`
+
+这个版本展示了 Todo List 的基础实现，包含以下核心功能：
+
+#### 1. 响应式数据定义
 
 ```javascript
-// main.js
-import { createApp } from 'vue'
-import App from './App.vue'
+const { createApp, ref, computed, watch } = Vue
 
-const app = createApp(App)
+createApp({
+  setup() {
+    // 响应式数据
+    const newTodo = ref('')                    // 输入框内容
+    const todos = ref([                        // 待办事项列表
+      { id: 1, text: '学习 Vue 3', completed: true },
+      { id: 2, text: '创建 Todo 应用', completed: false }
+    ])
+    const filter = ref('all')                  // 筛选条件
+    const nextId = ref(3)                      // 下一个 ID
+    
+    return { newTodo, todos, filter, nextId }
+  }
+}).mount('#app')
+```
 
-// 注册全局指令
-app.directive('focus', {
-  mounted(el) {
-    el.focus()
+**关键点**：
+- 使用 `ref` 创建响应式数据
+- `todos` 数组存储所有待办事项
+- 每个待办是一个对象，包含 `id`、`text`、`completed`
+
+#### 2. 计算属性 - 筛选功能
+
+```javascript
+const filteredTodos = computed(() => {
+  switch (filter.value) {
+    case 'active':
+      return todos.value.filter(todo => !todo.completed)
+    case 'completed':
+      return todos.value.filter(todo => todo.completed)
+    default:
+      return todos.value
   }
 })
-
-app.mount('#app')
 ```
 
-### 简写形式
+**类比理解**：
+想象你有一堆衣服（todos）：
+- `filter` 就像是你想要查看什么类型的衣服
+- `all` = 看所有衣服
+- `active` = 只看脏衣服（未完成）
+- `completed` = 只看干净衣服（已完成）
+- `computed` 会自动根据筛选条件显示对应的衣服
 
-如果只需要 `mounted` 和 `updated` 钩子，且逻辑相同：
+#### 3. 本地存储实现
 
 ```javascript
-app.directive('color', (el, binding) => {
-  el.style.color = binding.value
-})
-```
+// 监听 todos 变化，自动保存到 localStorage
+watch(todos, (newTodos) => {
+  localStorage.setItem('todos', JSON.stringify(newTodos))
+}, { deep: true })
 
----
-
-## 2. 局部注册指令
-
-```vue
-<script setup>
-const vFocus = {
-  mounted: (el) => el.focus()
+// 页面加载时读取数据
+const savedTodos = localStorage.getItem('todos')
+if (savedTodos) {
+  todos.value = JSON.parse(savedTodos)
 }
-</script>
-
-<template>
-  <input v-focus />
-</template>
 ```
+
+**工作原理**：
+1. `watch` 监听 `todos` 数组的变化（添加、删除、修改）
+2. 变化时，将数据转换为 JSON 字符串存入 `localStorage`
+3. 页面刷新后，从 `localStorage` 读取数据并解析
+4. 实现数据持久化，刷新页面不丢失
+
+**类比理解**：
+- `localStorage` 就像是浏览器的"记事本"
+- `JSON.stringify` 把数据写成文字
+- `JSON.parse` 把文字读回成数据
+- `watch` 就像是一个自动记录员，每次数据变化都自动记录
+
+### TypeScript 版本
+
+文件：`src/ts/todolist-app.html`
+
+TypeScript 版本在 JS 版本的基础上增加了类型安全：
+
+#### 1. 类型定义
+
+```typescript
+// 待办事项接口
+interface Todo {
+  id: number
+  text: string
+  completed: boolean
+}
+
+// 筛选类型
+type FilterType = 'all' | 'active' | 'completed'
+```
+
+#### 2. 带类型的响应式数据
+
+```typescript
+const newTodo: Ref<string> = ref('')
+const todos: Ref<Todo[]> = ref([...])
+const filter: Ref<FilterType> = ref('all')
+```
+
+#### JS 与 TS 对比
+
+| 方面 | JavaScript | TypeScript |
+|------|-----------|------------|
+| **类型定义** | 无 | `interface Todo` |
+| **ref 类型** | `ref('')` | `Ref<string>` |
+| **数组类型** | `ref([])` | `Ref<Todo[]>` |
+| **编译检查** | 运行时出错 | 编译时发现错误 |
+| **代码提示** | 有限 | 更好的 IDE 支持 |
 
 ---
 
-## 3. 指令使用示例
+## 实现步骤详解
 
-### 自动聚焦指令
+### 第一步：搭建基础结构
+
+1. 创建 HTML 骨架，引入 Vue 3 CDN
+2. 设计界面布局（输入区、列表区、统计区）
+3. 定义响应式数据
+
+### 第二步：实现添加功能
 
 ```javascript
-// 全局注册
-app.directive('focus', {
-  mounted(el) {
-    el.focus()
-  }
-})
-
-// 使用
-<input v-focus />
+const addTodo = () => {
+  const text = newTodo.value.trim()
+  if (!text) return
+  
+  todos.value.push({
+    id: nextId.value++,
+    text: text,
+    completed: false
+  })
+  
+  newTodo.value = ''
+}
 ```
 
-### 颜色指令
+**注意事项**：
+- 使用 `.trim()` 去除首尾空格
+- 空内容不添加
+- 添加后清空输入框
+
+### 第三步：实现删除功能
 
 ```javascript
-app.directive('color', {
-  mounted(el, binding) {
-    el.style.color = binding.value
-  },
-  updated(el, binding) {
-    el.style.color = binding.value
+const removeTodo = (id) => {
+  const index = todos.value.findIndex(todo => todo.id === id)
+  if (index > -1) {
+    todos.value.splice(index, 1)
   }
-})
-
-// 使用
-<p v-color="'red'">红色文字</p>
-<p v-color="dynamicColor">动态颜色</p>
+}
 ```
 
-### 带参数的指令
+### 第四步：实现完成切换
 
-```javascript
-app.directive('pin', {
-  mounted(el, binding) {
-    const position = binding.arg || 'top-left'
-    const [y, x] = position.split('-')
-    
-    el.style.position = 'fixed'
-    el.style[y] = '10px'
-    el.style[x] = '10px'
-  }
-})
+使用 `v-model` 双向绑定：
 
-// 使用
-<div v-pin:top-right>固定在右上角</div>
-<div v-pin:bottom-left>固定在左下角</div>
+```html
+<input type="checkbox" v-model="todo.completed">
 ```
 
-### 带修饰符的指令
+### 第五步：实现筛选功能
 
 ```javascript
-app.directive('click-outside', {
-  mounted(el, binding) {
-    el._clickOutside = (event) => {
-      // 如果配置了阻止冒泡修饰符
-      if (binding.modifiers.stop) {
-        event.stopPropagation()
-      }
-      
-      if (!(el === event.target || el.contains(event.target))) {
-        binding.value()
-      }
-    }
-    
-    document.addEventListener('click', el._clickOutside)
-  },
-  unmounted(el) {
-    document.removeEventListener('click', el._clickOutside)
+const filteredTodos = computed(() => {
+  switch (filter.value) {
+    case 'active':
+      return todos.value.filter(todo => !todo.completed)
+    case 'completed':
+      return todos.value.filter(todo => todo.completed)
+    default:
+      return todos.value
   }
 })
-
-// 使用
-<div v-click-outside="closeModal">点击外部关闭</div>
-<div v-click-outside.stop="handleClick">阻止冒泡</div>
 ```
 
----
-
-## 4. 完整实用指令
-
-### 复制到剪贴板
+### 第六步：添加本地存储
 
 ```javascript
-app.directive('copy', {
-  mounted(el, binding) {
-    el._copyHandler = () => {
-      const text = binding.value || el.textContent
-      navigator.clipboard.writeText(text).then(() => {
-        console.log('已复制:', text)
-      })
-    }
-    
-    el.addEventListener('click', el._copyHandler)
-    el.style.cursor = 'pointer'
-  },
-  unmounted(el) {
-    el.removeEventListener('click', el._copyHandler)
-  }
-})
+// 保存数据
+watch(todos, (newTodos) => {
+  localStorage.setItem('todos', JSON.stringify(newTodos))
+}, { deep: true })
 
-// 使用
-<button v-copy="'复制这段文字'">复制</button>
-<span v-copy>点击复制这段内容</span>
-```
-
-### 权限控制
-
-```javascript
-app.directive('permission', {
-  mounted(el, binding) {
-    const userRole = localStorage.getItem('userRole')
-    const requiredRole = binding.value
-    
-    if (userRole !== requiredRole) {
-      el.style.display = 'none'
-    }
-  }
-})
-
-// 使用
-<button v-permission="'admin'">只有管理员可见</button>
-```
-
-### 水印指令
-
-```javascript
-app.directive('watermark', {
-  mounted(el, binding) {
-    const text = binding.value || '水印'
-    const canvas = document.createElement('canvas')
-    canvas.width = 200
-    canvas.height = 200
-    
-    const ctx = canvas.getContext('2d')
-    ctx.rotate(-20 * Math.PI / 180)
-    ctx.font = '16px Arial'
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'
-    ctx.fillText(text, 20, 100)
-    
-    el.style.backgroundImage = `url(${canvas.toDataURL()})`
-  }
-})
-
-// 使用
-<div v-watermark="'机密文档'" style="width: 100%; height: 300px;">
-  内容区域
-</div>
-```
-
-### 防抖指令
-
-```javascript
-app.directive('debounce', {
-  mounted(el, binding) {
-    let timer
-    const delay = binding.arg || 300
-    
-    el._debounceHandler = () => {
-      clearTimeout(timer)
-      timer = setTimeout(() => {
-        binding.value()
-      }, delay)
-    }
-    
-    el.addEventListener(binding.arg || 'input', el._debounceHandler)
-  },
-  unmounted(el, binding) {
-    el.removeEventListener(binding.arg || 'input', el._debounceHandler)
-  }
-})
-
-// 使用
-<input v-debounce:300="search" v-model="query" />
+// 读取数据
+const savedTodos = localStorage.getItem('todos')
+if (savedTodos) {
+  todos.value = JSON.parse(savedTodos)
+}
 ```
 
 ---
 
-## 5. 完整代码示例
+## 扩展功能实现
 
-### App.vue - 指令演示
+详见 `practice-solution.html`，包含以下高级功能：
 
-```vue
-<script setup>
-import { ref } from 'vue'
+### 1. 优先级设置
 
-// 局部注册指令
-const vHighlight = {
-  mounted(el, binding) {
-    el.style.backgroundColor = binding.value || 'yellow'
-  },
-  updated(el, binding) {
-    el.style.backgroundColor = binding.value || 'yellow'
-  }
-}
-
-const color = ref('blue')
-const showModal = ref(false)
-const inputValue = ref('')
-
-const closeModal = () => {
-  showModal.value = false
-}
-
-const doSearch = () => {
-  console.log('搜索:', inputValue.value)
-}
-</script>
-
-<template>
-  <div>
-    <h2>1. 自动聚焦</h2>
-    <input v-focus placeholder="自动聚焦" />
-    
-    <h2>2. 动态颜色</h2>
-    <p v-color="color">这段文字颜色会变化</p>
-    <button @click="color = color === 'blue' ? 'red' : 'blue'">
-      切换颜色
-    </button>
-    
-    <h2>3. 高亮（局部指令）</h2>
-    <p v-highlight="'lightblue'">浅蓝色背景</p>
-    
-    <h2>4. 点击外部关闭</h2>
-    <button @click="showModal = true">打开模态框</button>
-    <div v-if="showModal" v-click-outside="closeModal" class="modal">
-      <p>点击外部关闭我</p>
-    </div>
-    
-    <h2>5. 防抖输入</h2>
-    <input v-debounce:500="doSearch" v-model="inputValue" placeholder="输入后 500ms 触发搜索" />
-    <p>输入值: {{ inputValue }}</p>
-  </div>
-</template>
-
-<style>
-.modal {
-  padding: 20px;
-  border: 1px solid #ddd;
-  background: white;
-  margin: 10px 0;
-}
-</style>
-```
-
-### main.js - 全局指令
+为每个待办添加优先级（高/中/低）：
 
 ```javascript
-import { createApp } from 'vue'
-import App from './App.vue'
+{
+  id: 1,
+  text: '学习 Vue',
+  completed: false,
+  priority: 'high'  // 新增字段
+}
+```
 
-const app = createApp(App)
+### 2. 截止日期
 
-// 自动聚焦
-app.directive('focus', {
-  mounted(el) {
-    el.focus()
+添加截止日期，并标记过期事项：
+
+```javascript
+const isOverdue = (todo) => {
+  if (!todo.dueDate || todo.completed) return false
+  return todo.dueDate < new Date().toISOString().split('T')[0]
+}
+```
+
+### 3. 搜索功能
+
+实时搜索待办内容：
+
+```javascript
+const filteredTodos = computed(() => {
+  let result = todos.value
+  
+  // 搜索过滤
+  if (searchQuery.value) {
+    result = result.filter(todo => 
+      todo.text.toLowerCase().includes(searchQuery.value.toLowerCase())
+    )
   }
+  
+  // 状态筛选...
+  return result
 })
+```
 
-// 颜色
-app.directive('color', {
-  mounted(el, binding) {
-    el.style.color = binding.value
-  },
-  updated(el, binding) {
-    el.style.color = binding.value
+### 4. 数据导入导出
+
+导出 JSON 数据：
+
+```javascript
+const exportData = computed(() => JSON.stringify(todos.value, null, 2))
+```
+
+导入 JSON 数据：
+
+```javascript
+const importTodos = () => {
+  try {
+    const data = JSON.parse(importData.value)
+    todos.value = data
+  } catch (e) {
+    alert('导入失败：' + e.message)
   }
-})
-
-// 点击外部
-app.directive('click-outside', {
-  mounted(el, binding) {
-    el._clickOutside = (event) => {
-      if (!(el === event.target || el.contains(event.target))) {
-        binding.value()
-      }
-    }
-    document.addEventListener('click', el._clickOutside)
-  },
-  unmounted(el) {
-    document.removeEventListener('click', el._clickOutside)
-  }
-})
-
-// 防抖
-app.directive('debounce', {
-  mounted(el, binding) {
-    let timer
-    el._debounceHandler = () => {
-      clearTimeout(timer)
-      timer = setTimeout(() => {
-        binding.value()
-      }, binding.arg || 300)
-    }
-    el.addEventListener('input', el._debounceHandler)
-  },
-  unmounted(el) {
-    el.removeEventListener('input', el._debounceHandler)
-  }
-})
-
-app.mount('#app')
+}
 ```
 
 ---
 
-## 关键点总结
+## 最佳实践
 
-| 钩子 | 用途 |
-|------|------|
-| `created` | 初始化指令 |
-| `mounted` | ★ 操作 DOM，添加事件监听 |
-| `updated` | 响应数据更新 |
-| `unmounted` | ★ 清理事件监听，避免内存泄漏 |
+### ✅ 推荐做法
 
-### 指令命名规范
+1. **始终使用 `:key`**：在使用 `v-for` 时务必提供唯一的 key
+   ```html
+   <li v-for="todo in todos" :key="todo.id">
+   ```
 
-- 使用 `v-` 前缀（Vue 自动添加）
-- 驼峰命名转换为短横线：`vMyDirective` → `v-my-directive`
+2. **数据驱动视图**：不要直接操作 DOM，通过修改数据让 Vue 更新视图
 
-### 注意事项
+3. **使用 computed 优化性能**：对于衍生数据使用计算属性，避免重复计算
 
-1. **务必清理副作用**：在 `unmounted` 中移除事件监听
-2. **避免过度使用**：优先考虑组件和组合式函数
-3. **不要操作组件内部**：只操作绑定元素自身
+4. **添加输入验证**：添加待办前检查内容是否为空
+
+5. **使用 watch 的 deep 选项**：监听对象数组变化时设置 `{ deep: true }`
+
+### ❌ 应避免的做法
+
+1. **不要使用索引作为 key**：删除项目时会导致索引变化，可能引发 bug
+   ```html
+   <!-- 错误 -->
+   <li v-for="(todo, index) in todos" :key="index">
+   
+   <!-- 正确 -->
+   <li v-for="todo in todos" :key="todo.id">
+   ```
+
+2. **不要直接修改 props**：遵循单向数据流原则
+
+3. **避免在 v-for 和 v-if 同时使用**：`v-if` 优先级更高，可以先计算属性过滤
 
 ---
 
 ## 练习题
 
-### 练习 1：v-tooltip 指令
+### 基础练习
 
-创建一个提示框指令：
-- 鼠标悬停时显示提示文字
-- 支持自定义提示内容和位置
-- 离开时隐藏提示
+基于 JS 版本的 Todo List，完成以下功能：
 
-### 练习 2：v-resize 指令
+1. 添加 "编辑" 功能：点击待办事项可以修改内容
+2. 添加 "一键全选/取消全选" 功能
+3. 限制最多添加 10 个待办事项
 
-创建元素尺寸监听指令：
-- 监听元素大小变化
-- 变化时触发回调函数
-- 使用 ResizeObserver API
+### 进阶练习
 
-### 练习 3：v-loading 指令
+1. 实现拖拽排序功能，可以拖动调整待办事项顺序
+2. 添加动画效果：添加/删除待办时显示过渡动画
+3. 实现撤销功能，可以撤销最后一次删除操作
 
-创建加载状态指令：
-- 显示加载动画覆盖层
-- 支持自定义加载文字
-- 值变为 false 时移除
+### 挑战练习
+
+1. 将应用拆分为多个组件（TodoInput、TodoList、TodoItem、TodoStats）
+2. 使用 Vue Router 实现多视图（今日待办、历史记录、设置）
+3. 实现云端同步功能（模拟后端 API）
 
 ---
 
-## 常见错误
+## 学习目标检查清单
 
-```javascript
-// ❌ 错误：忘记清理事件监听
-app.directive('click', {
-  mounted(el, binding) {
-    el.addEventListener('click', binding.value)
-  }
-  // 缺少 unmounted！
-})
+- [ ] 能够设计 Todo List 的数据结构
+- [ ] 掌握列表渲染和条件渲染的综合使用
+- [ ] 理解计算属性在数据处理中的应用
+- [ ] 掌握 localStorage 的读写操作
+- [ ] 能够实现数据的筛选和搜索功能
+- [ ] 理解 watch 监听器的使用场景
+- [ ] 能够进行简单的代码重构和优化
 
-// ✅ 正确
-app.directive('click', {
-  mounted(el, binding) {
-    el._handler = binding.value
-    el.addEventListener('click', el._handler)
-  },
-  unmounted(el) {
-    el.removeEventListener('click', el._handler)
-  }
-})
+---
+
+## 练习题答案
+
+详见 `practice-solution.html` 文件，包含完整的高级功能实现：
+- 优先级设置和颜色标识
+- 截止日期和过期提醒
+- 实时搜索功能
+- 多种排序方式
+- 完成进度条
+- 数据导入导出
+- 更多统计信息
+
+---
+
+## 下一步
+
+完成本章学习后，建议：
+1. 回顾之前章节，巩固基础知识
+2. 尝试将 Todo List 改造成真实项目（如项目管理工具、购物清单等）
+3. 学习 Vue Router 实现多页面应用
+4. 学习 Pinia 进行更复杂的状态管理
+5. 开始你的第一个真实项目开发！
+
+---
+
+## 文件结构
+
 ```
-
-```javascript
-// ❌ 错误：在 created 中操作 DOM
-created(el) {
-  el.style.color = 'red' // 此时 DOM 还未挂载
-}
-
-// ✅ 正确：在 mounted 中操作
-mounted(el) {
-  el.style.color = 'red'
-}
+26-chapter-26/
+├── README.md                    # 本教程文档
+├── src/
+│   ├── js/
+│   │   └── todolist-app.html    # JS 版本实现
+│   └── ts/
+│       └── todolist-app.html    # TS 版本实现
+└── practice-solution.html       # 高级功能完整实现
 ```

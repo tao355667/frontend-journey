@@ -3,244 +3,118 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>组件基础 - TypeScript 版本</title>
+  <title>第二十五章：script setup 语法糖 - TypeScript 示例</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 40px 20px;
-    }
-    
-    .container { max-width: 1000px; margin: 0 auto; }
-    
-    h1 {
-      color: white;
-      text-align: center;
-      margin-bottom: 40px;
-      font-size: 36px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    }
-    
-    .demo-card {
-      background: white;
-      border-radius: 16px;
-      padding: 30px;
-      margin-bottom: 30px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    }
-    
-    .demo-title {
-      color: #667eea;
-      font-size: 24px;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 3px solid #667eea;
-    }
-    
-    .type-tag {
-      display: inline-block;
-      background: #667eea;
-      color: white;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-family: 'Courier New', monospace;
-      margin-left: 10px;
-    }
-    
-    .my-button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      background: #42b883;
-      color: white;
-    }
-    
-    .my-button:hover { background: #369870; transform: translateY(-2px); }
-    .my-button.danger { background: #dc3545; }
-    .my-button.warning { background: #ffc107; color: #212529; }
-    .my-button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    
-    .my-card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-    
-    .my-card:hover { transform: translateY(-5px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
-    
-    .card-header { padding: 20px; background: #f8f9fa; border-bottom: 1px solid #dee2e6; }
-    .card-body { padding: 20px; }
-    .card-footer { padding: 15px 20px; background: #f8f9fa; border-top: 1px solid #dee2e6; }
-    
-    .card-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-    
-    .component-demo { display: flex; gap: 15px; flex-wrap: wrap; margin: 20px 0; }
-    
-    .code-block {
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 8px;
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-      color: #d63384;
-      margin-top: 15px;
-    }
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; }
+    .demo-section { border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 8px; }
+    button { padding: 8px 16px; margin: 5px; background: #42b983; color: white; border: none; border-radius: 4px; }
+    .code-block { background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 4px; font-family: monospace; font-size: 13px; }
+    .user-card { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 4px; }
   </style>
 </head>
 <body>
+  <h1>第二十五章：script setup 语法糖（TypeScript）</h1>
   <div id="app">
-    <div class="container">
-      <h1>🧩 组件基础演示（TypeScript）</h1>
-      
-      <!-- Demo 1: 带类型的 Button 组件 -->
-      <div class="demo-card">
-        <h2 class="demo-title">
-          1. 带类型的 Button 组件
-          <span class="type-tag">type ButtonType = 'primary' | 'danger' | 'warning'</span>
-        </h2>
-        
-        <div class="component-demo">
-          <my-button @click="handleClick">主按钮</my-button>
-          <my-button type="danger" @click="handleClick">危险</my-button>
-          <my-button type="warning" @click="handleClick">警告</my-button>
-          <my-button :disabled="true">禁用</my-button>
-        </div>
-        
-        <div class="code-block">
-// Props 类型定义
-interface ButtonProps {
-  type?: 'primary' | 'danger' | 'warning'
-  disabled?: boolean
-}
-
-const props = defineProps&lt;ButtonProps&gt;()
-        </div>
-      </div>
-      
-      <!-- Demo 2: Card 组件 -->
-      <div class="demo-card">
-        <h2 class="demo-title">2. 使用插槽的 Card 组件</h2>
-        
-        <my-card>
-          <template #header>
-            <h3>带类型的卡片</h3>
-          </template>
-          <p>Card 组件使用插槽机制，允许父组件自定义内容。</p>
-          <template #footer>
-            <my-button type="primary" size="small">操作</my-button>
-          </template>
-        </my-card>
-      </div>
-      
-      <!-- Demo 3: 带类型的列表组件 -->
-      <div class="demo-card">
-        <h2 class="demo-title">
-          3. 带类型的 CardList 组件
-          <span class="type-tag">interface CardItem { id: number; title: string; price: number; }</span>
-        </h2>
-        
-        <card-list 
-          :items="cardItems"
-          @item-click="handleItemClick"
-        />
-      </div>
-    </div>
+    <script-setup-demo></script-setup-demo>
   </div>
 
   <script>
-    const { createApp, ref } = Vue
-    
-    // Button 组件（带类型注释）
-    const MyButton = {
+    const { createApp, ref, computed, defineProps, defineEmits } = Vue;
+
+    /**
+     * @typedef {Object} User
+     * @property {string} name
+     * @property {number} age
+     * @property {string} [email]
+     */
+
+    // 子组件
+    const UserCard = {
       props: {
-        type: { type: String, default: 'primary' },
-        disabled: { type: Boolean, default: false }
+        name: { type: String, required: true },
+        age: { type: Number, default: 0 },
+        email: String
       },
-      emits: ['click'],
+      emits: ['update'],
+      setup(props, { emit }) {
+        /**
+         * @param {User} userData
+         */
+        const handleUpdate = (userData) => {
+          emit('update', userData);
+        };
+        
+        return { handleUpdate, props };
+      },
       template: `
-        <button 
-          class="my-button"
-          :class="type"
-          :disabled="disabled"
-          @click="$emit('click')"
-        >
-          <slot>按钮</slot>
-        </button>
-      `
-    }
-    
-    // Card 组件
-    const MyCard = {
-      template: `
-        <div class="my-card">
-          <div class="card-header" v-if="$slots.header">
-            <slot name="header"></slot>
-          </div>
-          <div class="card-body"><slot></slot></div>
-          <div class="card-footer" v-if="$slots.footer">
-            <slot name="footer"></slot>
-          </div>
+        <div class="user-card">
+          <h4>{{ props.name }}</h4>
+          <p>年龄：{{ props.age }}</p>
+          <p v-if="props.email">邮箱：{{ props.email }}</p>
+          <button @click="handleUpdate({ name: props.name, age: props.age })">更新</button>
         </div>
       `
-    }
-    
-    // CardList 组件
-    const CardList = {
-      props: {
-        items: { type: Array, required: true }
-      },
-      emits: ['item-click'],
-      template: `
-        <div class="card-list">
-          <my-card 
-            v-for="item in items" 
-            :key="item.id"
-            @click="$emit('item-click', item)"
-            style="cursor: pointer;"
-          >
-            <template #header>
-              <h4>{{ item.title }}</h4>
-            </template>
-            <p>{{ item.description }}</p>
-            <p style="color: #667eea; font-weight: bold;">¥{{ item.price }}</p>
-          </my-card>
-        </div>
-      `
-    }
-    
-    createApp({
-      components: { MyButton, MyCard, CardList },
+    };
+
+    const ScriptSetupDemo = {
+      components: { UserCard },
       setup() {
-        const handleClick = () => {
-          alert('带类型的按钮点击事件！')
-        }
+        /** @type {import('vue').Ref<User[]>} */
+        const users = ref([
+          { name: '张三', age: 25, email: 'zhangsan@example.com' },
+          { name: '李四', age: 30 }
+        ]);
         
-        // 带类型的数据
-        /** @type {import('vue').Ref<Array<{id: number, title: string, description: string, price: number}>>} */
-        const cardItems = ref([
-          { id: 1, title: '商品 A', description: '高质量商品', price: 199 },
-          { id: 2, title: '商品 B', description: '性价比之选', price: 99 },
-          { id: 3, title: '商品 C', description: '限量版', price: 299 }
-        ])
+        const avgAge = computed(() => {
+          return users.value.reduce((sum, u) => sum + u.age, 0) / users.value.length;
+        });
         
-        const handleItemClick = (/** @type {{id: number, title: string}} */ item) => {
-          alert(`点击了 ID 为 ${item.id} 的 ${item.title}`)
-        }
+        /**
+         * @param {User} userData
+         */
+        const updateUser = (userData) => {
+          console.log('更新用户：', userData);
+        };
         
-        return { handleClick, cardItems, handleItemClick }
-      }
-    }).mount('#app')
+        return { users, avgAge, updateUser };
+      },
+      template: `
+        <div class="demo-section">
+          <h3>script setup 风格组件</h3>
+          <p>平均年龄：{{ avgAge.toFixed(1) }}</p>
+          <user-card
+            v-for="(user, index) in users"
+            :key="index"
+            :name="user.name"
+            :age="user.age"
+            :email="user.email"
+            @update="updateUser"
+          />
+          
+          <div class="code-block">
+&lt;script setup lang="ts"&gt;
+interface User {
+  name: string;
+  age: number;
+  email?: string;
+}
+
+const users = ref&lt;User[]&gt;([
+  { name: '张三', age: 25, email: 'zhangsan@example.com' },
+  { name: '李四', age: 30 }
+]);
+
+const avgAge = computed(() => {
+  return users.value.reduce((sum, u) => sum + u.age, 0) / users.value.length;
+});
+&lt;/script&gt;
+          </div>
+        </div>
+      `
+    };
+
+    createApp({ components: { ScriptSetupDemo } }).mount('#app');
   </script>
 </body>
 </html>

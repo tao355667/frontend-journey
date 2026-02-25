@@ -3,682 +3,341 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>列表渲染 - JavaScript 版本</title>
+  <title>第二十二章：生命周期钩子 - JavaScript 示例</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 40px 20px;
-    }
-    
-    .container {
-      max-width: 1000px;
+      font-family: Arial, sans-serif;
+      max-width: 900px;
       margin: 0 auto;
+      padding: 20px;
     }
-    
-    h1 {
-      color: white;
-      text-align: center;
-      margin-bottom: 40px;
-      font-size: 36px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    .demo-section {
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
     }
-    
-    .demo-card {
-      background: white;
-      border-radius: 16px;
-      padding: 30px;
-      margin-bottom: 30px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    }
-    
     .demo-title {
-      color: #667eea;
-      font-size: 24px;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 3px solid #667eea;
+      color: #42b983;
+      margin-top: 0;
     }
-    
-    .controls {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-    
     button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      font-weight: 600;
-      background: #42b883;
-      color: white;
-    }
-    
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(66, 184, 131, 0.4);
-    }
-    
-    button.secondary { background: #6c757d; }
-    button.danger { background: #dc3545; }
-    button.warning { background: #ffc107; color: #212529; }
-    
-    .todo-list {
-      list-style: none;
-    }
-    
-    .todo-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 15px;
-      background: #f8f9fa;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      transition: all 0.3s ease;
-    }
-    
-    .todo-item:hover {
-      background: #e9ecef;
-      transform: translateX(5px);
-    }
-    
-    .todo-item.completed {
-      opacity: 0.6;
-    }
-    
-    .todo-item.completed .todo-text {
-      text-decoration: line-through;
-      color: #6c757d;
-    }
-    
-    .todo-checkbox {
-      width: 20px;
-      height: 20px;
-      cursor: pointer;
-    }
-    
-    .todo-text {
-      flex: 1;
-    }
-    
-    .todo-delete {
-      padding: 6px 12px;
-      font-size: 14px;
-      background: #dc3545;
-    }
-    
-    .todo-input {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    
-    .todo-input input {
-      flex: 1;
-      padding: 12px;
-      border: 2px solid #dee2e6;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-    
-    .todo-input input:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-    
-    .filter-tabs {
-      display: flex;
-      gap: 5px;
-      margin-bottom: 20px;
-    }
-    
-    .filter-tabs button {
       padding: 8px 16px;
-      font-size: 14px;
-    }
-    
-    .filter-tabs button.active {
-      background: #667eea;
-    }
-    
-    .stats {
-      display: flex;
-      gap: 20px;
-      padding: 15px;
-      background: #e9ecef;
-      border-radius: 8px;
-      margin-top: 20px;
-    }
-    
-    .stat-item {
-      text-align: center;
-    }
-    
-    .stat-value {
-      font-size: 24px;
-      font-weight: bold;
-      color: #667eea;
-    }
-    
-    .stat-label {
-      font-size: 14px;
-      color: #6c757d;
-    }
-    
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 15px;
-    }
-    
-    .product-card {
-      background: #f8f9fa;
-      border-radius: 12px;
-      padding: 20px;
-      text-align: center;
-      transition: all 0.3s ease;
-    }
-    
-    .product-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
-    
-    .product-card.out-of-stock {
-      opacity: 0.5;
-    }
-    
-    .product-icon {
-      font-size: 48px;
-      margin-bottom: 10px;
-    }
-    
-    .product-name {
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    
-    .product-price {
-      color: #667eea;
-      font-size: 18px;
-      font-weight: bold;
-    }
-    
-    .product-stock {
-      font-size: 14px;
-      color: #6c757d;
-      margin-top: 5px;
-    }
-    
-    .product-stock.out {
-      color: #dc3545;
-      font-weight: bold;
-    }
-    
-    .object-list {
-      background: #f8f9fa;
-      border-radius: 8px;
-      padding: 20px;
-    }
-    
-    .object-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid #dee2e6;
-    }
-    
-    .object-item:last-child {
-      border-bottom: none;
-    }
-    
-    .object-key {
-      font-weight: bold;
-      color: #667eea;
-    }
-    
-    .object-value {
-      color: #666;
-    }
-    
-    .range-demo {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    
-    .range-item {
-      width: 40px;
-      height: 40px;
-      background: #667eea;
+      margin: 5px;
+      background: #42b983;
       color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      font-weight: bold;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
     }
-    
-    .sortable-list {
-      list-style: none;
+    button:hover {
+      background: #369870;
     }
-    
-    .sortable-item {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 12px;
-      background: #f8f9fa;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      cursor: move;
+    button.danger {
+      background: #ff6b6b;
     }
-    
-    .sortable-item:hover {
-      background: #e9ecef;
+    button.danger:hover {
+      background: #ff5252;
     }
-    
-    .sort-handle {
-      color: #6c757d;
-      cursor: grab;
-    }
-    
-    .code-block {
-      background: #f8f9fa;
+    .info-box {
+      background: #f0f8ff;
       padding: 15px;
+      border-left: 4px solid #42b983;
+      margin: 10px 0;
+    }
+    .log-box {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .log-entry {
+      margin: 2px 0;
+      padding: 2px 5px;
+      border-bottom: 1px solid #444;
+    }
+    .component-box {
+      border: 2px solid #42b983;
+      padding: 20px;
+      margin: 10px 0;
       border-radius: 8px;
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-      color: #d63384;
-      margin-top: 15px;
-      overflow-x: auto;
+      background: #f9f9f9;
     }
-    
-    .info-section {
-      background: #e7f3ff;
-      border-left: 4px solid #667eea;
-      padding: 15px;
-      margin-top: 20px;
-      border-radius: 0 8px 8px 0;
+    .loading {
+      color: #42b983;
     }
-    
-    .info-section h4 {
-      color: #667eea;
-      margin-bottom: 10px;
+    .error {
+      color: #ff6b6b;
     }
   </style>
 </head>
 <body>
+  <h1>第二十二章：生命周期钩子（组合式）</h1>
+  <p>本章演示组合式 API 中的生命周期钩子的使用。</p>
+
   <div id="app">
-    <div class="container">
-      <h1>📋 列表渲染演示</h1>
-      
-      <!-- Demo 1: 基础 v-for 数组渲染 -->
-      <div class="demo-card">
-        <h2 class="demo-title">1. 基础 v-for 数组渲染</h2>
-        
-        <div class="todo-input">
-          <input 
-            v-model="newTodo" 
-            @keyup.enter="addTodo"
-            placeholder="输入待办事项，按回车添加..."
-          >
-          <button @click="addTodo">添加</button>
-        </div>
-        
-        <div class="filter-tabs">
-          <button 
-            v-for="filter in filters" 
-            :key="filter"
-            :class="{ active: currentFilter === filter }"
-            @click="currentFilter = filter"
-          >
-            {{ filter === 'all' ? '全部' : filter === 'active' ? '进行中' : '已完成' }}
-          </button>
-        </div>
-        
-        <ul class="todo-list">
-          <li 
-            v-for="(todo, index) in filteredTodos" 
-            :key="todo.id"
-            class="todo-item"
-            :class="{ completed: todo.completed }"
-          >
-            <span style="color: #6c757d; min-width: 30px;">{{ index + 1 }}.</span>
-            <input 
-              type="checkbox" 
-              class="todo-checkbox"
-              v-model="todo.completed"
-            >
-            <span class="todo-text">{{ todo.text }}</span>
-            <button class="todo-delete" @click="removeTodo(todo.id)">删除</button>
-          </li>
-        </ul>
-        
-        <p v-if="filteredTodos.length === 0" style="text-align: center; color: #6c757d; padding: 20px;">
-          暂无事项
-        </p>
-        
-        <div class="stats">
-          <div class="stat-item">
-            <div class="stat-value">{{ todos.length }}</div>
-            <div class="stat-label">总计</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value">{{ activeCount }}</div>
-            <div class="stat-label">进行中</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value">{{ completedCount }}</div>
-            <div class="stat-label">已完成</div>
-          </div>
-        </div>
-        
-        <div class="code-block">
-          &lt;li v-for="(todo, index) in todos" :key="todo.id"&gt;
-            {{ index + 1 }}. {{ todo.text }}
-          &lt;/li&gt;
-        </div>
-      </div>
-      
-      <!-- Demo 2: 商品列表（带条件渲染） -->
-      <div class="demo-card">
-        <h2 class="demo-title">2. 商品列表示例</h2>
-        
-        <div class="controls">
-          <button @click="sortProducts('price')">按价格排序</button>
-          <button @click="sortProducts('name')" class="secondary">按名称排序</button>
-          <button @click="toggleOutOfStock" class="warning">
-            {{ showOutOfStock ? '隐藏缺货商品' : '显示缺货商品' }}
-          </button>
-        </div>
-        
-        <div class="product-grid">
-          <div 
-            v-for="product in displayedProducts" 
-            :key="product.id"
-            class="product-card"
-            :class="{ 'out-of-stock': product.stock === 0 }"
-          >
-            <div class="product-icon">{{ product.icon }}</div>
-            <div class="product-name">{{ product.name }}</div>
-            <div class="product-price">¥{{ product.price }}</div>
-            <div 
-              class="product-stock"
-              :class="{ out: product.stock === 0 }"
-            >
-              {{ product.stock === 0 ? '缺货' : `库存: ${product.stock}` }}
-            </div>
-          </div>
-        </div>
-        
-        <div class="info-section">
-          <h4>💡 key 属性的重要性</h4>
-          <p>key 帮助 Vue 识别哪些元素改变了，从而高效地更新 DOM。推荐使用唯一 ID 作为 key。</p>
-        </div>
-      </div>
-      
-      <!-- Demo 3: 对象遍历 -->
-      <div class="demo-card">
-        <h2 class="demo-title">3. 使用 v-for 遍历对象</h2>
-        
-        <div class="object-list">
-          <div 
-            v-for="(value, key, index) in userInfo" 
-            :key="key"
-            class="object-item"
-          >
-            <span style="color: #6c757d; min-width: 30px;">{{ index + 1 }}.</span>
-            <span class="object-key">{{ key }}:</span>
-            <span class="object-value">{{ value }}</span>
-          </div>
-        </div>
-        
-        <div class="code-block">
-          &lt;div v-for="(value, key, index) in object" :key="key"&gt;
-            {{ index }}. {{ key }}: {{ value }}
-          &lt;/div&gt;
-        </div>
-      </div>
-      
-      <!-- Demo 4: 范围渲染 -->
-      <div class="demo-card">
-        <h2 class="demo-title">4. 范围渲染（v-for with Number）</h2>
-        
-        <div class="range-demo">
-          <div 
-            v-for="n in 10" 
-            :key="n"
-            class="range-item"
-          >
-            {{ n }}
-          </div>
-        </div>
-        
-        <div class="code-block">
-          &lt;span v-for="n in 10" :key="n"&gt;{{ n }}&lt;/span&gt;
-        </div>
-        
-        <div class="info-section">
-          <h4>💡 提示</h4>
-          <p>v-for 也可以直接使用数字作为范围，常用于分页按钮、评分星星等场景。</p>
-        </div>
-      </div>
-      
-      <!-- Demo 5: 数组方法演示 -->
-      <div class="demo-card">
-        <h2 class="demo-title">5. 数组变更检测</h2>
-        
-        <div class="controls">
-          <button @click="pushItem">push() 添加</button>
-          <button @click="popItem" class="secondary">pop() 移除末尾</button>
-          <button @click="shiftItem" class="secondary">shift() 移除开头</button>
-          <button @click="unshiftItem">unshift() 添加开头</button>
-          <button @click="reverseItems" class="warning">reverse() 反转</button>
-          <button @click="sortItems" class="warning">sort() 排序</button>
-        </div>
-        
-        <ul class="sortable-list">
-          <li 
-            v-for="(item, index) in arrayMethodsDemo" 
-            :key="item.id"
-            class="sortable-item"
-          >
-            <span class="sort-handle">☰</span>
-            <span>{{ index + 1 }}. {{ item.name }}</span>
-            <span style="color: #6c757d; font-size: 14px;">ID: {{ item.id }}</span>
-          </li>
-        </ul>
-        
-        <div class="code-block">
-          // 变更方法 - Vue 能自动检测
-          items.push(newItem)
-          items.pop()
-          items.splice(index, 1)
-          items.sort()
-          
-          // 非变更方法 - 需要赋值回原数组
-          items = items.filter(item => item.active)
-        </div>
-      </div>
+    <!-- 示例 1：生命周期演示 -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 1：生命周期钩子演示</h2>
+      <button @click="showLifecycleDemo = !showLifecycleDemo">
+        {{ showLifecycleDemo ? '卸载' : '挂载' }}组件
+      </button>
+      <lifecycle-demo v-if="showLifecycleDemo"></lifecycle-demo>
+    </div>
+
+    <!-- 示例 2：数据获取 -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 2：onMounted 数据获取</h2>
+      <data-fetch-demo></data-fetch-demo>
+    </div>
+
+    <!-- 示例 3：定时器清理 -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 3：onUnmounted 清理副作用</h2>
+      <button @click="showTimer = !showTimer">
+        {{ showTimer ? '停止' : '开始' }}计时器
+      </button>
+      <timer-demo v-if="showTimer"></timer-demo>
+    </div>
+
+    <!-- 示例 4：事件监听 -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 4：事件监听与清理</h2>
+      <button @click="showMouseTracker = !showMouseTracker">
+        {{ showMouseTracker ? '隐藏' : '显示' }}鼠标追踪
+      </button>
+      <mouse-tracker v-if="showMouseTracker"></mouse-tracker>
     </div>
   </div>
 
   <script>
-    const { createApp, ref, computed } = Vue
+    const { 
+      createApp, 
+      ref, 
+      onBeforeMount,
+      onMounted, 
+      onBeforeUpdate,
+      onUpdated,
+      onBeforeUnmount,
+      onUnmounted 
+    } = Vue;
 
-    createApp({
+    // 示例 1：生命周期演示组件
+    const LifecycleDemo = {
       setup() {
-        // Demo 1: 待办事项列表
-        const newTodo = ref('')
-        const todos = ref([
-          { id: 1, text: '学习 Vue 基础', completed: true },
-          { id: 2, text: '完成练习项目', completed: false },
-          { id: 3, text: '阅读官方文档', completed: false }
-        ])
-        const nextTodoId = ref(4)
-        const currentFilter = ref('all')
-        const filters = ['all', 'active', 'completed']
+        const count = ref(0);
+        const logs = ref([]);
         
-        const addTodo = () => {
-          if (newTodo.value.trim() === '') return
-          todos.value.push({
-            id: nextTodoId.value++,
-            text: newTodo.value.trim(),
-            completed: false
-          })
-          newTodo.value = ''
-        }
+        const addLog = (message) => {
+          const time = new Date().toLocaleTimeString();
+          logs.value.push(`${time} - ${message}`);
+        };
         
-        const removeTodo = (id) => {
-          const index = todos.value.findIndex(todo => todo.id === id)
-          if (index > -1) {
-            todos.value.splice(index, 1)
-          }
-        }
+        onBeforeMount(() => {
+          addLog('onBeforeMount: 组件即将挂载到 DOM');
+        });
         
-        const filteredTodos = computed(() => {
-          switch (currentFilter.value) {
-            case 'active':
-              return todos.value.filter(t => !t.completed)
-            case 'completed':
-              return todos.value.filter(t => t.completed)
-            default:
-              return todos.value
-          }
-        })
+        onMounted(() => {
+          addLog('onMounted: 组件已挂载，可以访问 DOM');
+        });
         
-        const activeCount = computed(() => todos.value.filter(t => !t.completed).length)
-        const completedCount = computed(() => todos.value.filter(t => t.completed).length)
+        onBeforeUpdate(() => {
+          addLog('onBeforeUpdate: 组件即将更新');
+        });
         
-        // Demo 2: 商品列表
-        const products = ref([
-          { id: 1, name: '苹果手机', price: 5999, stock: 10, icon: '📱' },
-          { id: 2, name: '蓝牙耳机', price: 299, stock: 50, icon: '🎧' },
-          { id: 3, name: '笔记本电脑', price: 8999, stock: 0, icon: '💻' },
-          { id: 4, name: '智能手表', price: 1299, stock: 20, icon: '⌚' },
-          { id: 5, name: '平板电脑', price: 3299, stock: 15, icon: '📲' },
-          { id: 6, name: '机械键盘', price: 499, stock: 0, icon: '⌨️' }
-        ])
-        const showOutOfStock = ref(true)
-        const sortBy = ref('')
+        onUpdated(() => {
+          addLog('onUpdated: 组件已更新，DOM 已同步');
+        });
         
-        const displayedProducts = computed(() => {
-          let result = showOutOfStock.value 
-            ? products.value 
-            : products.value.filter(p => p.stock > 0)
-          
-          if (sortBy.value === 'price') {
-            result = [...result].sort((a, b) => a.price - b.price)
-          } else if (sortBy.value === 'name') {
-            result = [...result].sort((a, b) => a.name.localeCompare(b.name))
-          }
-          
-          return result
-        })
+        onBeforeUnmount(() => {
+          addLog('onBeforeUnmount: 组件即将卸载');
+        });
         
-        const sortProducts = (type) => {
-          sortBy.value = sortBy.value === type ? '' : type
-        }
-        
-        const toggleOutOfStock = () => {
-          showOutOfStock.value = !showOutOfStock.value
-        }
-        
-        // Demo 3: 对象遍历
-        const userInfo = {
-          name: '张三',
-          age: 28,
-          email: 'zhangsan@example.com',
-          city: '北京',
-          job: '前端工程师'
-        }
-        
-        // Demo 4: 范围渲染（直接在模板中使用）
-        
-        // Demo 5: 数组方法演示
-        const arrayMethodsDemo = ref([
-          { id: 1, name: '项目 A' },
-          { id: 2, name: '项目 B' },
-          { id: 3, name: '项目 C' },
-          { id: 4, name: '项目 D' }
-        ])
-        let nextArrayId = 5
-        
-        const pushItem = () => {
-          arrayMethodsDemo.value.push({
-            id: nextArrayId++,
-            name: `新项目 ${String.fromCharCode(64 + nextArrayId - 1)}`
-          })
-        }
-        
-        const popItem = () => {
-          arrayMethodsDemo.value.pop()
-        }
-        
-        const shiftItem = () => {
-          arrayMethodsDemo.value.shift()
-        }
-        
-        const unshiftItem = () => {
-          arrayMethodsDemo.value.unshift({
-            id: nextArrayId++,
-            name: `新项目(前) ${String.fromCharCode(64 + nextArrayId - 1)}`
-          })
-        }
-        
-        const reverseItems = () => {
-          arrayMethodsDemo.value.reverse()
-        }
-        
-        const sortItems = () => {
-          arrayMethodsDemo.value.sort((a, b) => a.name.localeCompare(b.name))
-        }
+        onUnmounted(() => {
+          console.log('onUnmounted: 组件已卸载，执行清理工作');
+        });
         
         return {
-          // Demo 1
-          newTodo,
-          todos,
-          currentFilter,
-          filters,
-          addTodo,
-          removeTodo,
-          filteredTodos,
-          activeCount,
-          completedCount,
-          // Demo 2
-          displayedProducts,
-          sortProducts,
-          toggleOutOfStock,
-          showOutOfStock,
-          // Demo 3
-          userInfo,
-          // Demo 5
-          arrayMethodsDemo,
-          pushItem,
-          popItem,
-          shiftItem,
-          unshiftItem,
-          reverseItems,
-          sortItems
-        }
+          count,
+          logs
+        };
+      },
+      template: `
+        <div class="component-box">
+          <h4>生命周期演示组件</h4>
+          <p>计数：{{ count }}</p>
+          <button @click="count++">增加计数（触发更新）</button>
+          <div class="log-box" style="margin-top: 10px;">
+            <div v-for="(log, index) in logs" :key="index" class="log-entry">
+              {{ log }}
+            </div>
+          </div>
+        </div>
+      `
+    };
+
+    // 示例 2：数据获取
+    const DataFetchDemo = {
+      setup() {
+        const users = ref([]);
+        const loading = ref(false);
+        const error = ref(null);
+        
+        const fetchUsers = async () => {
+          loading.value = true;
+          error.value = null;
+          
+          try {
+            // 模拟 API 调用
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // 模拟随机失败
+            if (Math.random() > 0.8) {
+              throw new Error('网络请求失败');
+            }
+            
+            users.value = [
+              { id: 1, name: '张三', role: '管理员' },
+              { id: 2, name: '李四', role: '用户' },
+              { id: 3, name: '王五', role: '用户' },
+            ];
+          } catch (err) {
+            error.value = err.message;
+          } finally {
+            loading.value = false;
+          }
+        };
+        
+        onMounted(() => {
+          fetchUsers();
+        });
+        
+        return {
+          users,
+          loading,
+          error,
+          fetchUsers
+        };
+      },
+      template: `
+        <div>
+          <div v-if="loading" class="loading">
+            <p>加载中...</p>
+          </div>
+          <div v-else-if="error" class="error">
+            <p>错误：{{ error }}</p>
+            <button @click="fetchUsers">重试</button>
+          </div>
+          <div v-else>
+            <ul>
+              <li v-for="user in users" :key="user.id">
+                {{ user.name }} - {{ user.role }}
+              </li>
+            </ul>
+            <button @click="fetchUsers">刷新数据</button>
+          </div>
+        </div>
+      `
+    };
+
+    // 示例 3：定时器
+    const TimerDemo = {
+      setup() {
+        const seconds = ref(0);
+        let timer = null;
+        
+        onMounted(() => {
+          timer = setInterval(() => {
+            seconds.value++;
+          }, 1000);
+          console.log('定时器启动');
+        });
+        
+        onUnmounted(() => {
+          clearInterval(timer);
+          console.log('定时器已清理');
+        });
+        
+        return {
+          seconds
+        };
+      },
+      template: `
+        <div class="component-box">
+          <p style="font-size: 24px; font-weight: bold; color: #42b983;">
+            {{ seconds }} 秒
+          </p>
+          <p>组件卸载时，定时器会自动清理</p>
+        </div>
+      `
+    };
+
+    // 示例 4：鼠标追踪
+    const MouseTracker = {
+      setup() {
+        const x = ref(0);
+        const y = ref(0);
+        const isTracking = ref(false);
+        
+        const updatePosition = (event) => {
+          x.value = event.clientX;
+          y.value = event.clientY;
+        };
+        
+        onMounted(() => {
+          window.addEventListener('mousemove', updatePosition);
+          isTracking.value = true;
+          console.log('开始监听鼠标移动');
+        });
+        
+        onUnmounted(() => {
+          window.removeEventListener('mousemove', updatePosition);
+          console.log('停止监听鼠标移动');
+        });
+        
+        return {
+          x,
+          y,
+          isTracking
+        };
+      },
+      template: `
+        <div class="component-box" style="text-align: center;">
+          <p>鼠标追踪状态：{{ isTracking ? '运行中' : '已停止' }}</p>
+          <p style="font-size: 18px; font-family: monospace;">
+            X: {{ x }} | Y: {{ y }}
+          </p>
+          <div style="font-size: 12px; color: #666;">
+            移动鼠标查看坐标变化
+          </div>
+        </div>
+      `
+    };
+
+    createApp({
+      components: {
+        LifecycleDemo,
+        DataFetchDemo,
+        TimerDemo,
+        MouseTracker
+      },
+      setup() {
+        const showLifecycleDemo = ref(false);
+        const showTimer = ref(false);
+        const showMouseTracker = ref(false);
+        
+        return {
+          showLifecycleDemo,
+          showTimer,
+          showMouseTracker
+        };
       }
-    }).mount('#app')
+    }).mount('#app');
   </script>
 </body>
 </html>

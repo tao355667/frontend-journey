@@ -3,359 +3,949 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>第16章练习答案 - 自定义指令应用</title>
+  <title>待办事项列表 - 高级版（扩展功能）</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #f5f5f5; }
-    h1 { text-align: center; color: #333; margin-bottom: 30px; }
-    h2 { color: #42b883; margin: 30px 0 15px; border-bottom: 2px solid #42b883; padding-bottom: 10px; }
-    .container { max-width: 1000px; margin: 0 auto; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     
-    .exercise-card { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0; }
-    .exercise-card h3 { color: #1976d2; margin-bottom: 10px; }
-    .exercise-card code { background: rgba(255,255,255,0.7); padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 13px; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
     
-    .card { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin: 5px; transition: all 0.2s; }
-    .btn-primary { background: #42b883; color: white; }
-    .btn-danger { background: #ff5252; color: white; }
-    .btn-default { background: #e0e0e0; color: #333; }
-    .btn:hover { opacity: 0.8; }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
     
-    /* 练习1：Tooltip */
-    .tooltip-target { padding: 10px 20px; background: #f8f8f8; border: 1px solid #ddd; border-radius: 4px; cursor: help; display: inline-block; }
-    .custom-tooltip { position: fixed; background: #333; color: white; padding: 8px 12px; border-radius: 4px; font-size: 13px; white-space: nowrap; z-index: 10000; pointer-events: none; opacity: 0; visibility: hidden; transition: all 0.2s; }
-    .custom-tooltip.show { opacity: 1; visibility: visible; }
-    .custom-tooltip::after { content: ''; position: absolute; border: 6px solid transparent; }
-    .custom-tooltip.top::after { top: 100%; left: 50%; transform: translateX(-50%); border-top-color: #333; }
-    .custom-tooltip.bottom::after { bottom: 100%; left: 50%; transform: translateX(-50%); border-bottom-color: #333; }
-    .custom-tooltip.left::after { left: 100%; top: 50%; transform: translateY(-50%); border-left-color: #333; }
-    .custom-tooltip.right::after { right: 100%; top: 50%; transform: translateY(-50%); border-right-color: #333; }
+    .app-card {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
     
-    /* 练习2：Resize */
-    .resize-container { background: #f8f8f8; padding: 30px; border-radius: 8px; border: 2px solid #e0e0e0; resize: both; overflow: auto; min-width: 200px; min-height: 100px; max-width: 100%; }
-    .resize-info { font-family: monospace; background: #e8f5e9; color: #2e7d32; padding: 10px; border-radius: 4px; margin-top: 15px; }
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
     
-    /* 练习3：Loading */
-    .loading-wrapper { position: relative; min-height: 200px; border: 2px dashed #ddd; border-radius: 8px; padding: 20px; }
-    .loading-fullscreen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
-    .loading-spinner-large { width: 60px; height: 60px; border: 5px solid #e0e0e0; border-top-color: #42b883; border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-text { margin-top: 15px; color: #666; font-size: 16px; }
-    .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 4px; }
-    @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+    }
     
-    .content-area h4 { margin-bottom: 15px; color: #333; }
-    .content-area ul { padding-left: 20px; }
-    .content-area li { margin: 8px 0; color: #666; }
+    .feature-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+    
+    /* 高级功能区域 */
+    .advanced-features {
+      background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 2px solid #667eea30;
+    }
+    
+    .advanced-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .feature-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .feature-group {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .feature-label {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    
+    select, input[type="date"] {
+      width: 100%;
+      padding: 10px 15px;
+      font-size: 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    
+    select:focus, input[type="date"]:focus {
+      border-color: #667eea;
+    }
+    
+    /* 输入区域 */
+    .input-section {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    input[type="text"] {
+      flex: 1;
+      padding: 15px 20px;
+      font-size: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    
+    input[type="text"]:focus {
+      border-color: #667eea;
+    }
+    
+    .btn-add {
+      padding: 15px 30px;
+      font-size: 16px;
+      background: #42b883;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+    
+    .btn-add:hover {
+      background: #369870;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(66, 184, 131, 0.4);
+    }
+    
+    .btn-add:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    /* 筛选和排序 */
+    .filter-sort-section {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+    
+    .filter-group {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .filter-btn {
+      padding: 8px 16px;
+      border: 2px solid #e0e0e0;
+      background: white;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    
+    .filter-btn:hover {
+      border-color: #667eea;
+      color: #667eea;
+    }
+    
+    .filter-btn.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+    
+    /* 待办列表 */
+    .todo-list {
+      list-style: none;
+    }
+    
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    
+    .todo-item:hover {
+      background: #e9ecef;
+      transform: translateX(5px);
+    }
+    
+    .todo-item.priority-high {
+      border-left-color: #ff6b6b;
+    }
+    
+    .todo-item.priority-medium {
+      border-left-color: #ffc107;
+    }
+    
+    .todo-item.priority-low {
+      border-left-color: #42b883;
+    }
+    
+    .todo-item.completed {
+      opacity: 0.6;
+    }
+    
+    .todo-item.completed .todo-text {
+      text-decoration: line-through;
+      color: #6c757d;
+    }
+    
+    .todo-item.overdue {
+      background: #fff3cd;
+    }
+    
+    .todo-checkbox {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      accent-color: #42b883;
+    }
+    
+    .todo-content {
+      flex: 1;
+    }
+    
+    .todo-text {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    
+    .todo-meta {
+      display: flex;
+      gap: 10px;
+      font-size: 12px;
+      color: #666;
+    }
+    
+    .priority-badge {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    
+    .priority-high {
+      background: #ff6b6b;
+      color: white;
+    }
+    
+    .priority-medium {
+      background: #ffc107;
+      color: #333;
+    }
+    
+    .priority-low {
+      background: #42b883;
+      color: white;
+    }
+    
+    .due-date {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .overdue-badge {
+      background: #dc3545;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+    }
+    
+    .btn-delete {
+      padding: 8px 16px;
+      background: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    
+    .btn-delete:hover {
+      background: #ee5a5a;
+      transform: scale(1.05);
+    }
+    
+    /* 空状态 */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+    
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+    
+    /* 统计信息 */
+    .stats-section {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px solid #e0e0e0;
+    }
+    
+    .stat-card {
+      text-align: center;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 12px;
+    }
+    
+    .stat-card.overdue-stat {
+      background: #f8d7da;
+    }
+    
+    .stat-value {
+      font-size: 28px;
+      font-weight: bold;
+      color: #667eea;
+    }
+    
+    .stat-card.overdue-stat .stat-value {
+      color: #dc3545;
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      color: #666;
+      margin-top: 5px;
+    }
+    
+    /* 操作按钮 */
+    .actions-section {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .btn-action {
+      padding: 10px 20px;
+      background: transparent;
+      border: 2px solid;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    
+    .btn-clear {
+      color: #ff6b6b;
+      border-color: #ff6b6b;
+    }
+    
+    .btn-clear:hover {
+      background: #ff6b6b;
+      color: white;
+    }
+    
+    .btn-export {
+      color: #667eea;
+      border-color: #667eea;
+    }
+    
+    .btn-export:hover {
+      background: #667eea;
+      color: white;
+    }
+    
+    .btn-import {
+      color: #42b883;
+      border-color: #42b883;
+    }
+    
+    .btn-import:hover {
+      background: #42b883;
+      color: white;
+    }
+    
+    /* 导入导出区域 */
+    .import-export-section {
+      margin-top: 20px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 12px;
+    }
+    
+    .import-export-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    
+    textarea {
+      width: 100%;
+      padding: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      resize: vertical;
+      min-height: 150px;
+    }
+    
+    .import-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    /* 搜索框 */
+    .search-section {
+      margin-bottom: 20px;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 12px 20px;
+      font-size: 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 25px;
+      outline: none;
+      transition: all 0.3s;
+      background: #f8f9fa;
+    }
+    
+    .search-input:focus {
+      border-color: #667eea;
+      background: white;
+    }
+    
+    /* 进度条 */
+    .progress-section {
+      margin: 20px 0;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 12px;
+    }
+    
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .progress-bar {
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #42b883 0%, #667eea 100%);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
   </style>
 </head>
 <body>
   <div id="app">
     <div class="container">
-      <h1>第16章练习题答案</h1>
-      
-      <!-- 练习1：v-tooltip 指令 -->
-      <div class="exercise-card">
-        <h3>练习 1：v-tooltip 提示框指令</h3>
-        <p>鼠标悬停显示提示文字 | 支持自定义内容和位置 (top/bottom/left/right) | 离开时隐藏</p>
-      </div>
-      
-      <div class="card">
-        <h4>基础提示</h4>
-        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
-          <span v-exercise1-tooltip="'这是一个提示'" class="tooltip-target">默认提示</span>
-          <span v-exercise1-tooltip:top="'上方提示'" class="tooltip-target">上方</span>
-          <span v-exercise1-tooltip:bottom="'下方提示'" class="tooltip-target">下方</span>
-          <span v-exercise1-tooltip:left="'左侧提示'" class="tooltip-target">左侧</span>
-          <span v-exercise1-tooltip:right="'右侧提示'" class="tooltip-target">右侧</span>
-        </div>
+      <div class="app-card">
+        <h1>
+          📝 待办事项列表
+          <span class="feature-badge">高级版</span>
+        </h1>
+        <p class="subtitle">包含扩展功能的完整实现</p>
         
-        <h4>带 HTML 内容的提示</h4>
-        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-          <button v-exercise1-tooltip="buttonTooltip" class="btn btn-primary">按钮提示</button>
-          <span v-exercise1-tooltip:top="dynamicTooltip" class="tooltip-target">动态提示</span>
-        </div>
-        <input v-model="dynamicTooltip" placeholder="修改提示内容" style="margin-top: 15px;" />
-      </div>
-      
-      <!-- 练习2：v-resize 指令 -->
-      <div class="exercise-card">
-        <h3>练习 2：v-resize 尺寸监听指令</h3>
-        <p>监听元素大小变化 | 变化时触发回调函数 | 使用 ResizeObserver API</p>
-      </div>
-      
-      <div class="card">
-        <p style="margin-bottom: 15px; color: #666;">拖动右下角的调整手柄改变下方区域大小：</p>
-        <div v-exercise2-resize="onResize" class="resize-container">
-          <h4>可调整大小的区域</h4>
-          <p>这个区域使用了 resize: both CSS 属性，可以直接拖动调整大小</p>
-        </div>
-        <div class="resize-info">
-          当前尺寸: {{ resizeInfo.width }}px × {{ resizeInfo.height }}px | 
-          变化次数: {{ resizeCount }}
-        </div>
-      </div>
-      
-      <!-- 练习3：v-loading 指令 -->
-      <div class="exercise-card">
-        <h3>练习 3：v-loading 加载状态指令</h3>
-        <p>显示加载动画覆盖层 | 支持自定义加载文字 | 值变为 false 时移除 | 支持全屏/局部两种模式</p>
-      </div>
-      
-      <div class="card">
-        <div style="margin-bottom: 15px;">
-          <label style="margin-right: 15px;">
-            <input type="radio" v-model="loadingMode" value="local"> 局部加载
-          </label>
-          <label>
-            <input type="radio" v-model="loadingMode" value="fullscreen"> 全屏加载
-          </label>
-        </div>
-        
-        <div v-if="loadingMode === 'local'">
-          <div v-exercise3-loading="isLoading" v-exercise3-loading-text="loadingText" class="loading-wrapper content-area">
-            <h4>内容区域</h4>
-            <ul>
-              <li>数据项 1</li>
-              <li>数据项 2</li>
-              <li>数据项 3</li>
-              <li>数据项 4</li>
-            </ul>
+        <!-- 高级功能配置 -->
+        <div class="advanced-features">
+          <div class="advanced-title">
+            ⚡ 高级功能配置
+          </div>
+          <div class="feature-row">
+            <div class="feature-group">
+              <div class="feature-label">优先级</div>
+              <select v-model="newTodoPriority">
+                <option value="low">低优先级</option>
+                <option value="medium">中优先级</option>
+                <option value="high">高优先级</option>
+              </select>
+            </div>
+            <div class="feature-group">
+              <div class="feature-label">截止日期</div>
+              <input type="date" v-model="newTodoDueDate">
+            </div>
           </div>
         </div>
         
-        <div v-if="loadingMode === 'fullscreen'" style="position: relative;">
-          <div class="content-area" style="padding: 20px; background: #f8f8f8; border-radius: 4px;">
-            <h4>页面内容</h4>
-            <p>全屏加载会覆盖整个视口</p>
-          </div>
-          <div v-if="isLoading && loadingMode === 'fullscreen'" class="loading-fullscreen">
-            <div class="loading-spinner-large"></div>
-            <div class="loading-text">{{ loadingText }}</div>
-          </div>
+        <!-- 搜索框 -->
+        <div class="search-section">
+          <input 
+            type="text" 
+            class="search-input"
+            v-model="searchQuery"
+            placeholder="🔍 搜索待办事项..."
+          >
         </div>
         
-        <div style="margin-top: 15px;">
-          <input v-model="loadingText" placeholder="加载提示文字" style="margin-right: 10px;" />
-          <button class="btn btn-primary" @click="toggleLoading">
-            {{ isLoading ? '停止' : '开始' }} 加载
+        <!-- 输入区域 -->
+        <div class="input-section">
+          <input 
+            type="text" 
+            v-model="newTodo"
+            @keyup.enter="addTodo"
+            placeholder="添加新的待办事项..."
+          >
+          <button class="btn-add" @click="addTodo" :disabled="!newTodo.trim()">
+            ➕ 添加
           </button>
+        </div>
+        
+        <!-- 进度条 -->
+        <div class="progress-section">
+          <div class="progress-label">
+            <span>完成进度</span>
+            <span>{{ Math.round(completionRate) }}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" :style="{ width: completionRate + '%' }"></div>
+          </div>
+        </div>
+        
+        <!-- 筛选和排序 -->
+        <div class="filter-sort-section">
+          <div class="filter-group">
+            <button 
+              class="filter-btn"
+              :class="{ active: filter === 'all' }"
+              @click="filter = 'all'"
+            >
+              全部 ({{ totalCount }})
+            </button>
+            <button 
+              class="filter-btn"
+              :class="{ active: filter === 'active' }"
+              @click="filter = 'active'"
+            >
+              待完成 ({{ pendingCount }})
+            </button>
+            <button 
+              class="filter-btn"
+              :class="{ active: filter === 'completed' }"
+              @click="filter = 'completed'"
+            >
+              已完成 ({{ completedCount }})
+            </button>
+            <button 
+              class="filter-btn"
+              :class="{ active: filter === 'overdue' }"
+              @click="filter = 'overdue'"
+            >
+              已过期 ({{ overdueCount }})
+            </button>
+          </div>
+          <div class="filter-group">
+            <select v-model="sortBy">
+              <option value="newest">最新添加</option>
+              <option value="dueDate">截止日期</option>
+              <option value="priority">优先级</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- 待办列表 -->
+        <ul class="todo-list" v-if="filteredAndSortedTodos.length > 0">
+          <li 
+            v-for="todo in filteredAndSortedTodos" 
+            :key="todo.id"
+            class="todo-item"
+            :class="{ 
+              completed: todo.completed,
+              ['priority-' + todo.priority]: true,
+              overdue: isOverdue(todo)
+            }"
+          >
+            <input 
+              type="checkbox" 
+              class="todo-checkbox"
+              v-model="todo.completed"
+            >
+            <div class="todo-content">
+              <div class="todo-text">{{ todo.text }}</div>
+              <div class="todo-meta">
+                <span class="priority-badge" :class="'priority-' + todo.priority">
+                  {{ priorityLabels[todo.priority] }}
+                </span>
+                <span class="due-date" v-if="todo.dueDate">
+                  📅 {{ formatDate(todo.dueDate) }}
+                  <span v-if="isOverdue(todo)" class="overdue-badge">已过期</span>
+                </span>
+                <span>创建于 {{ formatDate(todo.createdAt) }}</span>
+              </div>
+            </div>
+            <button class="btn-delete" @click="removeTodo(todo.id)">
+              删除
+            </button>
+          </li>
+        </ul>
+        
+        <!-- 空状态 -->
+        <div class="empty-state" v-else>
+          <div class="empty-state-icon">📭</div>
+          <p v-if="searchQuery">没有找到匹配的待办事项</p>
+          <p v-else-if="filter === 'all'">还没有待办事项，添加一个吧！</p>
+          <p v-else-if="filter === 'active'">没有待完成的事项，真棒！</p>
+          <p v-else-if="filter === 'completed'">没有已完成的事项</p>
+          <p v-else>没有已过期的待办事项</p>
+        </div>
+        
+        <!-- 统计信息 -->
+        <div class="stats-section">
+          <div class="stat-card">
+            <div class="stat-value">{{ totalCount }}</div>
+            <div class="stat-label">总事项</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">{{ completedCount }}</div>
+            <div class="stat-label">已完成</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">{{ pendingCount }}</div>
+            <div class="stat-label">待完成</div>
+          </div>
+          <div class="stat-card overdue-stat" v-if="overdueCount > 0">
+            <div class="stat-value">{{ overdueCount }}</div>
+            <div class="stat-label">已过期</div>
+          </div>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="actions-section">
+          <button class="btn-action btn-clear" @click="clearCompleted" v-if="completedCount > 0">
+            🗑️ 清除已完成 ({{ completedCount }})
+          </button>
+          <button class="btn-action btn-export" @click="showExport = !showExport">
+            📤 导出数据
+          </button>
+          <button class="btn-action btn-import" @click="showImport = !showImport">
+            📥 导入数据
+          </button>
+        </div>
+        
+        <!-- 导出区域 -->
+        <div class="import-export-section" v-if="showExport">
+          <div class="import-export-title">📤 导出数据（复制下方 JSON）</div>
+          <textarea readonly>{{ exportData }}</textarea>
+        </div>
+        
+        <!-- 导入区域 -->
+        <div class="import-export-section" v-if="showImport">
+          <div class="import-export-title">📥 导入数据（粘贴 JSON 数据）</div>
+          <textarea v-model="importData" placeholder='粘贴格式：[{"id": 1, "text": "示例", "completed": false, "priority": "medium", "dueDate": "2024-12-31", "createdAt": "2024-01-01"}]'></textarea>
+          <div class="import-actions">
+            <button class="btn-add" @click="importTodos" :disabled="!importData.trim()">
+              确认导入
+            </button>
+            <button class="btn-action btn-clear" @click="importData = ''">
+              清空
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    const { createApp, ref, nextTick } = Vue;
-
-    // 全局 tooltip 元素（避免重复创建）
-    let globalTooltip = null;
-    let currentTarget = null;
-
-    function getGlobalTooltip() {
-      if (!globalTooltip) {
-        globalTooltip = document.createElement('div');
-        globalTooltip.className = 'custom-tooltip';
-        document.body.appendChild(globalTooltip);
-      }
-      return globalTooltip;
-    }
+    const { createApp, ref, computed, watch } = Vue
 
     createApp({
       setup() {
-        // 练习1数据
-        const dynamicTooltip = ref('动态提示内容');
-        const buttonTooltip = ref('<strong>富文本</strong><br>支持 HTML');
-
-        // 练习2数据
-        const resizeInfo = ref({ width: 0, height: 0 });
-        const resizeCount = ref(0);
-
-        const onResize = (size) => {
-          resizeInfo.value = size;
-          resizeCount.value++;
-        };
-
-        // 练习3数据
-        const isLoading = ref(false);
-        const loadingText = ref('正在加载数据...');
-        const loadingMode = ref('local');
-
-        const toggleLoading = () => {
-          isLoading.value = !isLoading.value;
-          if (isLoading.value && loadingMode.value === 'fullscreen') {
-            // 全屏模式 3 秒后自动停止
-            setTimeout(() => {
-              isLoading.value = false;
-            }, 3000);
+        // ========== 响应式数据 ==========
+        const newTodo = ref('')
+        const newTodoPriority = ref('medium')
+        const newTodoDueDate = ref('')
+        const todos = ref([
+          { 
+            id: 1, 
+            text: '学习 Vue 3 组合式 API', 
+            completed: true, 
+            priority: 'high',
+            dueDate: '2024-12-31',
+            createdAt: new Date().toISOString().split('T')[0]
+          },
+          { 
+            id: 2, 
+            text: '完成 Todo List 项目', 
+            completed: false, 
+            priority: 'high',
+            dueDate: '',
+            createdAt: new Date().toISOString().split('T')[0]
+          },
+          { 
+            id: 3, 
+            text: '学习本地存储和生命周期', 
+            completed: false, 
+            priority: 'medium',
+            dueDate: '2024-12-25',
+            createdAt: new Date().toISOString().split('T')[0]
+          },
+          { 
+            id: 4, 
+            text: '复习 CSS 动画', 
+            completed: false, 
+            priority: 'low',
+            dueDate: '',
+            createdAt: new Date().toISOString().split('T')[0]
           }
-        };
+        ])
+        const filter = ref('all')
+        const sortBy = ref('newest')
+        const searchQuery = ref('')
+        const nextId = ref(5)
+        const showExport = ref(false)
+        const showImport = ref(false)
+        const importData = ref('')
+        
+        // 优先级标签映射
+        const priorityLabels = {
+          low: '低',
+          medium: '中',
+          high: '高'
+        }
+        
+        // 优先级排序值
+        const priorityValue = {
+          high: 3,
+          medium: 2,
+          low: 1
+        }
+
+        // ========== 计算属性 ==========
+        // 过滤后的待办事项
+        const filteredTodos = computed(() => {
+          let result = todos.value
+          
+          // 搜索过滤
+          if (searchQuery.value.trim()) {
+            const query = searchQuery.value.toLowerCase()
+            result = result.filter(todo => 
+              todo.text.toLowerCase().includes(query)
+            )
+          }
+          
+          // 状态筛选
+          switch (filter.value) {
+            case 'active':
+              result = result.filter(todo => !todo.completed)
+              break
+            case 'completed':
+              result = result.filter(todo => todo.completed)
+              break
+            case 'overdue':
+              result = result.filter(todo => isOverdueValue(todo))
+              break
+          }
+          
+          return result
+        })
+        
+        // 排序后的待办事项
+        const filteredAndSortedTodos = computed(() => {
+          const result = [...filteredTodos.value]
+          
+          switch (sortBy.value) {
+            case 'dueDate':
+              result.sort((a, b) => {
+                if (!a.dueDate) return 1
+                if (!b.dueDate) return -1
+                return new Date(a.dueDate) - new Date(b.dueDate)
+              })
+              break
+            case 'priority':
+              result.sort((a, b) => priorityValue[b.priority] - priorityValue[a.priority])
+              break
+            case 'newest':
+            default:
+              result.sort((a, b) => b.id - a.id)
+          }
+          
+          return result
+        })
+
+        const totalCount = computed(() => todos.value.length)
+        const completedCount = computed(() => todos.value.filter(t => t.completed).length)
+        const pendingCount = computed(() => todos.value.filter(t => !t.completed).length)
+        
+        // 过期数量
+        const overdueCount = computed(() => 
+          todos.value.filter(todo => isOverdueValue(todo)).length
+        )
+        
+        // 完成率
+        const completionRate = computed(() => {
+          if (totalCount.value === 0) return 0
+          return (completedCount.value / totalCount.value) * 100
+        })
+        
+        // 导出数据
+        const exportData = computed(() => JSON.stringify(todos.value, null, 2))
+
+        // ========== 方法 ==========
+        const addTodo = () => {
+          const text = newTodo.value.trim()
+          if (!text) return
+          
+          todos.value.push({
+            id: nextId.value++,
+            text: text,
+            completed: false,
+            priority: newTodoPriority.value,
+            dueDate: newTodoDueDate.value,
+            createdAt: new Date().toISOString().split('T')[0]
+          })
+          
+          newTodo.value = ''
+          newTodoPriority.value = 'medium'
+          newTodoDueDate.value = ''
+        }
+
+        const removeTodo = (id) => {
+          const index = todos.value.findIndex(todo => todo.id === id)
+          if (index > -1) {
+            todos.value.splice(index, 1)
+          }
+        }
+
+        const clearCompleted = () => {
+          todos.value = todos.value.filter(todo => !todo.completed)
+        }
+        
+        // 检查是否过期（模板中使用）
+        const isOverdue = (todo) => {
+          return isOverdueValue(todo)
+        }
+        
+        // 检查是否过期（内部逻辑使用）
+        const isOverdueValue = (todo) => {
+          if (!todo.dueDate || todo.completed) return false
+          const today = new Date().toISOString().split('T')[0]
+          return todo.dueDate < today
+        }
+        
+        // 格式化日期显示
+        const formatDate = (dateString) => {
+          if (!dateString) return ''
+          const date = new Date(dateString)
+          return date.toLocaleDateString('zh-CN')
+        }
+        
+        // 导入数据
+        const importTodos = () => {
+          try {
+            const data = JSON.parse(importData.value)
+            if (Array.isArray(data)) {
+              todos.value = data
+              const maxId = Math.max(...data.map(t => t.id), 0)
+              nextId.value = maxId + 1
+              importData.value = ''
+              showImport.value = false
+              alert('数据导入成功！')
+            } else {
+              alert('数据格式错误：必须是数组')
+            }
+          } catch (e) {
+            alert('导入失败：' + e.message)
+          }
+        }
+
+        // ========== 本地存储 ==========
+        watch(todos, (newTodos) => {
+          localStorage.setItem('todos-advanced', JSON.stringify(newTodos))
+        }, { deep: true })
+
+        const savedTodos = localStorage.getItem('todos-advanced')
+        if (savedTodos) {
+          try {
+            todos.value = JSON.parse(savedTodos)
+            const maxId = Math.max(...todos.value.map(t => t.id), 0)
+            nextId.value = maxId + 1
+          } catch (e) {
+            console.error('Failed to parse todos from localStorage:', e)
+          }
+        }
 
         return {
-          dynamicTooltip,
-          buttonTooltip,
-          resizeInfo,
-          resizeCount,
-          onResize,
-          isLoading,
-          loadingText,
-          loadingMode,
-          toggleLoading
-        };
-      }
-    })
-    // 练习1：v-exercise1-tooltip
-    .directive('exercise1-tooltip', {
-      mounted(el, binding) {
-        const tooltip = getGlobalTooltip();
-        
-        const showTooltip = () => {
-          currentTarget = el;
-          
-          // 设置内容
-          tooltip.innerHTML = binding.value;
-          tooltip.className = 'custom-tooltip show';
-          
-          // 设置位置
-          const position = binding.arg || 'top';
-          tooltip.classList.add(position);
-          
-          // 计算位置
-          const rect = el.getBoundingClientRect();
-          const tooltipRect = tooltip.getBoundingClientRect();
-          
-          let top, left;
-          
-          switch (position) {
-            case 'top':
-              top = rect.top - tooltipRect.height - 8;
-              left = rect.left + rect.width / 2 - tooltipRect.width / 2;
-              break;
-            case 'bottom':
-              top = rect.bottom + 8;
-              left = rect.left + rect.width / 2 - tooltipRect.width / 2;
-              break;
-            case 'left':
-              top = rect.top + rect.height / 2 - tooltipRect.height / 2;
-              left = rect.left - tooltipRect.width - 8;
-              break;
-            case 'right':
-              top = rect.top + rect.height / 2 - tooltipRect.height / 2;
-              left = rect.right + 8;
-              break;
-            default:
-              top = rect.top - tooltipRect.height - 8;
-              left = rect.left + rect.width / 2 - tooltipRect.width / 2;
-          }
-          
-          tooltip.style.top = top + 'px';
-          tooltip.style.left = left + 'px';
-        };
-        
-        const hideTooltip = () => {
-          if (currentTarget === el) {
-            tooltip.classList.remove('show');
-            currentTarget = null;
-          }
-        };
-        
-        el.addEventListener('mouseenter', showTooltip);
-        el.addEventListener('mouseleave', hideTooltip);
-        
-        el._tooltipShow = showTooltip;
-        el._tooltipHide = hideTooltip;
-      },
-      updated(el, binding) {
-        // 如果当前显示的是此元素的提示，更新内容
-        if (currentTarget === el && globalTooltip) {
-          globalTooltip.innerHTML = binding.value;
-        }
-      },
-      unmounted(el) {
-        el.removeEventListener('mouseenter', el._tooltipShow);
-        el.removeEventListener('mouseleave', el._tooltipHide);
-        if (currentTarget === el && globalTooltip) {
-          globalTooltip.classList.remove('show');
+          newTodo,
+          newTodoPriority,
+          newTodoDueDate,
+          todos,
+          filter,
+          sortBy,
+          searchQuery,
+          filteredAndSortedTodos,
+          totalCount,
+          completedCount,
+          pendingCount,
+          overdueCount,
+          completionRate,
+          priorityLabels,
+          showExport,
+          showImport,
+          importData,
+          exportData,
+          addTodo,
+          removeTodo,
+          clearCompleted,
+          isOverdue,
+          formatDate,
+          importTodos
         }
       }
-    })
-    // 练习2：v-exercise2-resize
-    .directive('exercise2-resize', {
-      mounted(el, binding) {
-        const callback = binding.value;
-        
-        // 立即获取初始尺寸
-        const rect = el.getBoundingClientRect();
-        callback({
-          width: Math.round(rect.width),
-          height: Math.round(rect.height)
-        });
-        
-        // 创建 ResizeObserver
-        const observer = new ResizeObserver((entries) => {
-          const entry = entries[0];
-          const { width, height } = entry.contentRect;
-          callback({
-            width: Math.round(width),
-            height: Math.round(height)
-          });
-        });
-        
-        observer.observe(el);
-        el._resizeObserver = observer;
-      },
-      unmounted(el) {
-        el._resizeObserver?.disconnect();
-      }
-    })
-    // 练习3：v-exercise3-loading
-    .directive('exercise3-loading', {
-      mounted(el, binding) {
-        const text = el.getAttribute('v-exercise3-loading-text') || '加载中...';
-        
-        const createLoadingOverlay = () => {
-          const overlay = document.createElement('div');
-          overlay.className = 'loading-fullscreen';
-          overlay.style.position = 'absolute';
-          overlay.innerHTML = `
-            <div class="loading-spinner-large" style="width: 40px; height: 40px; border-width: 3px;"></div>
-            <div class="loading-text" style="font-size: 14px;">${text}</div>
-          `;
-          return overlay;
-        };
-        
-        el._loadingOverlay = createLoadingOverlay();
-        el.style.position = 'relative';
-        
-        if (binding.value) {
-          el.appendChild(el._loadingOverlay);
-        }
-      },
-      updated(el, binding) {
-        const overlay = el._loadingOverlay;
-        if (!overlay) return;
-        
-        // 更新文字
-        const text = el.getAttribute('v-exercise3-loading-text') || '加载中...';
-        const textEl = overlay.querySelector('.loading-text');
-        if (textEl) textEl.textContent = text;
-        
-        // 显示/隐藏
-        if (binding.value && !el.contains(overlay)) {
-          el.appendChild(overlay);
-        } else if (!binding.value && el.contains(overlay)) {
-          el.removeChild(overlay);
-        }
-      },
-      unmounted(el) {
-        if (el._loadingOverlay && el.contains(el._loadingOverlay)) {
-          el.removeChild(el._loadingOverlay);
-        }
-      }
-    })
-    .mount('#app');
+    }).mount('#app')
   </script>
 </body>
 </html>

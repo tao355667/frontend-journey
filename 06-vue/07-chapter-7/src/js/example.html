@@ -3,434 +3,418 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>条件渲染 - JavaScript 版本</title>
+  <title>第二十一章：computed 与 watch - JavaScript 示例</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 40px 20px;
-    }
-    
-    .container {
+      font-family: Arial, sans-serif;
       max-width: 900px;
       margin: 0 auto;
+      padding: 20px;
     }
-    
-    h1 {
-      color: white;
-      text-align: center;
-      margin-bottom: 40px;
-      font-size: 36px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    .demo-section {
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
     }
-    
-    .demo-card {
-      background: white;
-      border-radius: 16px;
-      padding: 30px;
-      margin-bottom: 30px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    }
-    
     .demo-title {
-      color: #667eea;
-      font-size: 24px;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 3px solid #667eea;
+      color: #42b983;
+      margin-top: 0;
     }
-    
-    .controls {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-    
     button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      font-weight: 600;
-      background: #42b883;
+      padding: 8px 16px;
+      margin: 5px;
+      background: #42b983;
       color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
     }
-    
     button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(66, 184, 131, 0.4);
+      background: #369870;
     }
-    
-    button.secondary {
-      background: #6c757d;
-    }
-    
-    button.secondary:hover {
-      background: #5a6268;
-    }
-    
-    button.warning {
-      background: #ffc107;
-      color: #212529;
-    }
-    
-    button.danger {
-      background: #dc3545;
-    }
-    
-    .message-box {
-      padding: 20px;
-      border-radius: 12px;
-      margin-top: 20px;
-      font-size: 18px;
-      font-weight: 600;
-      text-align: center;
-      transition: all 0.3s ease;
-    }
-    
-    .success {
-      background: #d4edda;
-      color: #155724;
-      border: 2px solid #c3e6cb;
-    }
-    
-    .info {
-      background: #d1ecf1;
-      color: #0c5460;
-      border: 2px solid #bee5eb;
-    }
-    
-    .warning {
-      background: #fff3cd;
-      color: #856404;
-      border: 2px solid #ffeaa7;
-    }
-    
-    .error {
-      background: #f8d7da;
-      color: #721c24;
-      border: 2px solid #f5c6cb;
-    }
-    
-    .user-card {
-      background: #f8f9fa;
-      padding: 25px;
-      border-radius: 12px;
-      margin-top: 20px;
-    }
-    
-    .user-card h3 {
-      color: #667eea;
-      margin-bottom: 15px;
-    }
-    
-    .user-card p {
-      color: #666;
-      margin: 8px 0;
-    }
-    
-    .permission-badge {
-      display: inline-block;
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 600;
-      margin-top: 10px;
-    }
-    
-    .admin { background: #dc3545; color: white; }
-    .user { background: #28a745; color: white; }
-    .guest { background: #6c757d; color: white; }
-    
-    .toggle-box {
-      background: #e9ecef;
-      padding: 20px;
-      border-radius: 8px;
-      margin-top: 20px;
-    }
-    
-    .detail-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid #dee2e6;
-    }
-    
-    .detail-item:last-child {
-      border-bottom: none;
-    }
-    
-    .code-block {
-      background: #f8f9fa;
+    .info-box {
+      background: #f0f8ff;
       padding: 15px;
-      border-radius: 8px;
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-      color: #d63384;
-      margin-top: 15px;
-      overflow-x: auto;
+      border-left: 4px solid #42b983;
+      margin: 10px 0;
     }
-    
-    .info-section {
-      background: #e7f3ff;
-      border-left: 4px solid #667eea;
-      padding: 15px;
-      margin-top: 20px;
-      border-radius: 0 8px 8px 0;
+    .log-box {
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
     }
-    
-    .info-section h4 {
-      color: #667eea;
-      margin-bottom: 10px;
+    .log-entry {
+      margin: 2px 0;
+      padding: 2px 5px;
+      border-bottom: 1px solid #ddd;
     }
-    
-    .info-section p {
-      color: #666;
-      line-height: 1.6;
+    input, select {
+      padding: 8px;
+      margin: 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
+  <h1>第二十一章：computed 与 watch</h1>
+  <p>本章演示 computed、watch 和 watchEffect 的用法和区别。</p>
+
   <div id="app">
-    <div class="container">
-      <h1>🎭 条件渲染演示</h1>
-      
-      <!-- Demo 1: 基础 v-if -->
-      <div class="demo-card">
-        <h2 class="demo-title">1. 基础 v-if / v-else</h2>
-        
-        <div class="controls">
-          <button @click="toggleLogin">
-            {{ isLoggedIn ? '退出登录' : '点击登录' }}
-          </button>
-        </div>
-        
-        <div v-if="isLoggedIn" class="message-box success">
-          ✅ 欢迎回来！您已登录
-        </div>
-        <div v-else class="message-box info">
-          ℹ️ 请先登录以查看内容
-        </div>
-        
-        <div class="code-block">
-          &lt;div v-if="isLoggedIn"&gt;欢迎回来！&lt;/div&gt;
-          &lt;div v-else&gt;请先登录&lt;/div&gt;
-        </div>
-      </div>
-      
-      <!-- Demo 2: 多级条件 v-if / v-else-if / v-else -->
-      <div class="demo-card">
-        <h2 class="demo-title">2. 多级条件 v-if / v-else-if / v-else</h2>
-        
-        <div class="controls">
-          <button @click="setRole('admin')">设为管理员</button>
-          <button @click="setRole('user')" class="secondary">设为用户</button>
-          <button @click="setRole('guest')" class="warning">设为访客</button>
-        </div>
-        
-        <div class="user-card">
-          <div v-if="userRole === 'admin'">
-            <h3>👑 管理员控制台</h3>
-            <p>您拥有系统的所有权限</p>
-            <p>可以管理用户、配置系统、查看报表</p>
-            <span class="permission-badge admin">管理员权限</span>
-          </div>
-          <div v-else-if="userRole === 'user'">
-            <h3>👤 用户中心</h3>
-            <p>您可以使用基础功能</p>
-            <p>可以查看内容、发表评论、编辑个人资料</p>
-            <span class="permission-badge user">普通用户</span>
-          </div>
-          <div v-else>
-            <h3>🚪 访客模式</h3>
-            <p>您只能浏览公开内容</p>
-            <p>请登录或注册以使用更多功能</p>
-            <span class="permission-badge guest">访客权限</span>
-          </div>
-        </div>
-        
-        <div class="code-block">
-          &lt;div v-if="role === 'admin'"&gt;...&lt;/div&gt;
-          &lt;div v-else-if="role === 'user'"&gt;...&lt;/div&gt;
-          &lt;div v-else&gt;...&lt;/div&gt;
-        </div>
-      </div>
-      
-      <!-- Demo 3: v-show -->
-      <div class="demo-card">
-        <h2 class="demo-title">3. v-show 切换显示</h2>
-        
-        <div class="controls">
-          <button @click="showDetails = !showDetails" class="secondary">
-            {{ showDetails ? '隐藏详情' : '显示详情' }}
-          </button>
-        </div>
-        
-        <div v-show="showDetails" class="toggle-box">
-          <h4>用户详细信息</h4>
-          <div class="detail-item">
-            <span>用户名：</span>
-            <span>zhangsan123</span>
-          </div>
-          <div class="detail-item">
-            <span>注册时间：</span>
-            <span>2024-01-15</span>
-          </div>
-          <div class="detail-item">
-            <span>最后登录：</span>
-            <span>2024-01-30 14:30</span>
-          </div>
-          <div class="detail-item">
-            <span>账户状态：</span>
-            <span style="color: #28a745;">正常</span>
-          </div>
-        </div>
-        
-        <div class="code-block">
-          &lt;div v-show="showDetails"&gt;...详细内容...&lt;/div&gt;
-        </div>
-        
-        <div class="info-section">
-          <h4>💡 v-show vs v-if</h4>
-          <p>v-show 只是切换 CSS 的 display 属性，元素始终存在于 DOM 中，适合频繁切换的场景。</p>
-        </div>
-      </div>
-      
-      <!-- Demo 4: 对比 v-if 和 v-show -->
-      <div class="demo-card">
-        <h2 class="demo-title">4. v-if 与 v-show 性能对比</h2>
-        
-        <div class="controls">
-          <button @click="toggleBoth">
-            同时切换两者
-          </button>
-          <button @click="rapidToggle" class="danger">
-            快速切换 10 次
-          </button>
-        </div>
-        
-        <div class="toggle-box">
-          <p><strong>v-if 控制的内容（切换 10 次耗时较长）：</strong></p>
-          <div v-if="showBoth" class="message-box info" style="margin-top: 10px;">
-            这是 v-if 控制的元素（创建/销毁）
-          </div>
-        </div>
-        
-        <div class="toggle-box" style="margin-top: 15px;">
-          <p><strong>v-show 控制的内容（切换 10 次几乎瞬间完成）：</strong></p>
-          <div v-show="showBoth" class="message-box warning" style="margin-top: 10px;">
-            这是 v-show 控制的元素（CSS 切换）
-          </div>
-        </div>
-        
-        <div class="info-section">
-          <h4>🎯 使用建议</h4>
-          <p>• <strong>v-if</strong>：条件很少改变，或初始条件为 false 时<br>
-             • <strong>v-show</strong>：需要频繁切换显示/隐藏时</p>
-        </div>
-      </div>
-      
-      <!-- Demo 5: 在 template 上使用 -->
-      <div class="demo-card">
-        <h2 class="demo-title">5. 在 &lt;template&gt; 上使用条件</h2>
-        
-        <div class="controls">
-          <button @click="showTemplate = !showTemplate">
-            {{ showTemplate ? '隐藏' : '显示' }} 多元素组
-          </button>
-        </div>
-        
-        <template v-if="showTemplate">
-          <div class="message-box success">
-            ✅ 元素 1：标题
-          </div>
-          <div class="message-box info">
-            ℹ️ 元素 2：描述信息
-          </div>
-          <div class="message-box warning">
-            ⚠️ 元素 3：警告提示
-          </div>
-        </template>
-        
-        <div class="code-block">
-          &lt;template v-if="condition"&gt;
-            &lt;div&gt;元素 1&lt;/div&gt;
-            &lt;div&gt;元素 2&lt;/div&gt;
-            &lt;div&gt;元素 3&lt;/div&gt;
-          &lt;/template&gt;
-        </div>
-        
-        <div class="info-section">
-          <h4>💡 &lt;template&gt; 的作用</h4>
-          <p>&lt;template&gt; 不会渲染为实际的 DOM 元素，可以用来包裹多个元素进行条件渲染，避免额外的包装 div。</p>
-        </div>
-      </div>
+    <!-- 示例 1：computed 基础 -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 1：computed 计算属性</h2>
+      <computed-basic-demo></computed-basic-demo>
+    </div>
+
+    <!-- 示例 2：watch 基础 -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 2：watch 侦听器</h2>
+      <watch-basic-demo></watch-basic-demo>
+    </div>
+
+    <!-- 示例 3：watchEffect -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 3：watchEffect 自动侦听</h2>
+      <watch-effect-demo></watch-effect-demo>
+    </div>
+
+    <!-- 示例 4：综合应用 -->
+    <div class="demo-section">
+      <h2 class="demo-title">示例 4：综合应用 - 搜索功能</h2>
+      <search-demo></search-demo>
     </div>
   </div>
 
   <script>
-    const { createApp, ref } = Vue
+    const { createApp, ref, reactive, computed, watch, watchEffect } = Vue;
+
+    // 示例 1：computed 基础
+    const ComputedBasicDemo = {
+      setup() {
+        const firstName = ref('张');
+        const lastName = ref('三');
+        
+        // 只读计算属性
+        const fullName = computed(() => {
+          return firstName.value + lastName.value;
+        });
+        
+        // 可写计算属性
+        const writableFullName = computed({
+          get() {
+            return firstName.value + ' ' + lastName.value;
+          },
+          set(newValue) {
+            [firstName.value, lastName.value] = newValue.split(' ');
+          }
+        });
+        
+        const scores = ref([85, 90, 78, 92]);
+        
+        // 复杂计算
+        const stats = computed(() => {
+          const sum = scores.value.reduce((a, b) => a + b, 0);
+          const avg = sum / scores.value.length;
+          const max = Math.max(...scores.value);
+          const min = Math.min(...scores.value);
+          
+          return { sum, avg: avg.toFixed(1), max, min };
+        });
+        
+        return {
+          firstName,
+          lastName,
+          fullName,
+          writableFullName,
+          scores,
+          stats
+        };
+      },
+      template: `
+        <div>
+          <h4>只读计算属性</h4>
+          <p>姓：{{ firstName }}，名：{{ lastName }}</p>
+          <p>全名：{{ fullName }}</p>
+          
+          <h4>可写计算属性</h4>
+          <p>全名（带空格）：{{ writableFullName }}</p>
+          <input v-model="writableFullName" placeholder="输入姓名（如：李 四）">
+          
+          <h4>复杂计算 - 成绩统计</h4>
+          <p>成绩：{{ scores.join(', ') }}</p>
+          <p>总分：{{ stats.sum }}，平均分：{{ stats.avg }}</p>
+          <p>最高分：{{ stats.max }}，最低分：{{ stats.min }}</p>
+          
+          <div class="info-box">
+            <strong>computed 特点：</strong><br>
+            1. 自动追踪依赖<br>
+            2. 结果缓存，依赖不变不会重新计算<br>
+            3. 可以创建可写计算属性
+          </div>
+        </div>
+      `
+    };
+
+    // 示例 2：watch 基础
+    const WatchBasicDemo = {
+      setup() {
+        const count = ref(0);
+        const user = reactive({
+          name: '张三',
+          age: 25
+        });
+        const logs = ref([]);
+        
+        const addLog = (message) => {
+          const time = new Date().toLocaleTimeString();
+          logs.value.unshift(`[${time}] ${message}`);
+          if (logs.value.length > 10) {
+            logs.value.pop();
+          }
+        };
+        
+        // 监听 ref
+        watch(count, (newVal, oldVal) => {
+          addLog(`count 变化: ${oldVal} → ${newVal}`);
+        });
+        
+        // 监听 reactive 对象的属性
+        watch(() => user.name, (newVal, oldVal) => {
+          addLog(`user.name 变化: ${oldVal} → ${newVal}`);
+        });
+        
+        // 监听多个数据源
+        watch([count, () => user.age], ([newCount, newAge], [oldCount, oldAge]) => {
+          addLog(`多监听 - count: ${oldCount}→${newCount}, age: ${oldAge}→${newAge}`);
+        });
+        
+        // 立即执行
+        watch(count, (newVal) => {
+          addLog(`[immediate] 当前 count: ${newVal}`);
+        }, { immediate: true });
+        
+        return {
+          count,
+          user,
+          logs
+        };
+      },
+      template: `
+        <div>
+          <div style="display: flex; gap: 20px;">
+            <div style="flex: 1;">
+              <h4>操作区域</h4>
+              <p>count: {{ count }}</p>
+              <button @click="count++">增加 count</button>
+              <button @click="count--">减少 count</button>
+              
+              <p>user.name: {{ user.name }}</p>
+              <input v-model="user.name" placeholder="修改姓名">
+              
+              <p>user.age: {{ user.age }}</p>
+              <button @click="user.age++">增加年龄</button>
+            </div>
+            <div style="flex: 1;">
+              <h4>监听日志</h4>
+              <div class="log-box">
+                <div v-for="(log, index) in logs" :key="index" class="log-entry">
+                  {{ log }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+    };
+
+    // 示例 3：watchEffect
+    const WatchEffectDemo = {
+      setup() {
+        const count = ref(0);
+        const message = ref('Hello');
+        const status = ref('等待...');
+        
+        // watchEffect 自动追踪依赖
+        watchEffect(() => {
+          // 使用了 count 和 message，会自动监听它们
+          status.value = `${message.value} - 当前计数: ${count.value}`;
+          console.log('watchEffect 执行:', status.value);
+        });
+        
+        // 带清理的 watchEffect
+        const timerCount = ref(0);
+        
+        watchEffect((onCleanup) => {
+          const timer = setInterval(() => {
+            timerCount.value++;
+          }, 1000);
+          
+          status.value += ` (timer: ${timerCount.value})`;
+          
+          // 注册清理函数
+          onCleanup(() => {
+            clearInterval(timer);
+            console.log('清理定时器');
+          });
+        });
+        
+        return {
+          count,
+          message,
+          status,
+          timerCount
+        };
+      },
+      template: `
+        <div>
+          <p>计数：{{ count }}</p>
+          <p>消息：{{ message }}</p>
+          <p>状态：{{ status }}</p>
+          <p>定时器计数：{{ timerCount }}</p>
+          
+          <button @click="count++">增加计数</button>
+          <button @click="message += '!'">修改消息</button>
+          
+          <div class="info-box">
+            <strong>watchEffect 特点：</strong><br>
+            1. 自动追踪依赖，无需手动指定<br>
+            2. 立即执行一次<br>
+            3. 可以使用 onCleanup 清理副作用<br>
+            4. 不会提供旧值
+          </div>
+        </div>
+      `
+    };
+
+    // 示例 4：搜索功能
+    const SearchDemo = {
+      setup() {
+        const searchQuery = ref('');
+        const searchType = ref('all');
+        const isSearching = ref(false);
+        const results = ref([]);
+        const searchHistory = ref([]);
+        
+        const allData = [
+          { id: 1, name: '苹果手机', category: '电子产品', price: 5999 },
+          { id: 2, name: '香蕉牛奶', category: '食品', price: 15 },
+          { id: 3, name: '橙子果汁', category: '饮料', price: 12 },
+          { id: 4, name: '华为手机', category: '电子产品', price: 4999 },
+          { id: 5, name: '苹果派', category: '食品', price: 25 },
+          { id: 6, name: '小米手机', category: '电子产品', price: 2999 },
+        ];
+        
+        // 使用 computed 过滤结果
+        const filteredResults = computed(() => {
+          let filtered = allData;
+          
+          // 按类型过滤
+          if (searchType.value !== 'all') {
+            const typeMap = {
+              'electronics': '电子产品',
+              'food': '食品',
+              'drink': '饮料'
+            };
+            filtered = filtered.filter(item => item.category === typeMap[searchType.value]);
+          }
+          
+          // 按关键词过滤
+          if (searchQuery.value) {
+            filtered = filtered.filter(item => 
+              item.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+            );
+          }
+          
+          return filtered;
+        });
+        
+        // 使用 watch 监听搜索并记录历史
+        watch(searchQuery, (newQuery) => {
+          if (newQuery && !searchHistory.value.includes(newQuery)) {
+            searchHistory.value.unshift(newQuery);
+            if (searchHistory.value.length > 5) {
+              searchHistory.value.pop();
+            }
+          }
+        });
+        
+        // 使用 watchEffect 模拟搜索加载状态
+        watchEffect(() => {
+          if (searchQuery.value || searchType.value !== 'all') {
+            isSearching.value = true;
+            setTimeout(() => {
+              isSearching.value = false;
+            }, 300);
+          }
+        });
+        
+        return {
+          searchQuery,
+          searchType,
+          isSearching,
+          filteredResults,
+          searchHistory
+        };
+      },
+      template: `
+        <div>
+          <div style="margin-bottom: 15px;">
+            <input 
+              v-model="searchQuery" 
+              placeholder="搜索商品..."
+              style="width: 200px;"
+            >
+            <select v-model="searchType">
+              <option value="all">所有类别</option>
+              <option value="electronics">电子产品</option>
+              <option value="food">食品</option>
+              <option value="drink">饮料</option>
+            </select>
+            <span v-if="isSearching" style="color: #42b983;">搜索中...</span>
+          </div>
+          
+          <div v-if="searchHistory.length > 0" style="margin-bottom: 15px;">
+            <small>搜索历史：</small>
+            <span 
+              v-for="(query, index) in searchHistory" 
+              :key="index"
+              style="cursor: pointer; color: #42b983; margin-right: 10px;"
+              @click="searchQuery = query"
+            >
+              {{ query }}
+            </span>
+          </div>
+          
+          <p>找到 {{ filteredResults.length }} 个结果</p>
+          <ul>
+            <li v-for="item in filteredResults" :key="item.id">
+              {{ item.name }} - {{ item.category }} - ¥{{ item.price }}
+            </li>
+          </ul>
+          
+          <div class="info-box">
+            <strong>实际应用场景：</strong><br>
+            使用 computed 实时过滤结果，使用 watch 记录搜索历史，使用 watchEffect 处理加载状态。
+          </div>
+        </div>
+      `
+    };
 
     createApp({
-      setup() {
-        // Demo 1: 登录状态
-        const isLoggedIn = ref(false)
-        const toggleLogin = () => {
-          isLoggedIn.value = !isLoggedIn.value
-        }
-
-        // Demo 2: 用户角色
-        const userRole = ref('guest')
-        const setRole = (role) => {
-          userRole.value = role
-        }
-
-        // Demo 3: 显示详情
-        const showDetails = ref(true)
-
-        // Demo 4: 性能对比
-        const showBoth = ref(true)
-        const toggleBoth = () => {
-          showBoth.value = !showBoth.value
-        }
-        const rapidToggle = () => {
-          let count = 0
-          const interval = setInterval(() => {
-            showBoth.value = !showBoth.value
-            count++
-            if (count >= 10) {
-              clearInterval(interval)
-            }
-          }, 100)
-        }
-
-        // Demo 5: template 条件
-        const showTemplate = ref(true)
-
-        return {
-          isLoggedIn,
-          toggleLogin,
-          userRole,
-          setRole,
-          showDetails,
-          showBoth,
-          toggleBoth,
-          rapidToggle,
-          showTemplate
-        }
+      components: {
+        ComputedBasicDemo,
+        WatchBasicDemo,
+        WatchEffectDemo,
+        SearchDemo
       }
-    }).mount('#app')
+    }).mount('#app');
   </script>
 </body>
 </html>

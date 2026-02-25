@@ -1,19 +1,18 @@
-# 计算属性（Computed）：智能的数据处理
+# 计算属性 computed
 
 ## 本章目的
 
-理解计算属性的概念和使用场景，掌握计算属性与 methods 的区别，学会使用计算属性处理派生数据。
+深入理解计算属性 `computed` 的工作原理，掌握如何在 `<script setup>` 中使用计算属性优化模板逻辑。
 
 ---
 
 ## 内容概述
 
-- 计算属性的基本概念
-- computed 与 methods 的区别
-- 计算属性的缓存机制
-- 可写计算属性（setter）
-- 计算属性的最佳实践
-- 复杂计算属性示例
+- 什么是计算属性
+- computed vs 普通函数
+- 可读写的计算属性
+- 计算属性的缓存特性
+- 最佳实践
 
 ---
 
@@ -21,359 +20,333 @@
 
 ### 什么是计算属性？
 
-计算属性是基于现有的响应式数据计算得出的新数据。它们会自动追踪依赖的数据变化，并在依赖变化时自动重新计算。
+计算属性是基于其他数据计算得出的值，它会根据依赖自动更新，并且具有缓存特性。
 
 #### 类比理解
 
-想象你有一家超市：
-- **原始数据（data）**：每种商品的单价和库存
-- **计算属性（computed）**：
-  - 购物车总价 = 商品A单价 × 数量 + 商品B单价 × 数量
-  - 库存状态 = 库存 > 0 ? "有货" : "缺货"
-  - 折扣后价格 = 原价 × 折扣率
+想象你在经营一家服装店：
+- **普通数据**（ref）：库存中的商品数量
+- **计算属性**：根据库存自动计算的库存总值（单价 × 数量）
 
-你不需要手动记录总价，只要记录单价和数量，总价就会自动计算出来。
+当商品数量变化时，库存总值会自动更新。而且，如果库存没有变化，你不需要重新计算总值。
 
 ---
 
-### 1. 计算属性的基本用法
+### 1. 基本用法
 
-```javascript
-createApp({
-  data() {
-    return {
-      firstName: '张',
-      lastName: '三',
-      quantity: 2,
-      price: 99.99
-    }
+```vue
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+
+// 基础数据
+const firstName = ref('张')
+const lastName = ref('三')
+
+// 计算属性
+const fullName = computed(() => {
+  return firstName.value + lastName.value
+})
+
+// 另一个例子
+const price = ref(100)
+const quantity = ref(2)
+const discount = ref(0.9)
+
+const total = computed(() => {
+  return price.value * quantity.value * discount.value
+})
+</script>
+
+<template>
+  <div>
+    <p>姓名: {{ fullName }}</p>
+    <p>总价: ¥{{ total }}</p>
+    
+    <input v-model="firstName" placeholder="姓">
+    <input v-model="lastName" placeholder="名">
+    <input v-model.number="quantity" type="number" placeholder="数量">
+  </div>
+</template>
+```
+
+---
+
+### 2. computed vs 普通方法
+
+```vue
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+
+const firstName = ref('张')
+const lastName = ref('三')
+
+// 计算属性 - 有缓存
+const fullNameComputed = computed(() => {
+  console.log('计算属性执行')
+  return firstName.value + lastName.value
+})
+
+// 普通方法 - 无缓存
+const fullNameMethod = () => {
+  console.log('普通方法执行')
+  return firstName.value + lastName.value
+}
+</script>
+
+<template>
+  <div>
+    <!-- 计算属性：依赖不变时，不会重新执行 -->
+    <p>{{ fullNameComputed }}</p>
+    <p>{{ fullNameComputed }}</p>
+    <p>{{ fullNameComputed }}</p>
+    
+    <!-- 普通方法：每次调用都会执行 -->
+    <p>{{ fullNameMethod() }}</p>
+    <p>{{ fullNameMethod() }}</p>
+    <p>{{ fullNameMethod() }}</p>
+  </div>
+</template>
+```
+
+#### 关键区别
+
+| 特性 | computed | 普通方法 |
+|------|----------|----------|
+| **缓存** | ✅ 依赖不变时返回缓存值 | ❌ 每次调用都重新执行 |
+| **使用方式** | `{{ fullName }}` | `{{ fullName() }}` |
+| **适用场景** | 需要缓存的计算 | 不需要缓存的操作 |
+| **副作用** | 不应该有 | 可以有 |
+
+---
+
+### 3. 可读写的计算属性
+
+默认情况下计算属性是只读的，但也可以定义 setter：
+
+```vue
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+
+const firstName = ref('张')
+const lastName = ref('三')
+
+// 可读写的计算属性
+const fullName = computed({
+  // getter
+  get() {
+    return firstName.value + ' ' + lastName.value
   },
-  computed: {
-    // 计算属性：全名
-    fullName() {
-      return this.firstName + ' ' + this.lastName
-    },
-    
-    // 计算属性：总价
-    totalPrice() {
-      return this.price * this.quantity
-    },
-    
-    // 计算属性：带格式化
-    formattedTotal() {
-      return '¥' + this.totalPrice.toFixed(2)
-    }
+  // setter
+  set(newValue) {
+    [firstName.value, lastName.value] = newValue.split(' ')
   }
 })
-```
 
-```html
-<div id="app">
-  <p>全名: {{ fullName }}</p>
-  <p>数量: {{ quantity }}</p>
-  <p>单价: ¥{{ price }}</p>
-  <p>总价: {{ formattedTotal }}</p>
-</div>
+const updateName = () => {
+  fullName.value = '李 四'  // 触发 setter
+}
+</script>
+
+<template>
+  <div>
+    <p>全名: {{ fullName }}</p>
+    <p>姓: {{ firstName }}</p>
+    <p>名: {{ lastName }}</p>
+    
+    <input v-model="fullName" placeholder="输入全名">
+    <button @click="updateName">设置为 "李 四"</button>
+  </div>
+</template>
 ```
 
 ---
 
-### 2. computed vs methods：关键区别
+### 4. 复杂计算示例
 
-| 特性 | Computed | Methods |
-|------|----------|---------|
-| **调用方式** | 像属性一样访问 `{{ fullName }}` | 像函数一样调用 `{{ getFullName() }}` |
-| **缓存** | ✅ 有缓存，依赖不变不重新计算 | ❌ 无缓存，每次调用都执行 |
-| **性能** | 依赖不变时，直接返回缓存值 | 每次都要重新执行 |
-| **适用场景** | 基于数据派生的值 | 需要参数或触发副作用 |
+```vue
+<script setup lang="ts">
+import { ref, computed } from 'vue'
 
-#### 性能对比示例
+// 购物车数据
+const cart = ref([
+  { id: 1, name: '苹果', price: 5, quantity: 3 },
+  { id: 2, name: '香蕉', price: 3, quantity: 5 },
+  { id: 3, name: '橙子', price: 4, quantity: 2 }
+])
 
-```javascript
-createApp({
-  data() {
-    return {
-      items: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    }
-  },
-  computed: {
-    // 计算属性：只计算一次，缓存结果
-    sumComputed() {
-      console.log('计算属性执行了')
-      return this.items.reduce((a, b) => a + b, 0)
-    }
-  },
-  methods: {
-    // 方法：每次调用都重新计算
-    sumMethod() {
-      console.log('方法执行了')
-      return this.items.reduce((a, b) => a + b, 0)
-    }
-  }
+// 计算购物车总价
+const cartTotal = computed(() => {
+  return cart.value.reduce((total, item) => {
+    return total + item.price * item.quantity
+  }, 0)
 })
-```
 
-```html
-<!-- 计算属性访问 -->
-<p>总和1: {{ sumComputed }}</p>
-<p>总和2: {{ sumComputed }}</p>
-<p>总和3: {{ sumComputed }}</p>
-<!-- 控制台只会输出一次 "计算属性执行了" -->
-
-<!-- 方法调用 -->
-<p>总和1: {{ sumMethod() }}</p>
-<p>总和2: {{ sumMethod() }}</p>
-<p>总和3: {{ sumMethod() }}</p>
-<!-- 控制台会输出三次 "方法执行了" -->
-```
-
-**生活类比**：
-- **计算属性** = 记在本子上的答案（问一次，看本子就行）
-- **方法** = 每次都要重新算一遍（问一次，算一次）
-
----
-
-### 3. 计算属性的依赖追踪
-
-Vue 会自动追踪计算属性中用到的响应式数据：
-
-```javascript
-computed: {
-  // 自动追踪 firstName 和 lastName
-  fullName() {
-    return this.firstName + this.lastName
-  }
-}
-```
-
-当 `firstName` 或 `lastName` 改变时，`fullName` 会自动重新计算。
-
-#### 复杂依赖示例
-
-```javascript
-createApp({
-  data() {
-    return {
-      cart: [
-        { name: '苹果', price: 5, quantity: 3 },
-        { name: '香蕉', price: 3, quantity: 5 }
-      ],
-      discount: 0.9, // 9折
-      isVip: true
-    }
-  },
-  computed: {
-    // 计算商品总数
-    totalItems() {
-      return this.cart.reduce((sum, item) => sum + item.quantity, 0)
-    },
-    
-    // 计算小计（未打折）
-    subtotal() {
-      return this.cart.reduce((sum, item) => {
-        return sum + item.price * item.quantity
-      }, 0)
-    },
-    
-    // 计算总价（考虑VIP折扣）
-    finalPrice() {
-      let total = this.subtotal // 依赖另一个计算属性！
-      if (this.isVip) {
-        total = total * this.discount
-      }
-      return total
-    },
-    
-    // 格式化显示
-    formattedPrice() {
-      return '¥' + this.finalPrice.toFixed(2)
-    }
-  }
+// 计算商品总数
+const itemCount = computed(() => {
+  return cart.value.reduce((count, item) => count + item.quantity, 0)
 })
-```
 
----
+// 计算平均单价
+const averagePrice = computed(() => {
+  if (itemCount.value === 0) return 0
+  return (cartTotal.value / itemCount.value).toFixed(2)
+})
 
-### 4. 可写计算属性（Getter + Setter）
+// 根据总价计算折扣
+const discount = computed(() => {
+  if (cartTotal.value >= 100) return 0.8
+  if (cartTotal.value >= 50) return 0.9
+  return 1
+})
 
-默认情况下，计算属性是只读的。但也可以定义 setter：
+// 折后价格
+const finalPrice = computed(() => {
+  return (cartTotal.value * discount.value).toFixed(2)
+})
 
-```javascript
-computed: {
-  fullName: {
-    // getter - 读取时调用
-    get() {
-      return this.firstName + ' ' + this.lastName
-    },
-    // setter - 赋值时调用
-    set(newValue) {
-      // newValue = '李 四'
-      [this.firstName, this.lastName] = newValue.split(' ')
-    }
-  }
-}
-```
-
-```html
-<div id="app">
-  <p>姓: <input v-model="firstName"></p>
-  <p>名: <input v-model="lastName"></p>
-  <p>全名: <input v-model="fullName"></p>
-  <!-- 修改全名输入框，firstName 和 lastName 会自动更新 -->
-</div>
-```
-
-**应用场景**：表单中的全名/姓名字段、价格与折扣计算等。
-
----
-
-### 5. 计算属性的最佳实践
-
-#### ✅ 应该使用计算属性的场景
-
-1. **派生数据**：从现有数据计算得出
-2. **模板复杂逻辑**：避免在模板中写复杂表达式
-3. **多次使用**：需要在多处使用的计算结果
-4. **数据转换**：格式化、过滤、排序等
-
-```javascript
-// ✅ 好的实践：复杂的过滤逻辑放在计算属性
-computed: {
-  filteredProducts() {
-    return this.products
-      .filter(p => p.price >= this.minPrice)
-      .filter(p => p.price <= this.maxPrice)
-      .sort((a, b) => a.price - b.price)
-  }
-}
-```
-
-#### ❌ 不应该使用计算属性的场景
-
-1. **不需要缓存**：每次都需要最新值
-2. **有副作用**：不应该在计算属性中修改其他数据
-3. **需要参数**：计算属性不能接收参数
-
-```javascript
-// ❌ 不好的实践：有副作用的计算属性
-computed: {
-  badComputed() {
-    this.someOtherData = '新值' // 不要这样做！
-    return this.someData
-  }
-}
-```
-
----
-
-### 6. 常见错误和注意事项
-
-#### 错误 1：在计算属性中修改数据
-
-```javascript
-// ✗ 错误：计算属性应该是纯函数
-computed: {
-  badExample() {
-    this.count++ // 不要修改数据！
-    return this.count
-  }
+// 增加数量
+const increaseQuantity = (id: number) => {
+  const item = cart.value.find(item => item.id === id)
+  if (item) item.quantity++
 }
 
-// ✓ 正确：只读取，不修改
-computed: {
-  goodExample() {
-    return this.count * 2
-  }
+// 减少数量
+const decreaseQuantity = (id: number) => {
+  const item = cart.value.find(item => item.id === id)
+  if (item && item.quantity > 0) item.quantity--
 }
-```
+</script>
 
-#### 错误 2：计算属性中使用异步操作
-
-```javascript
-// ✗ 错误：计算属性不能异步
-computed: {
-  async badAsync() {
-    const result = await fetchData() // 不行！
-    return result
-  }
-}
-
-// ✓ 正确：异步操作应该在 methods 或生命周期钩子中
-```
-
----
-
-## JavaScript vs TypeScript 对比
-
-| 特性 | JavaScript | TypeScript |
-|------|-----------|------------|
-| 计算属性定义 | 直接返回 | 可定义返回类型 |
-| 类型推断 | 自动 | 更精确 |
-| 代码提示 | 基本 | 完整 |
-
-#### TypeScript 示例
-
-```typescript
-interface Product {
-  name: string
-  price: number
-  quantity: number
-}
-
-interface CartData {
-  cart: Product[]
-  discount: number
-  isVip: boolean
-}
-
-export default {
-  data(): CartData {
-    return {
-      cart: [],
-      discount: 0.9,
-      isVip: false
-    }
-  },
-  
-  computed: {
-    // 显式定义返回类型
-    totalItems(): number {
-      return this.cart.reduce((sum, item) => sum + item.quantity, 0)
-    },
+<template>
+  <div class="cart">
+    <h2>购物车</h2>
     
-    finalPrice(): number {
-      let total = this.cart.reduce((sum, item) => {
-        return sum + item.price * item.quantity
-      }, 0)
-      return this.isVip ? total * this.discount : total
-    },
+    <table>
+      <thead>
+        <tr>
+          <th>商品</th>
+          <th>单价</th>
+          <th>数量</th>
+          <th>小计</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in cart" :key="item.id">
+          <td>{{ item.name }}</td>
+          <td>¥{{ item.price }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>¥{{ item.price * item.quantity }}</td>
+          <td>
+            <button @click="decreaseQuantity(item.id)">-</button>
+            <button @click="increaseQuantity(item.id)">+</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     
-    // 可写计算属性
-    fullName: {
-      get(): string {
-        return `${this.firstName} ${this.lastName}`
-      },
-      set(value: string): void {
-        const parts = value.split(' ')
-        this.firstName = parts[0] || ''
-        this.lastName = parts[1] || ''
-      }
-    }
-  }
+    <div class="summary">
+      <p>商品总数: {{ itemCount }} 件</p>
+      <p>平均单价: ¥{{ averagePrice }}</p>
+      <p>原价: ¥{{ cartTotal }}</p>
+      <p>折扣: {{ discount === 1 ? '无' : (1 - discount) * 10 + '折' }}</p>
+      <p class="final">应付: ¥{{ finalPrice }}</p>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.cart {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
 }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background: #f5f5f5;
+}
+
+button {
+  padding: 5px 10px;
+  margin: 0 2px;
+  cursor: pointer;
+}
+
+.summary {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.summary p {
+  margin: 5px 0;
+}
+
+.final {
+  font-size: 24px;
+  font-weight: bold;
+  color: #42b883;
+}
+</style>
 ```
 
 ---
 
-## 完整示例代码
+## 最佳实践
 
-### JavaScript 版本
+### ✅ 推荐做法
 
-详见 `src/js/example.html`
+1. **使用 computed 进行数据转换**：当需要根据现有数据派生出新数据时使用
+2. **避免在 computed 中执行副作用**：如修改外部状态、发起 API 请求等
+3. **合理使用 getter/setter**：当需要双向绑定时使用可写计算属性
+4. **保持计算属性简单**：复杂逻辑应拆分成多个计算属性
 
-### TypeScript 版本
+### ❌ 应避免的做法
 
-详见 `src/ts/example.html`
+1. **不要在 computed 中修改其他响应式数据**
+
+```vue
+<script setup>
+import { ref, computed } from 'vue'
+
+const count = ref(0)
+const other = ref(0)
+
+// ❌ 错误 - computed 不应该有副作用
+const badComputed = computed(() => {
+  other.value = count.value * 2  // 不要这样做！
+  return count.value * 2
+})
+</script>
+```
+
+2. **不要滥用 computed**
+
+```vue
+<script setup>
+import { ref, computed } from 'vue'
+
+const count = ref(0)
+
+// ❌ 过度使用 - 简单的显示不需要 computed
+const displayText = computed(() => `Count: ${count.value}`)
+
+// ✅ 直接在模板中使用
+// <p>Count: {{ count }}</p>
+</script>
+```
 
 ---
 
@@ -381,57 +354,60 @@ export default {
 
 ### 基础练习
 
-创建一个成绩统计系统：
-1. 使用 `data` 存储3门课程的成绩
-2. 使用计算属性计算总分、平均分、最高分、最低分
-3. 使用计算属性判断成绩等级（A/B/C/D/F）
-4. 添加一个计算属性判断是否全部及格（>=60分）
+创建一个用户信息展示组件：
+1. 使用 `ref` 定义用户的姓、名、年龄
+2. 使用 `computed` 计算全名
+3. 使用 `computed` 判断是否成年（age >= 18）
+4. 使用 `computed` 生成用户简介（"XXX，XX岁，已/未成年"）
 
 ### 进阶练习
 
-创建一个商品筛选系统：
-1. 使用 `data` 存储商品列表（名称、价格、类别、库存）
-2. 使用计算属性根据价格范围筛选商品
-3. 使用计算属性根据类别筛选商品
-4. 使用计算属性对结果进行排序（价格升序/降序）
-5. 使用计算属性统计筛选后的商品数量和总库存
+创建一个搜索和过滤组件：
+1. 定义产品列表（id, name, category, price）
+2. 使用 `ref` 定义搜索关键词和分类过滤器
+3. 使用 `computed` 实现：
+   - 按名称搜索过滤
+   - 按分类筛选
+   - 按价格排序（升序/降序）
+   - 计算过滤后的结果数量
+   - 计算平均价格
 
 ### 挑战练习
 
-创建一个完整的购物车价格计算系统：
-1. 定义购物车数据结构（商品ID、名称、单价、数量、是否选中）
-2. 使用计算属性计算：
-   - 选中商品的总数
-   - 选中商品的原价总和
-   - 满减优惠（满200减30，满500减100）
-   - VIP折扣（在满减后打9折）
+创建一个完整的购物车系统：
+1. 定义商品列表和购物车
+2. 实现以下计算属性：
+   - 购物车商品列表（包含商品详情）
+   - 每种商品的小计
+   - 商品总数
+   - 商品原价总和
+   - 折扣金额（满100减20，满200减50，满500减150）
    - 最终应付金额
-3. 实现可写计算属性：全选/取消全选功能
-4. 显示详细的优惠明细
-
----
-
-## 练习题答案
-
-详见 `practice-solution.html`
+   - 是否可以结算（购物车不为空且库存充足）
+3. 实现可写的 "全选" 计算属性
+4. 实现可写的 "批量修改数量" 计算属性
 
 ---
 
 ## 学习目标检查清单
 
-- [ ] 理解计算属性的概念和用途
-- [ ] 掌握计算属性的基本语法
-- [ ] 理解计算属性与 methods 的区别（缓存机制）
-- [ ] 了解计算属性的依赖追踪原理
-- [ ] 掌握可写计算属性的使用（getter/setter）
-- [ ] 知道何时应该/不应该使用计算属性
-- [ ] 能够在实际项目中正确使用计算属性
-- [ ] 理解计算属性不能用于异步操作和副作用
+- [ ] 理解什么是计算属性及其作用
+- [ ] 掌握 `computed` 的基本用法
+- [ ] 理解计算属性的缓存特性
+- [ ] 理解 computed vs 普通方法的区别
+- [ ] 掌握可读写的计算属性
+- [ ] 能够正确使用计算属性优化模板逻辑
+- [ ] 了解计算属性的最佳实践
 
 ---
 
 ## 延伸阅读
 
 - [Vue 官方文档 - 计算属性](https://cn.vuejs.org/guide/essentials/computed.html)
-- [Vue 计算属性 vs 方法](https://cn.vuejs.org/guide/essentials/computed.html#computed-caching-vs-methods)
-- [Vue 可写计算属性](https://cn.vuejs.org/guide/essentials/computed.html#writable-computed)
+- [Vue 官方文档 - computed](https://cn.vuejs.org/api/reactivity-core.html#computed)
+
+---
+
+## 下一步
+
+完成本章学习后，进入 [第 5 章：侦听器 watch](../05-chapter-5/README.md)，学习如何监听数据变化。

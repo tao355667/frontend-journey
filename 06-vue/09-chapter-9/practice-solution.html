@@ -3,566 +3,258 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>第 9 章练习题答案</title>
+  <title>第二十三章练习题答案 - provide 与 inject</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 40px 20px;
-    }
-    
-    .container { max-width: 1000px; margin: 0 auto; }
-    
-    h1 {
-      color: white;
-      text-align: center;
-      margin-bottom: 40px;
-      font-size: 36px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    }
-    
-    .exercise-card {
-      background: white;
-      border-radius: 16px;
-      padding: 30px;
-      margin-bottom: 30px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    }
-    
-    .exercise-title {
-      color: #667eea;
-      font-size: 24px;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 3px solid #667eea;
-    }
-    
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      font-weight: 600;
-      background: #42b883;
-      color: white;
-    }
-    
-    button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(66, 184, 131, 0.4); }
-    button.secondary { background: #6c757d; }
-    
-    /* 基础练习 */
-    .event-demo-area {
-      background: #f8f9fa;
-      padding: 30px;
-      border-radius: 12px;
-      text-align: center;
-    }
-    
-    .message-display {
-      font-size: 24px;
-      color: #667eea;
-      font-weight: bold;
-      margin: 20px 0;
-      min-height: 40px;
-    }
-    
-    .track-area {
-      height: 150px;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 20px 0;
-      cursor: crosshair;
-    }
-    
-    .coords-display {
-      font-size: 20px;
-      color: #667eea;
-      font-weight: bold;
-    }
-    
-    .input-section {
-      margin: 20px 0;
-    }
-    
-    .input-section input {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #dee2e6;
-      border-radius: 8px;
-      font-size: 16px;
-      margin-bottom: 10px;
-    }
-    
-    .char-display {
-      text-align: right;
-      color: #6c757d;
-    }
-    
-    /* 进阶练习：画板 */
-    .toolbar {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 15px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    
-    .color-btn {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      border: 3px solid transparent;
-      cursor: pointer;
-    }
-    
-    .color-btn.active { border-color: #333; }
-    
-    .size-slider {
-      width: 150px;
-    }
-    
-    .canvas-wrapper {
-      border: 2px solid #dee2e6;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    
-    canvas { display: block; cursor: crosshair; }
-    
-    .history-controls {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-    }
-    
-    /* 挑战练习：快捷键系统 */
-    .shortcut-demo {
-      background: #f8f9fa;
-      padding: 30px;
-      border-radius: 12px;
-    }
-    
-    .shortcut-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    
-    .shortcut-table th,
-    .shortcut-table td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid #dee2e6;
-    }
-    
-    .shortcut-table th {
-      background: #667eea;
-      color: white;
-    }
-    
-    .key-combo {
-      display: inline-block;
-      padding: 5px 10px;
-      background: #e9ecef;
-      border-radius: 4px;
-      font-family: monospace;
-      font-weight: bold;
-    }
-    
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      background: #333;
-      color: white;
-      padding: 15px 25px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      animation: slideIn 0.3s ease;
-    }
-    
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-    
-    .vim-mode-indicator {
-      display: inline-block;
-      padding: 5px 15px;
-      border-radius: 4px;
-      font-weight: bold;
-      margin-left: 10px;
-    }
-    
-    .vim-normal { background: #28a745; color: white; }
-    .vim-insert { background: #007bff; color: white; }
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
+    .exercise { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .exercise-title { color: #42b983; border-bottom: 2px solid #42b983; padding-bottom: 10px; }
+    button { padding: 10px 20px; margin: 5px; background: #42b983; color: white; border: none; border-radius: 4px; }
+    .component-box { border: 2px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px; }
+    .level-1 { border-color: #42b983; background: #f0fff4; }
+    .level-2 { border-color: #409eff; background: #f0f8ff; margin-left: 20px; }
+    .level-3 { border-color: #e6a23c; background: #fff9f0; margin-left: 40px; }
+    .notification { background: #42b983; color: white; padding: 15px; margin: 10px 0; border-radius: 4px; position: relative; }
+    .notification.error { background: #ff6b6b; }
+    .notification.warning { background: #e6a23c; }
+    .close-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; }
   </style>
 </head>
 <body>
+  <h1>第二十三章练习题答案</h1>
   <div id="app">
-    <div class="container">
-      <h1>🎯 第 9 章练习题答案</h1>
-      
-      <!-- 基础练习 -->
-      <div class="exercise-card">
-        <h2 class="exercise-title">基础练习：简单事件演示</h2>
-        
-        <div class="event-demo-area">
-          <button @click="showMessage('Hello World!')">
-            点击显示 Hello World
-          </button>
-          
-          <div class="message-display">{{ message }}</div>
-        </div>
-        
-        <div 
-          class="track-area"
-          @mousemove="updateCoords"
-        >
-          <span class="coords-display">
-            鼠标位置: ({{ mouseX }}, {{ mouseY }})
-          </span>
-        </div>
-        
-        <div class="input-section">
-          <input 
-            @input="updateCharCount"
-            placeholder="输入时实时显示字符数..."
-          >
-          <div class="char-display">
-            字符数: {{ charCount }}
-          </div>
-        </div>
-        
-        <div class="input-section">
-          <input 
-            @keyup.enter="handleEnter"
-            placeholder="按 Enter 键触发提交..."
-          >
-          <div v-if="enterMessage" style="color: #28a745; margin-top: 10px;">
-            {{ enterMessage }}
-          </div>
-        </div>
-      </div>
-      
-      <!-- 进阶练习：交互式画板 -->
-      <div class="exercise-card">
-        <h2 class="exercise-title">进阶练习：交互式画板</h2>
-        
-        <div class="toolbar">
-          <span>颜色：</span>
-          <div 
-            v-for="color in colors" 
-            :key="color"
-            class="color-btn"
-            :style="{ background: color }"
-            :class="{ active: currentColor === color }"
-            @click="currentColor = color"
-          ></div>
-          
-          <span style="margin-left: 20px;">粗细：</span>
-          <input 
-            type="range" 
-            v-model.number="brushSize"
-            min="1" 
-            max="20"
-            class="size-slider"
-          >
-          <span>{{ brushSize }}px</span>
-          
-          <button @click="clearCanvas" class="secondary" style="margin-left: auto;">
-            清空
-          </button>
-        </div>
-        
-        <div class="canvas-wrapper">
-          <canvas 
-            ref="canvas"
-            width="800"
-            height="400"
-            @mousedown="startDrawing"
-            @mousemove="draw"
-            @mouseup="stopDrawing"
-            @mouseleave="stopDrawing"
-          ></canvas>
-        </div>
-        
-        <div class="history-controls">
-          <button @click="undo" :disabled="historyIndex <= 0">
-            ↩️ 撤销
-          </button>
-          <button @click="redo" :disabled="historyIndex >= history.length - 1">
-            ↪️ 重做
-          </button>
-          <button @click="saveImage" class="secondary">
-            💾 保存图片
-          </button>
-        </div>
-      </div>
-      
-      <!-- 挑战练习：快捷键系统 -->
-      <div class="exercise-card">
-        <h2 class="exercise-title">挑战练习：键盘快捷键系统</h2>
-        
-        <div class="shortcut-demo" @keydown="handleGlobalKeydown" tabindex="0">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-            <h3>全局快捷键</h3>
-            <div>
-              Vim 模式
-              <span 
-                class="vim-mode-indicator"
-                :class="vimMode === 'normal' ? 'vim-normal' : 'vim-insert'"
-              >
-                {{ vimMode === 'normal' ? 'NORMAL' : 'INSERT' }}
-              </span>
-            </div>
-          </div>
-          
-          <table class="shortcut-table">
-            <thead>
-              <tr>
-                <th>快捷键</th>
-                <th>功能</th>
-                <th>状态</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="shortcut in shortcuts" :key="shortcut.key">
-                <td><span class="key-combo">{{ shortcut.display }}</span></td>
-                <td>{{ shortcut.action }}</td>
-                <td>
-                  <span v-if="shortcut.triggered" style="color: #28a745;">✓ 已触发</span>
-                  <span v-else style="color: #6c757d;">等待中</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          
-          <div style="margin-top: 20px; padding: 20px; background: white; border-radius: 8px;">
-            <h4>操作日志：</h4>
-            <div v-for="(log, index) in shortcutLogs" :key="index" style="padding: 5px 0; color: #666;">
-              {{ log }}
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="exercise">
+      <h2 class="exercise-title">练习 1：多层级主题系统</h2>
+      <theme-system></theme-system>
     </div>
-    
-    <!-- Toast 提示 -->
-    <div v-if="toastMessage" class="toast">
-      {{ toastMessage }}
+    <div class="exercise">
+      <h2 class="exercise-title">练习 2：应用配置系统</h2>
+      <config-system></config-system>
+    </div>
+    <div class="exercise">
+      <h2 class="exercise-title">练习 3：通知系统</h2>
+      <notification-system></notification-system>
     </div>
   </div>
 
   <script>
-    const { createApp, ref, onMounted } = Vue
+    const { createApp, provide, inject, ref, reactive, readonly } = Vue;
+
+    // 练习 1：主题系统
+    const ThemeLevelC = {
+      setup() {
+        const theme = inject('theme');
+        const toggleTheme = inject('toggleTheme');
+        const config = inject('themeConfig');
+        
+        return { theme, toggleTheme, config };
+      },
+      template: `
+        <div class="component-box level-3" :style="{ background: config[theme].bg, color: config[theme].color }">
+          <h4>Level C（第三层）</h4>
+          <p>当前主题：{{ theme }}</p>
+          <button @click="toggleTheme">切换主题</button>
+        </div>
+      `
+    };
+
+    const ThemeLevelB = {
+      components: { ThemeLevelC },
+      template: `
+        <div class="component-box level-2">
+          <h4>Level B（第二层）</h4>
+          <theme-level-c></theme-level-c>
+        </div>
+      `
+    };
+
+    const ThemeSystem = {
+      components: { ThemeLevelB },
+      setup() {
+        const theme = ref('light');
+        const themeConfig = {
+          light: { bg: '#f0fff4', color: '#333' },
+          dark: { bg: '#333', color: '#fff' }
+        };
+        
+        const toggleTheme = () => {
+          theme.value = theme.value === 'light' ? 'dark' : 'light';
+        };
+        
+        provide('theme', readonly(theme));
+        provide('toggleTheme', toggleTheme);
+        provide('themeConfig', themeConfig);
+        
+        return { theme };
+      },
+      template: `
+        <div class="component-box level-1">
+          <h4>Level A（第一层）</h4>
+          <p>当前主题：{{ theme }}</p>
+          <theme-level-b></theme-level-b>
+        </div>
+      `
+    };
+
+    // 练习 2：配置系统
+    const ConfigKey = Symbol('appConfig');
+    const UpdateConfigKey = Symbol('updateConfig');
+
+    const ConfigDisplay = {
+      setup() {
+        const config = inject(ConfigKey);
+        
+        return { config };
+      },
+      template: `
+        <div class="component-box level-2">
+          <h4>配置展示</h4>
+          <p>语言：{{ config.language }}</p>
+          <p>时区：{{ config.timezone }}</p>
+          <p>日期格式：{{ config.dateFormat }}</p>
+        </div>
+      `
+    };
+
+    const ConfigEditor = {
+      setup() {
+        const config = inject(ConfigKey);
+        const updateConfig = inject(UpdateConfigKey);
+        
+        return { config, updateConfig };
+      },
+      template: `
+        <div class="component-box level-2">
+          <h4>配置编辑</h4>
+          <select :value="config.language" @change="updateConfig('language', $event.target.value)">
+            <option value="zh-CN">中文</option>
+            <option value="en-US">English</option>
+          </select>
+          <select :value="config.timezone" @change="updateConfig('timezone', $event.target.value)">
+            <option value="Asia/Shanghai">上海</option>
+            <option value="UTC">UTC</option>
+          </select>
+        </div>
+      `
+    };
+
+    const ConfigSystem = {
+      components: { ConfigDisplay, ConfigEditor },
+      setup() {
+        const config = reactive({
+          language: 'zh-CN',
+          timezone: 'Asia/Shanghai',
+          dateFormat: 'yyyy-MM-dd'
+        });
+        
+        const updateConfig = (key, value) => {
+          config[key] = value;
+        };
+        
+        provide(ConfigKey, readonly(config));
+        provide(UpdateConfigKey, updateConfig);
+        
+        return {};
+      },
+      template: `
+        <div class="component-box level-1">
+          <h4>应用配置系统</h4>
+          <config-display></config-display>
+          <config-editor></config-editor>
+        </div>
+      `
+    };
+
+    // 练习 3：通知系统
+    const NotificationTrigger = {
+      setup() {
+        const addNotification = inject('addNotification');
+        
+        return { addNotification };
+      },
+      template: `
+        <div>
+          <button @click="addNotification('success', '操作成功！')">成功</button>
+          <button @click="addNotification('error', '发生错误！')">错误</button>
+          <button @click="addNotification('warning', '请注意！')">警告</button>
+          <button @click="addNotification('info', '提示信息')">信息</button>
+        </div>
+      `
+    };
+
+    const NotificationList = {
+      setup() {
+        const notifications = inject('notifications');
+        const removeNotification = inject('removeNotification');
+        
+        return { notifications, removeNotification };
+      },
+      template: `
+        <div style="position: fixed; top: 20px; right: 20px; width: 300px; z-index: 1000;">
+          <div 
+            v-for="n in notifications" 
+            :key="n.id"
+            class="notification"
+            :class="n.type"
+          >
+            {{ n.message }}
+            <span class="close-btn" @click="removeNotification(n.id)">×</span>
+          </div>
+        </div>
+      `
+    };
+
+    const NotificationSystem = {
+      components: { NotificationTrigger, NotificationList },
+      setup() {
+        const notifications = ref([]);
+        let idCounter = 0;
+        
+        const addNotification = (type, message) => {
+          // 最多 5 条
+          if (notifications.value.length >= 5) {
+            notifications.value.shift();
+          }
+          
+          const id = ++idCounter;
+          notifications.value.push({ id, type, message });
+          
+          // 自动消失
+          setTimeout(() => {
+            removeNotification(id);
+          }, 5000);
+        };
+        
+        const removeNotification = (id) => {
+          const index = notifications.value.findIndex(n => n.id === id);
+          if (index > -1) {
+            notifications.value.splice(index, 1);
+          }
+        };
+        
+        const clearAll = () => {
+          notifications.value = [];
+        };
+        
+        provide('notifications', notifications);
+        provide('addNotification', addNotification);
+        provide('removeNotification', removeNotification);
+        
+        return { notifications, clearAll };
+      },
+      template: `
+        <div class="component-box level-1">
+          <h4>通知系统（共 {{ notifications.length }} 条）</h4>
+          <notification-trigger></notification-trigger>
+          <button @click="clearAll">清空所有</button>
+          <notification-list></notification-list>
+        </div>
+      `
+    };
 
     createApp({
-      setup() {
-        // 基础练习
-        const message = ref('')
-        const mouseX = ref(0)
-        const mouseY = ref(0)
-        const charCount = ref(0)
-        const enterMessage = ref('')
-        
-        const showMessage = (msg) => {
-          message.value = msg
-          setTimeout(() => message.value = '', 3000)
-        }
-        
-        const updateCoords = (e) => {
-          mouseX.value = e.offsetX
-          mouseY.value = e.offsetY
-        }
-        
-        const updateCharCount = (e) => {
-          charCount.value = e.target.value.length
-        }
-        
-        const handleEnter = (e) => {
-          enterMessage.value = `已提交: "${e.target.value}"`
-          e.target.value = ''
-          setTimeout(() => enterMessage.value = '', 3000)
-        }
-        
-        // 进阶练习：画板
-        const canvas = ref(null)
-        const currentColor = ref('#000000')
-        const brushSize = ref(3)
-        const colors = ['#000000', '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffffff']
-        
-        let ctx = null
-        let isDrawing = false
-        const history = ref([])
-        const historyIndex = ref(-1)
-        
-        onMounted(() => {
-          if (canvas.value) {
-            ctx = canvas.value.getContext('2d')
-            ctx.lineCap = 'round'
-            ctx.lineJoin = 'round'
-            saveState()
-          }
-        })
-        
-        const saveState = () => {
-          if (historyIndex.value < history.value.length - 1) {
-            history.value = history.value.slice(0, historyIndex.value + 1)
-          }
-          history.value.push(canvas.value.toDataURL())
-          historyIndex.value++
-        }
-        
-        const startDrawing = (e) => {
-          isDrawing = true
-          const rect = canvas.value.getBoundingClientRect()
-          ctx.beginPath()
-          ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top)
-        }
-        
-        const draw = (e) => {
-          if (!isDrawing) return
-          const rect = canvas.value.getBoundingClientRect()
-          ctx.strokeStyle = currentColor.value
-          ctx.lineWidth = brushSize.value
-          ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top)
-          ctx.stroke()
-        }
-        
-        const stopDrawing = () => {
-          if (isDrawing) {
-            isDrawing = false
-            saveState()
-          }
-        }
-        
-        const clearCanvas = () => {
-          ctx.clearRect(0, 0, canvas.value.width, canvas.value.height)
-          saveState()
-        }
-        
-        const undo = () => {
-          if (historyIndex.value > 0) {
-            historyIndex.value--
-            restoreState()
-          }
-        }
-        
-        const redo = () => {
-          if (historyIndex.value < history.value.length - 1) {
-            historyIndex.value++
-            restoreState()
-          }
-        }
-        
-        const restoreState = () => {
-          const img = new Image()
-          img.src = history.value[historyIndex.value]
-          img.onload = () => {
-            ctx.clearRect(0, 0, canvas.value.width, canvas.value.height)
-            ctx.drawImage(img, 0, 0)
-          }
-        }
-        
-        const saveImage = () => {
-          const link = document.createElement('a')
-          link.download = 'drawing.png'
-          link.href = canvas.value.toDataURL()
-          link.click()
-        }
-        
-        // 挑战练习：快捷键系统
-        const toastMessage = ref('')
-        const vimMode = ref('normal')
-        const shortcutLogs = ref([])
-        
-        const shortcuts = ref([
-          { key: 'ctrl+s', display: 'Ctrl+S', action: '保存', triggered: false },
-          { key: 'ctrl+z', display: 'Ctrl+Z', action: '撤销', triggered: false },
-          { key: 'ctrl+shift+z', display: 'Ctrl+Shift+Z', action: '重做', triggered: false },
-          { key: 'escape', display: 'Esc', action: '退出 Vim 插入模式', triggered: false }
-        ])
-        
-        const showToast = (msg) => {
-          toastMessage.value = msg
-          setTimeout(() => toastMessage.value = '', 2000)
-        }
-        
-        const addLog = (msg) => {
-          shortcutLogs.value.unshift(`${new Date().toLocaleTimeString()}: ${msg}`)
-          if (shortcutLogs.value.length > 10) shortcutLogs.value.pop()
-        }
-        
-        const handleGlobalKeydown = (e) => {
-          const key = []
-          if (e.ctrlKey) key.push('ctrl')
-          if (e.shiftKey) key.push('shift')
-          if (e.altKey) key.push('alt')
-          key.push(e.key.toLowerCase())
-          
-          const keyCombo = key.join('+')
-          
-          // Vim 模式切换
-          if (e.key === 'Escape') {
-            vimMode.value = 'normal'
-            addLog('切换到 NORMAL 模式')
-            const shortcut = shortcuts.value.find(s => s.key === 'escape')
-            if (shortcut) shortcut.triggered = true
-          }
-          
-          // 全局快捷键
-          if (keyCombo === 'ctrl+s') {
-            e.preventDefault()
-            showToast('💾 已保存')
-            addLog('触发保存快捷键')
-            shortcuts.value.find(s => s.key === 'ctrl+s').triggered = true
-          } else if (keyCombo === 'ctrl+z') {
-            e.preventDefault()
-            showToast('↩️ 已撤销')
-            addLog('触发撤销快捷键')
-            shortcuts.value.find(s => s.key === 'ctrl+z').triggered = true
-          } else if (keyCombo === 'ctrl+shift+z') {
-            e.preventDefault()
-            showToast('↪️ 已重做')
-            addLog('触发重做快捷键')
-            shortcuts.value.find(s => s.key === 'ctrl+shift+z').triggered = true
-          }
-          
-          // Vim 导航（仅在 Normal 模式）
-          if (vimMode.value === 'normal') {
-            const vimKeys = { h: '左', j: '下', k: '上', l: '右' }
-            if (vimKeys[e.key]) {
-              e.preventDefault()
-              addLog(`Vim 导航: ${e.key} (${vimKeys[e.key]})`)
-            }
-            if (e.key === 'i') {
-              vimMode.value = 'insert'
-              addLog('切换到 INSERT 模式')
-            }
-          }
-        }
-        
-        return {
-          message, mouseX, mouseY, charCount, enterMessage,
-          showMessage, updateCoords, updateCharCount, handleEnter,
-          canvas, currentColor, brushSize, colors,
-          startDrawing, draw, stopDrawing, clearCanvas,
-          history, historyIndex, undo, redo, saveImage,
-          toastMessage, vimMode, shortcuts, shortcutLogs,
-          handleGlobalKeydown
-        }
-      }
-    }).mount('#app')
+      components: { ThemeSystem, ConfigSystem, NotificationSystem }
+    }).mount('#app');
   </script>
 </body>
 </html>
