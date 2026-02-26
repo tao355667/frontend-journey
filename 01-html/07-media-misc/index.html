@@ -64,7 +64,7 @@
   <section>
     <h2>视频（含字幕）</h2>
     <p>示例：使用 <code>&lt;video&gt;</code> 标签播放视频，并包含字幕轨道</p>
-    <video controls width="640" poster="https://via.placeholder.com/640x360/667eea/ffffff?text=Video+Poster">
+    <video controls width="640" poster="pic.png">
       <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
       <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm" type="video/webm" />
       <track kind="captions" srclang="en" label="English" src="https://interactive-examples.mdn.mozilla.net/media/examples/flower.vtt" default />
@@ -76,7 +76,7 @@
     <h2>图文与说明</h2>
     <p>示例：使用 <code>&lt;figure&gt;</code> 和 <code>&lt;figcaption&gt;</code> 为图片添加说明</p>
     <figure>
-      <img src="https://via.placeholder.com/400x220/667eea/ffffff?text=示例图片" alt="示例占位图" />
+      <img src="pic.png" alt="示例占位图" />
       <figcaption>使用 figure/figcaption 为图片或代码块添加说明，提升可访问性和 SEO。</figcaption>
     </figure>
   </section>
@@ -86,9 +86,9 @@
     <p>示例：使用 <code>&lt;picture&gt;</code> 和 <code>&lt;source&gt;</code> 根据屏幕宽度加载不同尺寸的图片</p>
     <figure>
       <picture>
-        <source media="(min-width: 800px)" srcset="https://via.placeholder.com/800x450/667eea/ffffff?text=Large+Image" />
-        <source media="(min-width: 400px)" srcset="https://via.placeholder.com/400x225/764ba2/ffffff?text=Medium+Image" />
-        <img src="https://via.placeholder.com/320x180/667eea/ffffff?text=Small+Image" alt="响应式图片示例" />
+        <source media="(min-width: 800px)" srcset="pic.png" />
+        <source media="(min-width: 400px)" srcset="pic.png" />
+        <img src="pic.png" alt="响应式图片示例" />
       </picture>
       <figcaption>调整浏览器窗口大小，查看不同屏幕宽度下的图片变化。</figcaption>
     </figure>
